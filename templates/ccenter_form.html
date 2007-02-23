@@ -1,0 +1,29 @@
+<{if $errors}>
+<div class="errorMsg">
+<{foreach from=$errors item=msg}>
+<div><{$msg}></div>
+<{/foreach}>
+</div>
+<{/if}>
+<div class="evform">
+<h2><{$form.title}></h2>
+<{$form.description}>
+<a name="form"></a>
+<form action="index.php?form=<{$form.formid}>" name="ccenter" method="post"<{if $form.check_script}> onsubmit="return xoopsFormValidate_ccenter();"<{/if}><{if $form.hasfile}> enctype="multipart/form-data"<{/if}>>
+<input type="hidden" name="op" value="<{$op}>"/>
+
+<table class="outer" align="center" cellspacing="1" border="0">
+<{foreach from=$form.items item=fm}>
+<tr class="<{cycle values="even, odd"}>">
+  <{if $fm.label}><th><{$fm.label}></th><td><{else}><td colspan="2"><{/if}><{$fm.input}>
+  <{if $fm.comment}><span class="note"><{$fm.comment}></span><{/if}></td>
+</tr>
+<{/foreach}>
+</table>
+<p style="text-align: center;"><input type="submit" value="<{$smarty.const._SUBMIT}>" <{$form.submit_opts}>/></p>
+</form>
+<{$form.check_script}>
+<{if $form.lang_note || $form.note}>
+  <p align="right"><{$form.lang_note}> <{$form.note}></p>
+<{/if}>
+</div>

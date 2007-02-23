@@ -1,0 +1,49 @@
+<h3><{$form.title}></h3>
+
+<{if !$form.active}><div><b><{$smarty.const._MD_FORM_INACTIVE}></b></div><{/if}>
+<{if empty($start)}>
+<div><b><{$smarty.const._MD_MODDATE}></b> <{$form.mdate}></div>
+
+<div class="description"><{$form.description}></div>
+<hr/>
+<{/if}>
+
+<table width="100%">
+<tr>
+  <td><{$smarty.const._MD_COUNT}> <{$form.nmsg}></td>
+  <td align="right">
+<{if $form.nmsg}>
+  <form action="export.php">
+    <input type="hidden" name="form" value="<{$form.formid}>"/>
+    <input type="submit" value="<{$smarty.const._MD_EXPORT_CSV}>"/>
+  </form>
+<{/if}></td>
+</tr>
+</table>
+<{if $mlist}>
+<{if $pagenav}><div style="text-align: center;"><{$pagenav}></div><{/if}>
+<table class="outer" cellspacing="1" border="0">
+<tr>
+  <th></th>
+  <th><{$smarty.const._MD_POSTDATE}></th>
+  <th><{$smarty.const._MD_STATUS}></th>
+  <th><{$smarty.const._MD_CONTACT_FROM}></th>
+<{foreach from=$form.items item=item name=labs}>
+  <th><{$item.label}></th>
+<{/foreach}>
+</tr>
+<{foreach from=$mlist item=msg}>
+<tr class="<{cycle values="even, odd"}>">
+  <td><a href="message.php?id=<{$msg.msgid}>"><{$smarty.const._MD_DETAIL}></a></td>
+  <td><{$msg.mdate}></td>
+  <td><{$msg.stat}></td>
+  <td><{$msg.uname}></td>
+<{foreach from=$msg.values item=val name=vals}>
+  <td><{$val}></td>
+<{/foreach}>
+<{/foreach}>
+</tr>
+</table>
+<{/if}>
+
+<{include file="db:system_notification_select.html"}>

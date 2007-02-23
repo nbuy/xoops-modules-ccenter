@@ -1,0 +1,7 @@
+<{if $block.list}>
+<ul>
+<{foreach from=$block.list item=msg}>
+  <li><a href="<{$xoops_url}>/modules/<{$block.dirname}>/message.php?id=<{$msg.msgid}>"><{$msg.title}> [<{$msg.uname}>]</a> (<{$msg.mdate}>)</li>
+<{/foreach}>
+</ul>
+<{/if}>

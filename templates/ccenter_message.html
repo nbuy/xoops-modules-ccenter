@@ -43,43 +43,15 @@
 </div>
 <div class="attr"><b class="label"><{$smarty.const._MD_REGDATE}></b> <{$mdate}></div>
 <div class="attr"><b class="label"><{$smarty.const._MD_CONTACT_FROM}></b> <{$sender}></div>
-<div class="attr"><b class="label"><{$smarty.const._MD_CONTACT_TO}></b> <{$sendto}></div>
-<{if $is_eval}>
-<div class="evaluate">
-<a name="evaluate"></a>
-<h4><{$smarty.const._MD_EVAL_VALUE}></h4>
-<form action="status.php" method="post">
-<style>
-table.evaluate { width: 20em; }
-table.evaluate td { width: 20%; text-align: center; }
-</style>
-<table id="evalate">
-<tr>
-  <td><input type="radio" name="eval" value="1">1</td>
-  <td><input type="radio" name="eval" value="2">2</td>
-  <td><input type="radio" name="eval" value="3">3</td>
-  <td><input type="radio" name="eval" value="4">4</td>
-  <td><input type="radio" name="eval" value="5">5</td>
-</tr>
-<tr>
-  <td><{$smarty.const._MD_EVAL_VAL_LOW}></td>
-  <td></td>
-  <td><{$smarty.const._MD_EVAL_VAL_MID}></td>
-  <td></td>
-  <td><{$smarty.const._MD_EVAL_VAL_MAX}></td>
-</tr>
-</table>
-
-<h4><{$smarty.const._MD_EVAL_COMMENT}>:</h4>
-<textarea name="comment" cols="50" rows="5"></textarea>
-<p>
+<div class="attr"><b class="label"><{$smarty.const._MD_CONTACT_TO}></b> <{$sendto}>
+<{if $data.touid==0 && $xoops_isuser}>
+<form action="status.php" method="post" style="display: inline;">
 <input type="hidden" name="id" value="<{$data.msgid}>"/>
-<input type="hidden" name="pass" value="<{$data.onepass|escape}>"/>
-<input type="submit" value="<{$smarty.const._SUBMIT}>"/>
-</p>
+<input type="hidden" name="op" value="myself"/>
+<input type="submit" value="<{$smarty.const._MD_CONTACT_MYSELF}>">
 </from>
-</div>
 <{/if}>
+</div>
 
 <table class="outer" align="center" cellspacing="1" border="0" width="100%">
 <{if $avatar}>
@@ -115,5 +87,42 @@ table.evaluate td { width: 20%; text-align: center; }
 <{/if}>
 <!-- end comments loop -->
 </div>
+<{if $is_eval}>
+<div class="evaluate">
+<a name="evaluate"></a>
+<h4><{$smarty.const._MD_EVAL_VALUE}></h4>
+<p><{$smarty.const._MD_EVAL_DESC}></p>
+<form action="status.php" method="post">
+<style>
+table.evaluate { width: 20em; }
+table.evaluate td { width: 20%; text-align: center; }
+</style>
+<table id="evalate">
+<tr>
+  <td><input type="radio" name="eval" value="1">1</td>
+  <td><input type="radio" name="eval" value="2">2</td>
+  <td><input type="radio" name="eval" value="3" checked="checked">3</td>
+  <td><input type="radio" name="eval" value="4">4</td>
+  <td><input type="radio" name="eval" value="5">5</td>
+</tr>
+<tr>
+  <td><{$smarty.const._MD_EVAL_VAL_LOW}></td>
+  <td></td>
+  <td><{$smarty.const._MD_EVAL_VAL_MID}></td>
+  <td></td>
+  <td><{$smarty.const._MD_EVAL_VAL_MAX}></td>
+</tr>
+</table>
+
+<h4><{$smarty.const._MD_EVAL_COMMENT}>:</h4>
+<textarea name="comment" cols="50" rows="4"></textarea>
+<p>
+<input type="hidden" name="id" value="<{$data.msgid}>"/>
+<input type="hidden" name="pass" value="<{$data.onepass|escape}>"/>
+<input type="submit" value="<{$smarty.const._MD_EVAL_SUBMIT}>"/>
+</p>
+</from>
+</div>
+<{/if}>
 <{/if}>
 <{include file="db:system_notification_select.html"}>

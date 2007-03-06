@@ -1,6 +1,6 @@
 <?php
 // contact to member
-// $Id: reception.php,v 1.1 2007/02/23 05:27:28 nobu Exp $
+// $Id: reception.php,v 1.2 2007/03/06 17:46:56 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -50,8 +50,11 @@ $xoopsOption['template_main'] = "ccenter_reception.html";
 
 $form = $xoopsDB->fetchArray($res);
 $id = $form['formid'];
-if ($form['custom']) {
-    $reg = array('/\\[desc\\](.*)\\[\/desc\\]/s', '/<form[^>]*>(.*)<\\/form[^>]*>/s', '/{CHECK_SCRIPT}/');
+$start = isset($_GET['start'])?intval($_GET['start']):0;
+if ($start>0) {
+    $form['description'] = "";
+} elseif ($form['custom']) {
+    $reg = array('/\\[desc\\](.*)\\[\/desc\\]/sU', '/<form[^>]*>(.*)<\\/form[^>]*>/sU', '/{CHECK_SCRIPT}/');
     $rep = array('\\1', '', '');
     $form['description'] = preg_replace($reg, $rep, $form['description']);
 } else {
@@ -59,6 +62,9 @@ if ($form['custom']) {
 }
 $form['mdate'] = formatTimestamp($form['mtime']);
 $items = get_form_attribute($form['defs']);
+foreach ($items as $k=>$item) {
+    if (empty($item['label'])) unset($items[$k]);
+}
 $max_cols = 3;
 $form['items'] = array_slice($items, 0, $max_cols);
 $n = $mpos = -1;
@@ -76,7 +82,6 @@ include_once XOOPS_ROOT_PATH.'/class/pagenav.php';
 $res = $xoopsDB->query('SELECT count(*) FROM '.MESSAGE." WHERE fidref=$id");
 list($count) = $xoopsDB->fetchRow($res);
 $max = 20;
-$start = isset($_GET['start'])?intval($_GET['start']):0;
 $args = preg_replace('/start=\\d+/', '', $_SERVER['QUERY_STRING']);
 $nav = new XoopsPageNav($count, $max, $start, "start", $args);
 $xoopsTpl->assign('pagenav', $count>$max?$nav->renderNav():"");

@@ -1,0 +1,9 @@
+<{if $forms}>
+<ul>
+<{foreach from=$forms item=form}>
+<li><a href="?form=<{$form.formid}>"><{$form.title}></a></li>
+<{/foreach}>
+</ul>
+<{else}>
+<{$smarty.const._MD_NOFORMS}>
+<{/if}>

@@ -1,5 +1,5 @@
 <?php
-// $Id: comment_post.php,v 1.1 2007/02/23 05:27:27 nobu Exp $
+// $Id: comment_post.php,v 1.2 2007/03/06 17:46:55 nobu Exp $
 //  ------------------------------------------------------------------------ //
 //                XOOPS - PHP Content Management System                      //
 //                    Copyright (c) 2000 XOOPS.org                           //
@@ -28,8 +28,9 @@ include '../../mainfile.php';
 include "functions.php";
 
 $id = intval($_POST['com_itemid']);
+$comid = intval($_POST['com_id']);
 $res = $xoopsDB->query("SELECT uid, touid, email, onepass, fidref, title FROM ".MESSAGE.", ".FORMS." WHERE msgid=$id AND formid=fidref");
-if ($res && $xoopsDB->getRowsNum($res)) {
+if ($comid==0 && $res && $xoopsDB->getRowsNum($res)) {
     $data = $xoopsDB->fetchArray($res);
     $email = $data['email'];
 
@@ -38,9 +39,9 @@ if ($res && $xoopsDB->getRowsNum($res)) {
 	// status to replyed
 	$xoopsDB->query("UPDATE ".MESSAGE." SET status='b' WHERE msgid=$id AND status='a'");
     }
-    if ($uid==0 || $uid==$data['uid']) { // comment by contact person
+    if ($uid==0 || $uid==$data['uid']) { // comment by order person
 	// status back to contacting
-	$xoopsDB->query("UPDATE ".MESSAGE." SET status='b' WHERE msgid=$id AND status IN ('c', 'f')");
+	$xoopsDB->query("UPDATE ".MESSAGE." SET status='a' WHERE msgid=$id AND status IN ('b', 'c')");
     }
     // notification for guest contact
     if (is_object($xoopsUser) && $data['uid']==0 && $email) {

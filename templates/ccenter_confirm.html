@@ -7,7 +7,7 @@
 <table class="outer" align="center" cellspacing="1" border="0">
 <tr><th colspan="2"><{$form.title}></th></tr>
 <{foreach from=$form.items item=item}>
-<tr class="<{cycle values="even, odd"}>"><th><{$item.label}></th><td><{$item.input}></td></tr>
+<{if $item.label}><tr class="<{cycle values="even, odd"}>"><td class="head"><{$item.label}></td><td><{$item.input}></td></tr><{/if}>
 <{/foreach}>
 </table>
 <p style="text-align: center;"><input type="submit" value="<{$smarty.const._MD_SUBMIT_SEND}>"/> &nbsp; <input type="submit" name="edit" value="<{$smarty.const._MD_SUBMIT_EDIT}>"/></p>

@@ -1,6 +1,6 @@
 <?php
 // contact to member
-// $Id: index.php,v 1.1 2007/02/23 05:27:28 nobu Exp $
+// $Id: index.php,v 1.2 2007/03/06 17:46:56 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -24,7 +24,7 @@ if (is_object($xoopsUser)) {
 if ($id) {
     $res = $xoopsDB->query("SELECT * FROM ".FORMS." WHERE $cond AND formid=$id");
 } else {
-    $res = $xoopsDB->query("SELECT * FROM ".FORMS." WHERE $cond");
+    $res = $xoopsDB->query("SELECT * FROM ".FORMS." WHERE $cond ORDER BY weight,formid");
 }
 
 if (!$res) {
@@ -34,17 +34,13 @@ if (!$res) {
 
 if ($xoopsDB->getRowsNum($res)!=1) {
     include XOOPS_ROOT_PATH."/header.php";
-    if ($xoopsDB->getRowsNum($res)) {
-	echo "<ul>\n";
-	while ($form=$xoopsDB->fetchArray($res)) {
-	    echo "<li><a href='?form=".$form['formid']."'>".htmlspecialchars($form['title'])."</a></li>\n";
-	}
-	echo "</ul>\n";
-    } else {
-	echo _MD_NOFORMS;
+    $xoopsOption['template_main'] = "ccenter_index.html";
+    $forms = array();
+    while ($form=$xoopsDB->fetchArray($res)) {
+	$forms[] = $form;
     }
+    $xoopsTpl->assign('forms', $forms);
     include XOOPS_ROOT_PATH."/footer.php";
-
 }
 
 if (isset($_POST['op']) && !isset($_POST['edit'])) $op = $_POST['op'];
@@ -73,6 +69,7 @@ $hasfile = false;
 $require = array();
 $confirm = array();
 foreach ($items as $item) {
+    if (empty($item['field'])) continue;
     $fname = $item['field'];
     $type = $item['type'];
     $lab = $item['label'];
@@ -90,34 +87,7 @@ $form['confirm'] = $confirm;
 $form['hasfile'] = $hasfile;
 
 if ($cust) {
-    $str = $rep = array();
-    $hasfile = "";
-    foreach ($items as $item) {
-	$str[] = '{'.preg_replace('/\*$/', '', $item['label']).'}';
-	$rep[] = $item['input'];
-	$fname = $item['field'];
-    }
-    $str[] = "{SUBMIT}";
-    $str[] = "{BACK}";
-    $str[] = "{FORM_ATTR}";
-    if ($op == 'confirm') {
-	$out = preg_replace('/\[desc\](.*)\[\/desc\]/s', '', $form['description']);
-	$rep[] = "<input type='hidden' name='op' value='store'/>".
-	    "<input type='submit' value='"._MD_SUBMIT_SEND."'/>";
-	$rep[] = "<input type='submit' name='edit' value='"._MD_SUBMIT_EDIT."'/>";
-	$rep[] = " action='index.php?form=$id' method='post' name='ccenter'";
-	$checkscript = "";
-    } else {
-	$out = preg_replace('/\[desc\](.*)\[\/desc\]/s', '\1', $form['description']);
-	$rep[] = "<input type='hidden' name='op' value='confirm'/>".
-	    "<input type='submit' value='"._SUBMIT."'/>";
-	$rep[] = "";		// back
-	$rep[] = " action='index.php?form=$id' method='post' name='ccenter' onsubmit='return xoopsFormValidate_ccenter();'".$hasfile;
-	$checkscript = $form['check_script'];
-    }
-    $str[] = "{CHECK_SCRIPT}";
-    $rep[] = $checkscript;
-    $out = str_replace($str, $rep, $out);
+    $out = custom_template($form, $items, $op == 'confirm');
     if ($cust==1) {
 	include XOOPS_ROOT_PATH."/header.php";
 	echo $out;
@@ -146,6 +116,7 @@ function store_message($items, $form) {
     $attach = array();
     $vals = array();
     foreach ($items as $item) {
+	if (empty($item['label'])) continue;
 	$name = preg_replace('/\*$/', '', $item['label']);
 	$vals[$name] = $item['value'];
 	switch ($item['type']) {
@@ -173,6 +144,7 @@ function store_message($items, $form) {
 	'fidref'=>$form['formid'],
 	'email'=>$xoopsDB->quoteString($email),
 	'onepass'=>$xoopsDB->quoteString($onepass));
+    $parg = $onepass?"&p=".urlencode($onepass):"";
     if ($form['store']) $values['body']=$xoopsDB->quoteString($text);
 
     $res = $xoopsDB->query("INSERT INTO ".MESSAGE. "(".join(',',array_keys($values)).") VALUES (".join(',', $values).")");
@@ -190,7 +162,7 @@ function store_message($items, $form) {
 	$text .= "\n"._MD_ATTACHMENT."\n";
 	foreach ($attach as $i=>$file) {
 	    move_attach_file('', $file, $id);
-	    $text .= attach_image($id, $file, true)."\n";
+	    $text .= attach_image($id, $file, true)."$parg\n";
 	}
 	rmdir(XOOPS_UPLOAD_PATH.attach_path(0, ''));
     }
@@ -206,33 +178,16 @@ function store_message($items, $form) {
 	$notification_handler->triggerEvent('global', $id, 'new', $tags);
 	// force subscribe sender and recipient
 	$notification_handler->subscribe('message', $id, 'comment');
-	$notification_handler->subscribe('message', $id, 'comment', null, null, $touid);
+	if ($touid) $notification_handler->subscribe('message', $id, 'comment', null, null, $touid);
     }
-    if ($onepass) $msgurl .= "&p=".urlencode($onepass);
+    $msgurl .= $parg;
     $tags['MSG_URL'] = $msgurl;
     notify_mail('form_confirm.tpl', $tags, $toUser, $email);
     //$url = str_replace('{UID}', $touid, $url);
     //$url = str_replace('{ID}', $id, $url);
+    if (!empty($form['redirect'])) $msgurl = $form['redirect'];
     redirect_header($msgurl, 3, _MD_CONTACT_DONE);
     exit;
-}
-
-function move_attach_file($tmp, $file, $id=0) {
-    global $xoopsConfig;
-
-    $base = XOOPS_UPLOAD_PATH."/ccenter";
-    if (!is_dir($base)) {
-	if (!mkdir($base)) die("UPLOADS permittion error");
-	$fp = fopen("$base/.htaccess", "w");
-	fwrite($fp, "deny from all\n");	// not access direct
-	fclose($fp);
-    }
-    $path=XOOPS_UPLOAD_PATH.attach_path($id, $file);
-    $dir = dirname($path);
-    if (!is_dir($dir) && !mkdir($dir)) die("UPLOADS permittion error");
-    if (empty($tmp)) $tmp = XOOPS_UPLOAD_PATH.attach_path(0, $file);
-    if (rename($tmp, $path) || move_uploaded_file($tmp, $path)) return true;
-    return false;
 }
 
 function checkScript($checks, $confirm) {

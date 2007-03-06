@@ -1,6 +1,6 @@
 <?php
 // ccenter common functions
-// $Id: functions.php,v 1.1 2007/02/23 05:27:28 nobu Exp $
+// $Id: functions.php,v 1.2 2007/03/06 17:46:55 nobu Exp $
 
 global $xoopsDB;		// for blocks scope
 // using tables
@@ -14,7 +14,6 @@ if (defined('_MD_STATUS_NONE')) {
 	'a'=>_MD_STATUS_ACCEPT,
 	'b'=>_MD_STATUS_REPLY,
 	'c'=>_MD_STATUS_CLOSE,
-	'f'=>_MD_STATUS_FIN,
 	'x'=>_MD_STATUS_DEL);
 }
 
@@ -26,6 +25,10 @@ function get_form_attribute($defs) {
     foreach (preg_split('/\r?\n/', $defs) as $ln) {
 	$ln = trim($ln);
 	if (empty($ln)) continue;
+	if (preg_match('/^\s*#/', $ln)) {
+	    $result[] = array('comment'=>preg_replace('/^\s*#/','', $ln));
+	    continue;
+	}
 	$opts = explode(",", $ln);
 	$name = array_shift($opts);
 	$type='';
@@ -34,14 +37,14 @@ function get_form_attribute($defs) {
 	if (count($opts) && in_array($opts[0], $types)) {
 	    $type = array_shift($opts);
 	}
+	while (isset($opts[0]) && preg_match('/^(size|rows|maxlength|cols|prop)=(\d+)$/', $opts[0], $d)) {
+	    array_shift($opts);
+	    $attr[$d[1]] = $d[2];
+	}
 	if (count($opts) && preg_match('/^\s*#/', $opts[0])) {
 	    $opts[0] = preg_replace('/^\s*#/','', $opts[0]);
 	    $comment = join(',',$opts);
 	    $opts=array();
-	}
-	while (isset($opts[0]) && preg_match('/^(size|rows|maxlength|cols|prop)=(\d+)$/', $opts[0], $d)) {
-	    array_shift($opts);
-	    $attr[$d[1]] = $d[2];
 	}
 	$options = array();
 	if (count($opts)) {
@@ -64,6 +67,7 @@ function assign_post_values(&$items) {
     global $myts;
     $errors = array();
     foreach ($items as $key=>$item) {
+	if (empty($item['field'])) continue;
 	$name = $item['field'];
 	$type = $item['type'];
 	$val = '';
@@ -118,6 +122,7 @@ function assign_form_widgets(&$items, $conf=false) {
     $mconf = !$conf;
     for ($n = 0; $n < count($items); $n++) {
 	$item =& $items[$n];
+	if (empty($item['field'])) continue;
 	$val =& $item['value'];
 	$fname =& $item['field'];
 	if ($conf) {
@@ -190,8 +195,7 @@ function make_widget($item) {
 		$def = $lab;
 	    }
 	    $ck = ($def == $lab)?" checked='checked'":"";
-	    $lab = htmlspecialchars($lab);
-	    $val = htmlspecialchars($val);
+	    $lab = strip_tags($lab);
 	    $input .= "<span class='ccradio'><input type='radio' name='$fname' value='$lab'$ck/> $val</span> ";
 	}
 	break;
@@ -210,8 +214,7 @@ function make_widget($item) {
 	    } else {
 		$ck = in_array($lab, $def)?" checked='checked'":"";
 	    }
-	    $lab = htmlspecialchars($lab);
-	    $val = htmlspecialchars($val);
+	    $lab = strip_tags($lab);
 	    $input .= "<span class='cccheckbox'><input type='checkbox' name='".$fname."[]' value='$lab'$ck$astr/> $val</span> ";
 	}
 	break;
@@ -228,16 +231,16 @@ function make_widget($item) {
 	}
 	$val = htmlspecialchars($val);
 	if ($type == 'textarea') {
-	    if (isset($attr['rows'])) $astr .= ' rows='.$attr['rows'];
-	    if (isset($attr['cols'])) $astr .= ' cols='.$attr['cols'];
+	    if (isset($attr['rows'])) $astr .= ' rows="'.$attr['rows'].'"';
+	    if (isset($attr['cols'])) $astr .= ' cols="'.$attr['cols'].'"';
 	    $input = "<textarea $names $astr>$val</textarea>";
 	} else {
 	    $input = "";
 	    if ($type=='file') {
 		if ($val) $input .= "$val<input type='hidden' name='{$fname}_prev' value='$val'/><br/>";
 	    } else $type = 'text';
-	    if (isset($attr['size'])) $astr .= ' size='.$attr['size'];
-	    if (isset($attr['maxlength'])) $astr .= ' maxlength='.$attr['maxlength'];
+	    if (isset($attr['size'])) $astr .= ' size="'.$attr['size'].'"';
+	    if (isset($attr['maxlength'])) $astr .= ' maxlength="'.$attr['maxlength'].'"';
 	    $input .= "<input type='$type' $names value='$val'$astr/>";
 	    if ($type=='file') {
 	    }
@@ -271,6 +274,24 @@ function unserialize_text($text) {
 	}
     }
     return $array;
+}
+
+function move_attach_file($tmp, $file, $id=0) {
+    global $xoopsConfig;
+
+    $path = XOOPS_UPLOAD_PATH.attach_path($id, $file);
+    $dir = dirname($path);
+    $base = dirname($dir);
+    if (!is_dir($base)) {
+	if (!mkdir($base)) die("UPLOADS permittion error");
+	$fp = fopen("$base/.htaccess", "w");
+	fwrite($fp, "deny from all\n");	// not access direct
+	fclose($fp);
+    }
+    if (!is_dir($dir) && !mkdir($dir)) die("UPLOADS permittion error");
+    if (empty($tmp)) $tmp = XOOPS_UPLOAD_PATH.attach_path(0, $file);
+    if (@rename($tmp, $path) || move_uploaded_file($tmp, $path)) return true;
+    return false;
 }
 
 function template_dir($file='') {
@@ -330,6 +351,7 @@ function attach_image($id, $file, $urlonly=false, $add='') {
 	if ($xy[0]>$xy[1] && $xy[0]>300) $extra = " width='300'";
 	elseif ($xy[1]>300) $extra = " height='300'";
 	else $extra = "";
+	$extra .= " alt='".htmlspecialchars($file)."'";
 	return "<img src='$rurl' class='myphoto' $extra/>";
     } else {
 	$size = return_unit_bytes(filesize($path));
@@ -356,7 +378,8 @@ function check_perm($data) {
     global $xoopsUser, $xoopsModule;
     $uid = is_object($xoopsUser)?$xoopsUser->getVar('uid'):0;
 
-    if (strlen($data['onepass'])>4 && isset($_GET['p']) && $_GET['p']==$data['onepass']) return true;
+    $pass = isset($_GET['p'])?$_GET['p']:(empty($_SESSION['onepass'])?"":$_SESSION['onepass']);
+    if (strlen($data['onepass'])>4 && $data['onepass']==$pass) return true;
 
     $mid = is_object($xoopsModule)?$xoopsModule->getVar('mid'):0;
     if ($uid && $xoopsUser->isAdmin($mid)) return true;
@@ -381,7 +404,9 @@ function delete_message($msgid) {
     $dir = XOOPS_UPLOAD_PATH.attach_path(0,'');
     $dh = opendir($dir);
     while ($file = readdir($dh)) {
-	echo "<div>$file</div>";
+	if ($file==".." || $file==".") continue;
+	$path = "$dir/$file";
+	unlink($path);
     }
 }
 
@@ -399,7 +424,7 @@ function message_entry($data, $link="message.php") {
 function is_evaluate($id, $uid, $pass) {
     global $xoopsDB;
     $cond = $pass?'onepass='.$xoopsDB->quoteString($pass):"uid=$uid";
-    $res = $xoopsDB->query("SELECT count(uid) FROM ".MESSAGE." WHERE msgid=$id AND $cond AND status='c'");
+    $res = $xoopsDB->query("SELECT count(uid) FROM ".MESSAGE." WHERE msgid=$id AND $cond AND status='b'");
     list($ret) = $xoopsDB->fetchRow($res);
     return $ret;
 }
@@ -414,7 +439,11 @@ function notify_mail($tpl, $tags, $users, $email='') {
     $xoopsMailer->assign($tags);
     $xoopsMailer->setTemplateDir(template_dir($tpl));
     $xoopsMailer->setTemplate($tpl);
-    $xoopsMailer->setToUsers($users);
+    if (empty($users)) {	// no reciever fallback
+	$xoopsMailer->setToEmails($xoopsConfig['adminmail']);
+    } else {
+	$xoopsMailer->setToUsers($users);
+    }
     if ($email) $xoopsMailer->setToEmails($email);
     else $xoopsMailer->setToUsers($xoopsUser);
     return $xoopsMailer->send();
@@ -427,7 +456,7 @@ function check_form_tags($defs, $desc) {
     if (file_exists($path)) include_once($path);
     else include_once("$base/english/main.php");
     $items = get_form_attribute($defs);
-    assign_form_widgets(&$items);
+    assign_form_widgets($items);
     $checks = array('{FORM_ATTR}', '{SUBMIT}', '{BACK}', '{CHECK_SCRIPT}');
     foreach ($items as $item) {
 	$checks[] = '{'.preg_replace('/\*$/', '', $item['label']).'}';
@@ -440,5 +469,47 @@ function check_form_tags($defs, $desc) {
 	}
     }
     return $error;
+}
+
+function custom_template($form, $items, $conf=false) {
+    global $xoopsConfig;
+    $str = $rep = array();
+    $hasfile = "";
+    $id = $form['formid'];
+    foreach ($items as $item) {
+	$str[] = '{'.preg_replace('/\*$/', '', $item['label']).'}';
+	$rep[] = $item['input'];
+	$fname = $item['field'];
+	if ($item['type']=='file') {
+	    $hasfile = ' enctype="multipart/form-data"';
+	}
+    }
+    $str[] = "{SUBMIT}";
+    $str[] = "{BACK}";
+    $str[] = "{FORM_ATTR}";
+    if ($conf) {
+	$out = preg_replace('/\\[desc\\](.*)\\[\\/desc\\]/sU', '', $form['description']);
+	$rep[] = "<input type='hidden' name='op' value='store'/>".
+	    "<input type='submit' value='"._MD_SUBMIT_SEND."'/>";
+	$rep[] = "<input type='submit' name='edit' value='"._MD_SUBMIT_EDIT."'/>";
+	$rep[] = " action='index.php?form=$id' method='post' name='ccenter'";
+	$checkscript = "";
+    } else {
+	$out = preg_replace('/\\[desc\\](.*)\\[\\/desc\]/sU', '\\1', $form['description']);
+	$rep[] = "<input type='hidden' name='op' value='confirm'/>".
+	    "<input type='submit' value='"._MD_SUBMIT_CONF."'/>";
+	$rep[] = "";		// back
+	$rep[] = " action='index.php?form=$id' method='post' name='ccenter' onsubmit='return xoopsFormValidate_ccenter();'".$hasfile;
+	$checkscript = $form['check_script'];
+    }
+    $str[] = "{CHECK_SCRIPT}";
+    $rep[] = $checkscript;
+    $str[] = "{XOOPS_URL}";
+    $rep[] = XOOPS_URL;
+    $str[] = "{XOOPS_SITENAME}";
+    $rep[] = $xoopsConfig['sitename'];
+    $str[] = "{TITLE}";
+    $rep[] = $form['title'];
+    return str_replace($str, $rep, $out);
 }
 ?>

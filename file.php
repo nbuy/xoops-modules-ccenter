@@ -1,11 +1,11 @@
 <?php
 // show attachment file
-// $Id: file.php,v 1.1 2007/02/23 05:27:28 nobu Exp $
+// $Id: file.php,v 1.2 2007/03/06 17:46:55 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
 
-if (!function_exists('mime_content_type ')) {
+if (!function_exists('mime_content_type')) {
     function mime_content_type($f) {
 	return trim(exec('file -bi '.escapeshellarg($f)));
     }

@@ -1,5 +1,5 @@
 <?php
-// $Id: notification.inc.php,v 1.2 2007/03/06 17:46:56 nobu Exp $
+// $Id: comment_functions.php,v 1.1 2007/03/06 17:46:55 nobu Exp $
 //  ------------------------------------------------------------------------ //
 //                XOOPS - PHP Content Management System                      //
 //                    Copyright (c) 2000 XOOPS.org                           //
@@ -25,24 +25,20 @@
 //  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA //
 //  ------------------------------------------------------------------------ //
 
+// comment callback functions
 
-function ccenter_notify_iteminfo($category, $item_id)
-{
-    global $xoopsDB;
+include_once XOOPS_ROOT_PATH.'/modules/news/class/class.newsstory.php';
+function ccenter_com_update($story_id, $total_num){
+    /*
+	$article = new NewsStory($story_id);
+	if (!$article->updateComments($total_num)) {
+		return false;
+	}
+    */
+	return true;
+}
 
-    $item = array('name'=>'','url'=>'');
-    $dirname = basename(dirname(__FILE__));
-    if ($category=='message' && $item_id!=0) {
-	// Assume we have a valid story id
-	$sql = "SELECT fidref, touid, title FROM ".
-	    $xoopsDB->prefix('ccenter_message').','.
-	    $xoopsDB->prefix('ccenter_form').
-	    " WHERE status<>'x' AND msgid=$item_id AND fidref=formid";
-	$result = $xoopsDB->query($sql); // TODO: error check
-	list($fid, $touid, $title) = $xoopsDB->fetchRow($result);
-	$item['name'] = $title;
-	$item['url'] = XOOPS_URL.'/modules/$dirname/message.php?id='.$item_id;
-    }
-    return $item;
+function ccenter_com_approve(&$comment){
+	// notification mail here
 }
 ?>

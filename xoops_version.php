@@ -1,5 +1,5 @@
 <?php
-// $Id: xoops_version.php,v 1.1 2007/02/23 05:27:28 nobu Exp $
+// $Id: xoops_version.php,v 1.2 2007/03/06 17:46:56 nobu Exp $
 //  ------------------------------------------------------------------------ //
 //  This program is free software; you can redistribute it and/or modify     //
 //  it under the terms of the GNU General Public License as published by     //
@@ -22,7 +22,7 @@
 //  ------------------------------------------------------------------------ //
 
 $modversion = array('name' => _MI_CCENTER_NAME,
-		    'version' => 0.5,
+		    'version' => 0.6,
 		    'description' => _MI_CCENTER_DESC,
 		    'credits' => "Nobuhiro Yasutomi",
 		    'author' => "Nobuhiro Yasutomi",
@@ -61,6 +61,9 @@ if (!empty($xoopsUser)) {
 
 // Templates
 $modversion['templates'][1] =
+    array('file' => 'ccenter_index.html',
+	  'description' => _MI_CCENTER_FORM_TPL);
+$modversion['templates'][] =
     array('file' => 'ccenter_form.html',
 	  'description' => _MI_CCENTER_FORM_TPL);
 $modversion['templates'][] =
@@ -125,6 +128,11 @@ $modversion['blocks'][]=array('file' => 'memberdirs_myavatar.php',
 $modversion['hasComments'] = 1;
 $modversion['comments']['pageName'] = 'message.php';
 $modversion['comments']['itemName'] = 'id';
+
+// Comment callback functions
+$modversion['comments']['callbackFile'] = 'comment_functions.php';
+$modversion['comments']['callback']['approve'] = 'ccenter_com_approve';
+$modversion['comments']['callback']['update'] = 'ccenter_com_update';
 
 // Config
 /*
@@ -212,21 +220,20 @@ $modversion['config'][]=array('name' => 'notice',
 
 $modversion['hasNotification'] = 1;
 $modversion['notification']['lookup_file'] = 'notification.inc.php';
-$modversion['notification']['lookup_func'] = 'memberdirs_notify_iteminfo';
+$modversion['notification']['lookup_func'] = 'ccenter_notify_iteminfo';
 
 $modversion['notification']['category'][1] =
     array('name' => 'global',
 	  'title' => _MI_CCENTER_GLOBAL_NOTIFY,
-	  'item_name' => 'form',
 	  'description' => '',
-	  'subscribe_from' => array('message.php')
+	  'subscribe_from' => array('reception.php')
 	);
-$modversion['notification']['category'][1] =
+$modversion['notification']['category'][] =
     array('name' => 'form',
 	  'title' => _MI_CCENTER_FORM_NOTIFY,
-	  'item_name' => 'id',
+	  'item_name' => 'form',
 	  'description' => '',
-	  'subscribe_from' => array('message.php')
+	  'subscribe_from' => array('reception.php')
 	);
 $modversion['notification']['category'][] =
     array('name' => 'message',
@@ -240,16 +247,16 @@ $modversion['notification']['event'][1]=
 	  'category' => 'global',
 	  'admin_only'=>1,
 	  'title' => _MI_CCENTER_NEWPOST_NOTIFY,
-	  'caption' => _MI_CCENTER_NEWPOST_NOTIFY_DESC,
+	  'caption' => _MI_CCENTER_NEWPOST_NOTIFY_CAP,
 	  'description' => '',
 	  'mail_template' => 'notify',
 	  'mail_subject' => _MI_CCENTER_NEWPOST_SUBJECT);
-$modversion['notification']['event'][1]=
+$modversion['notification']['event'][]=
     array('name' => 'new',
 	  'category' => 'form',
 	  'admin_only'=>1,
 	  'title' => _MI_CCENTER_NEWPOST_NOTIFY,
-	  'caption' => _MI_CCENTER_NEWPOST_NOTIFY_DESC,
+	  'caption' => _MI_CCENTER_NEWPOST_NOTIFY_CAP,
 	  'description' => '',
 	  'mail_template' => 'notify',
 	  'mail_subject' => _MI_CCENTER_NEWPOST_SUBJECT);

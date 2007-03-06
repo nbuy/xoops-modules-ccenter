@@ -1,6 +1,6 @@
 <?php
 // Changing message status
-// $Id: status.php,v 1.1 2007/02/23 05:27:28 nobu Exp $
+// $Id: status.php,v 1.2 2007/03/06 17:46:56 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -15,7 +15,7 @@ if (!empty($_POST['eval'])) {	// evaluate at last
     $com = $xoopsDB->quoteString($myts->stripSlashesGPC($_POST['comment']));
     $now = time();
     if (is_evaluate($msgid, $uid, $pass)) {
-	$xoopsDB->query("UPDATE ".MESSAGE." SET comment=$com,value=$eval,comtime=$now,status='f' WHERE msgid=$msgid");
+	$xoopsDB->query("UPDATE ".MESSAGE." SET comment=$com,value=$eval,comtime=$now,status='c' WHERE msgid=$msgid");
 	redirect_header($redirect, 1, _MD_EVAL_THANKYOU);
     } else {
 	redirect_header($redirect, 3, _NOPERM);
@@ -26,6 +26,14 @@ if (!empty($_POST['eval'])) {	// evaluate at last
 	exit;
     }
     redirect_header($redirect, 3, _MD_UPDATE_FAILED);
+} else {
+    switch ($_POST['op']) {
+    case 'myself':
+	$res = $xoopsDB->query("UPDATE ".MESSAGE." SET touid=$uid WHERE msgid=$msgid AND touid=0");
+	break;
+    }
+    redirect_header($redirect, 1, _MD_UPDATE_STATUS);
+    exit;
 }
 
 function change_message_status($msgid, $touid, $stat) {

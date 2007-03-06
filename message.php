@@ -1,6 +1,6 @@
 <?php
 // show messages file
-// $Id: message.php,v 1.1 2007/02/23 05:27:28 nobu Exp $
+// $Id: message.php,v 1.2 2007/03/06 17:46:56 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -10,6 +10,12 @@ $xoopsOption['template_main'] = "ccenter_message.html";
 $uid = is_object($xoopsUser)?$xoopsUser->getVar('uid'):0;
 
 $msgid = intval($_GET['id']);
+
+if (isset($_GET['p'])) {
+    $_SESSION['onepass'] = $myts->stripSlashesGPC($_GET['p']);
+}
+$pass = empty($_SESSION['onepass'])?"":$_SESSION['onepass'];
+
 $res = $xoopsDB->query("SELECT m.*, title FROM ".MESSAGE." m,".FORMS." WHERE msgid=$msgid AND status<>'x' AND fidref=formid");
 if (!$res || $xoopsDB->getRowsNum($res)==0) {
     redirect_header("message.php", 3, _NOPERM);
@@ -30,7 +36,6 @@ if ($uid && $uid == $data['touid'] && $data['status']=='-') {
 include XOOPS_ROOT_PATH."/header.php";
 
 $vals = unserialize_text($data['body']);
-$pass = isset($_GET['p'])?$myts->stripSlashesGPC($_GET['p']):"";
 $add = $pass?"p=".$pass:"";
 $to_uname = XoopsUser::getUnameFromId($data['touid']);
 $items=array();
@@ -43,6 +48,7 @@ foreach ($vals as $key=>$val) {
     $items[$key] = $val;
 }
 $data['comment'] = $myts->displayTarea($data['comment']);
+$isadmin = $uid && $xoopsUser->isAdmin($xoopsModule->getVar('mid'));
 $xoopsTpl->assign(
     array('subject'=>$data['title'],
 	  'sender'=>xoops_getLinkedUnameFromId($data['uid']),
@@ -53,7 +59,7 @@ $xoopsTpl->assign(
 	  'status'=>$msg_status[$data['status']],
 	  'is_eval'=>is_evaluate($msgid, $uid, $pass),
 	  'is_mine'=>$data['touid']==$uid,
-	  'own_status'=>array_slice($msg_status, 1, 3),
+	  'own_status'=>array_slice($msg_status, 1, $isadmin?4:3),
 	));
 
 include XOOPS_ROOT_PATH.'/include/comment_view.php';

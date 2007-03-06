@@ -15,7 +15,7 @@
 <table class="outer" align="center" cellspacing="1" border="0">
 <{foreach from=$form.items item=fm}>
 <tr class="<{cycle values="even, odd"}>">
-  <{if $fm.label}><th><{$fm.label}></th><td><{else}><td colspan="2"><{/if}><{$fm.input}>
+  <{if $fm.label}><td class="head"><{$fm.label}></td><td><{else}><td colspan="2"><{/if}><{$fm.input}>
   <{if $fm.comment}><span class="note"><{$fm.comment}></span><{/if}></td>
 </tr>
 <{/foreach}>

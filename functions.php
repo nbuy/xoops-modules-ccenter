@@ -1,6 +1,6 @@
 <?php
 // ccenter common functions
-// $Id: functions.php,v 1.2 2007/03/06 17:46:55 nobu Exp $
+// $Id: functions.php,v 1.3 2007/03/18 09:29:59 nobu Exp $
 
 global $xoopsDB;		// for blocks scope
 // using tables
@@ -70,6 +70,7 @@ function assign_post_values(&$items) {
 	if (empty($item['field'])) continue;
 	$name = $item['field'];
 	$type = $item['type'];
+	$lab = $item['label'];
 	$val = '';
 	if (isset($_POST[$name])) {
 	    $val = $_POST[$name];
@@ -113,7 +114,6 @@ function assign_post_values(&$items) {
 	    break;
 	}
 	$items[$key]['value'] = $val;
-	$lab = $item['label'];
     }
     return $errors;
 }
@@ -307,35 +307,6 @@ function template_dir($file='') {
     return $path;
 }
 
-function lang_label() {
-    global $xoopsDB;
-
-    $res = $xoopsDB->query("SELECT fid, name, caption FROM ".$xoopsDB->prefix('hakusen_form'));
-
-    if (!$res) {
-	global $xoopsConfig;
-	$base = XOOPS_ROOT_PATH."/language/";
-	$lang = $xoopsConfig['language'];
-	$path = "$base/$lang/user.php";
-	if (file_exists($path)) include_once $path;
-	else include_once "$base/english/user.php";
-	return array('name'=>_US_REALNAME, 'email'=>_US_EMAIL,
-		     'url'=>_US_WEBSITE, 'timezone_offset'=>_US_TIMEZONE,
-		     'user_icq'=>_US_ICQ, 'user_aim'=>_US_AIM,
-		     'user_yim'=>_US_YIM, 'user_msnm'=>_US_MSNM,
-		     'user_from'=>_US_LOCATION, 'user_occ'=>_US_OCCUPATION,
-		     'user_intrest'=>_US_INTEREST, 'user_sig'=>_US_SIGNATURE,
-		     'bio'=>_US_EXTRAINFO);
-    }
-
-    $ret = array();
-    while (list($fid, $name, $caption) = $xoopsDB->fetchRow($res)) {
-	if (empty($name)) $name = 'var'.$fid;
-	$ret[$name] = $caption;
-    }
-    return $ret;
-}
-
 function attach_path($id, $file) {
     $dir = $id?sprintf("%05d", $id):"work".substr(session_id(), 0, 8);
     return "/ccenter/$dir".($file?"/$file":"");
@@ -385,13 +356,6 @@ function check_perm($data) {
     if ($uid && $xoopsUser->isAdmin($mid)) return true;
     if ($uid && ($data['uid']==$uid || $data['touid'] == $uid)) return true;
     return false;
-}
-
-function is_confirmed($uid, $ok='Y') {
-    global $xoopsDB;
-    $res = $xoopsDB->query("SELECT confirm FROM ".HAKU." WHERE uid=$uid");
-    list($ans) = $xoopsDB->fetchRow($res);
-    return strstr($ok, $ans);
 }
 
 function gen_onetime_ticket($genseed="mypasswdbasestring") {
@@ -478,7 +442,7 @@ function custom_template($form, $items, $conf=false) {
     $id = $form['formid'];
     foreach ($items as $item) {
 	$str[] = '{'.preg_replace('/\*$/', '', $item['label']).'}';
-	$rep[] = $item['input'];
+	$rep[] = empty($item['input'])?"":$item['input'];
 	$fname = $item['field'];
 	if ($item['type']=='file') {
 	    $hasfile = ' enctype="multipart/form-data"';
@@ -500,7 +464,7 @@ function custom_template($form, $items, $conf=false) {
 	    "<input type='submit' value='"._MD_SUBMIT_CONF."'/>";
 	$rep[] = "";		// back
 	$rep[] = " action='index.php?form=$id' method='post' name='ccenter' onsubmit='return xoopsFormValidate_ccenter();'".$hasfile;
-	$checkscript = $form['check_script'];
+	$checkscript = empty($form['check_script'])?"":$form['check_script'];
     }
     $str[] = "{CHECK_SCRIPT}";
     $rep[] = $checkscript;

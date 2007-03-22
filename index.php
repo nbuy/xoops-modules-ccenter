@@ -1,6 +1,6 @@
 <?php
 // contact to member
-// $Id: index.php,v 1.2 2007/03/06 17:46:56 nobu Exp $
+// $Id: index.php,v 1.3 2007/03/22 18:43:17 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -54,7 +54,7 @@ if ($op!="form") {
 	$op = 'form';
 	assign_form_widgets($items);
     } elseif ($op == 'store') {
-	store_message($items, $form);
+	$errors = store_message($items, $form);
     } elseif ($op == 'confirm') {
 	assign_form_widgets($items, true);
     }
@@ -90,6 +90,7 @@ if ($cust) {
     $out = custom_template($form, $items, $op == 'confirm');
     if ($cust==1) {
 	include XOOPS_ROOT_PATH."/header.php";
+	if ($errors) xoops_error($errors);
 	echo $out;
 	include XOOPS_ROOT_PATH."/footer.php";
     } else {
@@ -148,7 +149,7 @@ function store_message($items, $form) {
     if ($form['store']) $values['body']=$xoopsDB->quoteString($text);
 
     $res = $xoopsDB->query("INSERT INTO ".MESSAGE. "(".join(',',array_keys($values)).") VALUES (".join(',', $values).")");
-    if (!$res) die("Error in DATABASE insert");
+    if (!$res) return array("Error in DATABASE insert");
     $id = $xoopsDB->getInsertID();
     if ($touid) {
 	$member_handler =& xoops_gethandler('member');

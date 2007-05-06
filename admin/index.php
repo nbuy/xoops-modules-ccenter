@@ -7,7 +7,7 @@ $myts =& MyTextSanitizer::getInstance();
 $op = isset($_GET['op'])?$_GET['op']:'';
 if (isset($_POST['op'])) $op = $_POST['op'];
 $start = isset($_GET['start'])?intval($_GET['start']):0;
-$formid = isset($_GET['formid'])?intval($_GET['formid']):0;
+$formid = isset($_REQUEST['formid'])?intval($_REQUEST['formid']):0;
 
 $fields = array('title', 'description', 'defs', 'priuid', 'cgroup',
 		'store', 'custom', 'weight', 'active', 'redirect');
@@ -228,7 +228,7 @@ function defsToString() {
            ret += "<div>"+lab+": {"+lab.replace(/\\*?$/,"")+"}</div>\n";
            if (lines[i].match(/^[^,]+,\\s*mail/i)) {
               lab = conf.replace(/%s/, lab);
-              ret += "<div>"+lab+": {"+lab.replace(/\\*?$/,"")+"}</div>\n";
+              ret += "[desc]<div>"+lab+": {"+lab.replace(/\\*?$/,"")+"}</div>[/desc]\n";
            }
        }
     }

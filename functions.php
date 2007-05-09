@@ -1,11 +1,12 @@
 <?php
 // ccenter common functions
-// $Id: functions.php,v 1.3 2007/03/18 09:29:59 nobu Exp $
+// $Id: functions.php,v 1.4 2007/05/09 05:43:58 nobu Exp $
 
 global $xoopsDB;		// for blocks scope
 // using tables
 define("FORMS", $xoopsDB->prefix("ccenter_form"));
 define('MESSAGE', $xoopsDB->prefix('ccenter_message'));
+
 $myts =& MyTextSanitizer::getInstance();
 
 if (defined('_MD_STATUS_NONE')) {
@@ -16,6 +17,8 @@ if (defined('_MD_STATUS_NONE')) {
 	'c'=>_MD_STATUS_CLOSE,
 	'x'=>_MD_STATUS_DEL);
 }
+
+define('LABEL_ETC', '*');	// radio, checkbox widget 'etc' text input.
 
 // attribute config option expanding
 function get_form_attribute($defs) {
@@ -37,22 +40,25 @@ function get_form_attribute($defs) {
 	if (count($opts) && in_array($opts[0], $types)) {
 	    $type = array_shift($opts);
 	}
-	while (isset($opts[0]) && preg_match('/^(size|rows|maxlength|cols|prop)=(\d+)$/', $opts[0], $d)) {
+	if (preg_match('/\*$/', $name)) $attr['check'] = 'require';
+	while (isset($opts[0]) && (preg_match('/^(size|rows|maxlength|cols|prop)=(\d+)$/', $opts[0], $d) || preg_match('/^(check)=(.+)$/', $opts[0], $d))) {
 	    array_shift($opts);
 	    $attr[$d[1]] = $d[2];
 	}
-	if (count($opts) && preg_match('/^\s*#/', $opts[0])) {
-	    $opts[0] = preg_replace('/^\s*#/','', $opts[0]);
-	    $comment = join(',',$opts);
-	    $opts=array();
-	}
 	$options = array();
 	if (count($opts)) {
-	    foreach($opts as $v) {
+	    while(count($opts) && !preg_match('/^\s*#/', $opts[0])) {
+		$v = array_shift($opts);
 		$sv = preg_split('/=/', $v, 2);
 		if (count($sv)>1) {
 		    $options[$sv[0]] = $sv[1];
-		} else $options[$v] = preg_replace('/\+$/', '', $v);
+		} else {
+		    $options[strip_tags($v)] = preg_replace('/\+$/', '', $v);
+		}
+	    }
+	    if (count($opts)) {
+		$opts[0] = preg_replace('/^\s*#/','', $opts[0]);
+		$comment = join(',',$opts);
 	    }
 	}
 	$fname = "cc".++$num;
@@ -71,6 +77,8 @@ function assign_post_values(&$items) {
 	$name = $item['field'];
 	$type = $item['type'];
 	$lab = $item['label'];
+	$attr = &$item['attr'];
+	$check = !empty($attr['check'])?$attr['check']:"";
 	$val = '';
 	if (isset($_POST[$name])) {
 	    $val = $_POST[$name];
@@ -82,10 +90,38 @@ function assign_post_values(&$items) {
 		$val = $myts->stripSlashesGPC($val);
 	    }
 	}
-	if ($val==='' && preg_match('/\*$/',$lab)) { // require check
-	    $errors[] = $lab.": "._MD_REQUIRE_ERROR;
+	switch ($check) {
+	case '':
+	    break;
+	case 'require':
+	    if ($val==='') $errors[] = $lab.": "._MD_REQUIRE_ERR;
+	    break;
+	case 'num':
+	case 'numeric':
+	    if (!preg_match('/^[-+]?\d+$/', $val)) $errors[] = $lab.": "._MD_NUMITEM_ERR;
+	    break;
+	case 'mail':
+	    if (!checkEmail($val)) $errors[] = $lab.": "._MD_ADDRESS_ERR;
+	    break;
+	default:
+	    if (!preg_match('/^'.$check.'$/', $val)) $errors[] = $lab.": "._MD_REGEXP_ERR;
+	    break;
 	}
 	switch ($type) {
+	case 'checkbox':
+	    $idx = array_search(LABEL_ETC, $val);	 // etc
+	    if ($idx) {
+		$val[$idx] = strip_tags($item['options'][LABEL_ETC])." ".$myts->stripSlashesGPC($_POST[$name."_etc"]);
+	    }
+	    break;
+	case 'radio':
+	    if ($val == LABEL_ETC) {			// etc
+		$val = strip_tags($item['options'][LABEL_ETC])." ".$myts->stripSlashesGPC($_POST[$name."_etc"]);
+	    }
+	    break;
+	case 'hidden':
+	    $val = join(',', $item['options']);
+	    break;
 	case 'file':
 	    $val = '';		// filename
 	    $upfile = isset($_FILES[$name])?$_FILES[$name]:array('name'=>'');
@@ -106,6 +142,9 @@ function assign_post_values(&$items) {
 	    break;
 	case 'mail':
 	    $name .= '_conf';
+	    if (!checkEmail($val)) {
+		$errors[] = $lab.": "._MD_ADDRESS_ERR;
+	    }
 	    if (isset($_POST[$name])) {
 		if ($val != $myts->stripSlashesGPC($_POST[$name])) {
 		    $errors[] = sprintf(_MD_CONF_LABEL, $lab).": "._MD_CONFIRM_ERR;
@@ -135,10 +174,11 @@ function assign_form_widgets(&$items, $conf=false) {
 		}
 	    } else {
 		$v = htmlspecialchars($val);
-		$input = "$v<input type='hidden' name='$fname' value='$v'/>";
+		if ($item['type']=='hidden') $input = $v;
+		else $input = "$v<input type='hidden' name='$fname' value='$v'/>";
 	    }
 	} else {
-	    $input = make_widget($item);
+	    $input = cc_make_widget($item);
 	    $lab = $item['label'];
 	    if ($mconf && $item['type']=='mail' && preg_match('/\*$/', $lab)) {
 		$cfname = $fname.'_conf';
@@ -146,16 +186,20 @@ function assign_form_widgets(&$items, $conf=false) {
 		    'label'=>sprintf(_MD_CONF_LABEL, $lab),
 		    'field'=>$cfname, 'type'=>$item['type'],
 		    'comment'=>_MD_CONF_DESC, 'attr'=>$item['attr']);
-		$citem['input'] = make_widget($citem);
+		$citem['input'] = cc_make_widget($citem);
 		array_splice($items, ++$n, 0, array($citem));
 		$mconf = false;
 	    }
 	}
 	$item['input'] = $input;
+	if ($item['type']=='hidden' && !$conf) {
+	    unset($items[$n]);
+	    continue;
+	}
     }
 }
 
-function make_widget($item) {
+function cc_make_widget($item) {
     global $myts;
     $input = '';
     $fname = $item['field'];
@@ -165,7 +209,12 @@ function make_widget($item) {
     $attr =& $item['attr'];
     $astr = '';
     if (isset($attr['prop'])) $astr .= ' '.$attr['prop'];
+    $etcreg = empty($item['options'][LABEL_ETC])?'':'/^'.preg_quote(strip_tags($item['options'][LABEL_ETC]), '/').'\s+/';
+    $etcval = '';
     switch($item['type']) {
+    case 'hidden':
+	$input=htmlspecialchars(join(',', $options));
+	break;
     case 'select':
 	$def = '';
 	if (isset($_POST[$fname])) { // ovarride post value
@@ -187,15 +236,23 @@ function make_widget($item) {
 	$def = '';
 	if (isset($_POST[$fname])) { // ovarride post value
 	    $def = $myts->stripSlashesGPC($_POST[$fname]);
+	    if ($etcreg && preg_match($etcreg, $def)) {
+		$etcval = preg_replace($etcreg, '', $def);
+		$def = LABEL_ETC;
+	    }
 	}
 	$input = "";
+	$estr = isset($attr['size'])?' size="'.$attr['size'].'"':'';
 	foreach ($options as $key=>$val) {
 	    $lab = preg_replace('/\+$/', '', $key);
 	    if (empty($def) && $lab != $key) {
 		$def = $lab;
 	    }
-	    $ck = ($def == $lab)?" checked='checked'":"";
-	    $lab = strip_tags($lab);
+	    $ck = ($def === $lab)?" checked='checked'":"";
+	    if ($lab == LABEL_ETC && $lab!=strip_tags($val)) {
+		$val .= " <input name='{$fname}_etc' value='$etcval' onChange='checkedEtcText(\"$fname\")'$estr/>";
+		$ck = " checked='checked' id='{$fname}_eck'";
+	    }
 	    $input .= "<span class='ccradio'><input type='radio' name='$fname' value='$lab'$ck/> $val</span> ";
 	}
 	break;
@@ -203,10 +260,16 @@ function make_widget($item) {
 	$def = ($_SERVER['REQUEST_METHOD']=='POST')?array():null;
 	if (isset($_POST[$fname])) { // ovarride post value
 	    foreach ($_POST[$fname] as $v) {
-		$def[] = $myts->stripSlashesGPC($v);
+		$v = $myts->stripSlashesGPC($v);
+		if ($etcreg && preg_match($etcreg, $v)) {
+		    $etcval = preg_replace($etcreg, '', $v);
+		    $v = LABEL_ETC;
+		}
+		$def[] = $v;
 	    }
 	}
 	$input = "";
+	$estr = isset($attr['size'])?' size="'.$attr['size'].'"':'';
 	foreach ($options as $key=>$val) {
 	    $lab = preg_replace('/\+$/', '', $key);
 	    if ($def==null) {
@@ -214,7 +277,10 @@ function make_widget($item) {
 	    } else {
 		$ck = in_array($lab, $def)?" checked='checked'":"";
 	    }
-	    $lab = strip_tags($lab);
+	    if ($lab == LABEL_ETC && $lab!=strip_tags($val)) {
+		$val .= " <input name='{$fname}_etc' value='$etcval' onChange='checkedEtcText(\"$fname\")'$estr/>";
+		$ck .= " id='{$fname}_eck'";
+	    }
 	    $input .= "<span class='cccheckbox'><input type='checkbox' name='".$fname."[]' value='$lab'$ck$astr/> $val</span> ";
 	}
 	break;

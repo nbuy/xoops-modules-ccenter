@@ -1,6 +1,6 @@
 <?php
 // contact to member
-// $Id: index.php,v 1.3 2007/03/22 18:43:17 nobu Exp $
+// $Id: index.php,v 1.4 2007/05/09 05:42:17 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -32,8 +32,13 @@ if (!$res) {
     exit;
 }
 
+$modurl = XOOPS_URL."/modules/".$xoopsModule->getVar('dirname').'/';
+$breadcrumbs = array();
+$breadcrumbs[] = array('name'=>$xoopsModule->getVar('name'), 'url'=>$modurl);
+
 if ($xoopsDB->getRowsNum($res)!=1) {
     include XOOPS_ROOT_PATH."/header.php";
+    $xoopsTpl->assign('xoops_breadcrumbs', $breadcrumbs);
     $xoopsOption['template_main'] = "ccenter_index.html";
     $forms = array();
     while ($form=$xoopsDB->fetchArray($res)) {
@@ -86,10 +91,13 @@ $form['check_script'] = checkScript($require, $confirm);
 $form['confirm'] = $confirm;
 $form['hasfile'] = $hasfile;
 
+$breadcrumbs[] = array('name'=>htmlspecialchars($form['title']), 'url'=>$modurl."index.php?form=$id");
+
 if ($cust) {
     $out = custom_template($form, $items, $op == 'confirm');
     if ($cust==1) {
 	include XOOPS_ROOT_PATH."/header.php";
+	$xoopsTpl->assign('xoops_breadcrumbs', $breadcrumbs);
 	if ($errors) xoops_error($errors);
 	echo $out;
 	include XOOPS_ROOT_PATH."/footer.php";
@@ -99,6 +107,7 @@ if ($cust) {
 } else {
     $form['description'] = $myts->displayTarea($form['description']);
     include XOOPS_ROOT_PATH."/header.php";
+    $xoopsTpl->assign('xoops_breadcrumbs', $breadcrumbs);
 
     $xoopsOption['template_main'] = ($op=='confirm')?"ccenter_confirm.html":"ccenter_form.html";
 
@@ -149,7 +158,7 @@ function store_message($items, $form) {
     if ($form['store']) $values['body']=$xoopsDB->quoteString($text);
 
     $res = $xoopsDB->query("INSERT INTO ".MESSAGE. "(".join(',',array_keys($values)).") VALUES (".join(',', $values).")");
-    if (!$res) return array("Error in DATABASE insert");
+    if ($res===false) return array("Error in DATABASE insert");
     $id = $xoopsDB->getInsertID();
     if ($touid) {
 	$member_handler =& xoops_gethandler('member');
@@ -195,7 +204,7 @@ function checkScript($checks, $confirm) {
     $script = "<script type=\"text/javascript\">
 <!--//
 function checkItem(obj, lab) {
-  msg = lab+\": "._MD_REQUIRE_ERROR."\\n\";
+  msg = lab+\": "._MD_REQUIRE_ERR."\\n\";
   if (obj.value == \"\" && obj.selectedIndex == null) return msg;
   if (obj.length) {
      for (i=0; i<obj.length; i++) {
@@ -230,6 +239,10 @@ function xoopsFormValidate_ccenter() {
     window.alert(msg);
     if (obj.length==null) obj.focus();
     return false;
+}
+function checkedEtcText(lab) {
+   obj = xoopsGetElementById(lab+\"_eck\");
+   if (obj) obj.checked=true;
 }
 //--></script>";
     return $script;

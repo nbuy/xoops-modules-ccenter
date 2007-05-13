@@ -42,7 +42,7 @@
 <{/if}>
 </div>
 <div class="attr"><b class="label"><{$smarty.const._MD_REGDATE}></b> <{$mdate}></div>
-<div class="attr"><b class="label"><{$smarty.const._MD_CONTACT_FROM}></b> <{$sender}></div>
+<div class="attr"><b class="label"><{$smarty.const._MD_CONTACT_FROM}></b> <{$sender}><{if $data.email}> &lt;<a href="mailto:<{$data.email|escape}>"><{$data.email|escape}></a>&gt;<{/if}></div>
 <div class="attr"><b class="label"><{$smarty.const._MD_CONTACT_TO}></b> <{$sendto}>
 <{if $data.touid==0 && $xoops_isuser}>
 <form action="status.php" method="post" style="display: inline;">

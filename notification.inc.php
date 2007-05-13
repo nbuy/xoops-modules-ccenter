@@ -1,5 +1,5 @@
 <?php
-// $Id: notification.inc.php,v 1.2 2007/03/06 17:46:56 nobu Exp $
+// $Id: notification.inc.php,v 1.3 2007/05/13 05:44:01 nobu Exp $
 //  ------------------------------------------------------------------------ //
 //                XOOPS - PHP Content Management System                      //
 //                    Copyright (c) 2000 XOOPS.org                           //
@@ -41,7 +41,7 @@ function ccenter_notify_iteminfo($category, $item_id)
 	$result = $xoopsDB->query($sql); // TODO: error check
 	list($fid, $touid, $title) = $xoopsDB->fetchRow($result);
 	$item['name'] = $title;
-	$item['url'] = XOOPS_URL.'/modules/$dirname/message.php?id='.$item_id;
+	$item['url'] = XOOPS_URL."/modules/$dirname/message.php?id=".$item_id;
     }
     return $item;
 }

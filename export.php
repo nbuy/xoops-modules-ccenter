@@ -1,6 +1,6 @@
 <?php
 // Export data in CSV format
-// $Id: export.php,v 1.1 2007/02/23 05:27:28 nobu Exp $
+// $Id: export.php,v 1.2 2007/05/13 05:44:01 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -28,12 +28,14 @@ if (!$res || $xoopsDB->getRowsNum($res)==0) {
 }
 $form = $xoopsDB->fetchArray($res);
 
-$res = $xoopsDB->query('SELECT * FROM '.MESSAGE." WHERE fidref=$id ORDER BY msgid");
+$cond = "fidref=$id AND status<>'x'";
+$res = $xoopsDB->query('SELECT * FROM '.MESSAGE." WHERE $cond ORDER BY msgid");
 
 $items = get_form_attribute($form['defs']);
 $labels = array('ID', _MD_POSTDATE, _MD_STATUS, _MD_CONTACT_FROM, _MD_CONTACT_TO);
 $n = $mpos = -1;
 foreach ($items as $item) {
+    if (empty($item['type'])) continue;	// skip comment
     $n++;
     if ($mpos<0 && $item['type'] == 'mail') $mpos = $n;
     $labels[] = $item['label'];
@@ -52,7 +54,6 @@ while ($data = $xoopsDB->fetchArray($res)) {
     $contents .= csv_str($fixval).",".csv_str($values)."\n";
 }
 
-//header('Content-type: text/xml; charset=UTF-8'); // for debug
 $tm=formatTimestamp(time(), 'Ymd');
 $file = "ccenter_form$id-$tm.csv";
 header("Content-type: text/csv; charset="._MD_EXPORT_CHARSET);

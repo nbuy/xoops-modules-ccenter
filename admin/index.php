@@ -80,9 +80,9 @@ default:
 xoops_cp_footer();
 
 function list_forms() {
-    global $xoopsDB;
+    global $xoopsDB, $xoopsUser;
     $dirname = basename(dirname(dirname(__FILE__)));
-    $res = $xoopsDB->query("SELECT formid, title,count(msgid) nmes,
+    $res = $xoopsDB->query("SELECT formid, title,count(msgid) nmes, priuid,
 sum(if(status='-',1,0)) nwait,
 sum(if(status='a',1,0)) nwork,
 sum(if(status='b',1,0)) nreply,
@@ -91,24 +91,25 @@ FROM ".FORMS." LEFT JOIN ".MESSAGE." ON fidref=formid AND status<>'x' GROUP BY f
     if (!$res || $xoopsDB->getRowsNum($res)==0) return false;
     echo "<style>td.num { text-align: right; }</style>";
     echo "<table class='outer' border='0' cellspacing='1'>\n";
-    echo "<tr><th>ID</th><th>"._AM_FORM_TITLE."</th><th>"._AM_MSG_COUNT."</th><th>"._AM_MSG_WAIT."</th><th>"._AM_MSG_WORK."</th><th>"._AM_MSG_REPLY."</th><th>"._AM_MSG_CLOSE."</th><th></th></tr>\n";
+    echo "<tr><th>ID</th><th>"._AM_FORM_TITLE."</th><th>"._AM_MSG_COUNT."</th><th>"._AM_MSG_WAIT."</th><th>"._AM_MSG_WORK."</th><th>"._AM_MSG_REPLY."</th><th>"._AM_MSG_CLOSE."</th><th>"._AM_OPERATION."</th></tr>\n";
     $n = 0;
     $mbase = XOOPS_URL."/modules/$dirname";
     while ($data = $xoopsDB->fetchArray($res)) {
 	$id = $data['formid'];
 	$title = htmlspecialchars($data['title']);
 	$url = "$mbase?form=$id";
+	$form = $url.($data['priuid']<0?"&amp;uid=".$xoopsUser->getVar('uid'):"");
 	$bg = $n++%2?'even':'odd';
 	$ope = "<a href='?formid=$id'>"._EDIT."</a>";
 	$ope .= "| <a href='?op=delete&formid=$id'>"._DELETE."</a>";
 	$ope .= "| <a href='$mbase/reception.php?form=$id'>"._AM_DETAIL."</a>";
 	echo "<tr class='$bg'><td>$id</td>
-<td><a href='$url' target='preview'>$title</a></td>
+<td><a href='$form' target='preview'>$title</a></td>
 <td class='num'>".$data['nmes']."</td><td class='num'>".$data['nwait']."</td>
 <td class='num'>".$data['nwork']."</td><td class='num'>".$data['nreply']."</td>
 <td class='num'>".$data['nclose']."</td><td>$ope</td></tr>\n";
     }
-    echo "</table>\n<hr/>\n";
+    echo "</table><hr/>\n";
     return true;
 }
 
@@ -187,7 +188,14 @@ function build_form($formid=0) {
     $form->addElement($defs);
 
     $priuid = new XoopsFormSelect(_AM_FORM_PRIM_CONTACT, 'priuid', $data['priuid']);
-    $options = array("0"=>_AM_FORM_PRIM_NONE);
+    $priuid->setDescription(_AM_FORM_PRIM_DESC);
+    $member_handler =& xoops_gethandler('member');
+    $groups = $member_handler->getGroupList(new Criteria('groupid', XOOPS_GROUP_ANONYMOUS, '!='));
+    $options = array();
+    foreach ($groups as $k=>$v) {
+	$options["-$k"] = sprintf(_AM_FORM_PRIM_GROUP, $v);
+    }
+    $options["0"] = _AM_FORM_PRIM_NONE;
     $cond = empty($xoopsModuleConfig['mod_group'])?"":
 	" AND groupid IN (".join(',', $xoopsModuleConfig['mod_group']).")";
     $res = $xoopsDB->query("SELECT u.uid, uname
@@ -201,8 +209,7 @@ FROM ".$xoopsDB->prefix("groups_users_link")." l, ".$xoopsDB->prefix("users")."
 
     $cgroup = new XoopsFormSelect(_AM_FORM_CONTACT_GROUP, 'cgroup', $data['cgroup']);
     $cgroup->addOption(0, _AM_FORM_CGROUP_NONE);
-    $member_handler =& xoops_gethandler('member');
-    $cgroup->addOptionArray($member_handler->getGroupList(new Criteria('groupid', XOOPS_GROUP_ANONYMOUS, '!=')));
+    $cgroup->addOptionArray($groups);
     $form->addElement($cgroup) ;
 
     $form->addElement(new XoopsFormRadioYN(_AM_FORM_STORE, 'store' , $data['store']));
@@ -215,6 +222,7 @@ FROM ".$xoopsDB->prefix("groups_users_link")." l, ".$xoopsDB->prefix("users")."
     $submit->addElement(new XoopsFormButton('' , 'preview', _PREVIEW, 'submit'));
     $form->addElement($submit) ;
 
+    echo "<a name='form'></a>";
     $form->display();
     echo '<script>
 function defsToString() {
@@ -224,7 +232,9 @@ function defsToString() {
     conf = "'._MD_CONF_LABEL.'";
     for (i in lines) {
        lab = lines[i].replace(/,.*$/, "");
-       if (lab != "" ) {
+       if (lab.match(/^\s*#/)) {
+           ret += "[desc]<div>"+lines[i].replace(/^\s*#/, "")+"</div>[/desc]\n";
+       } else if (lab != "") {
            ret += "<div>"+lab+": {"+lab.replace(/\\*?$/,"")+"}</div>\n";
            if (lines[i].match(/^[^,]+,\\s*mail/i)) {
               lab = conf.replace(/%s/, lab);

@@ -1,8 +1,7 @@
 <a name="form"></a>
 <div class="evform">
-<form action="index.php?form=<{$form.formid}>" name="order" method="post">
+<form action="index.php?form=<{$form.formid}><{if $form.priuser.uid}>&amp;uid=<{$form.priuser.uid}><{/if}>" name="order" method="post">
 <input type="hidden" name="op" value="store"/>
-<input type="hidden" name="uid" value="<{$user.uid}>"/>
 <p clss="heading"><{$heading}></p>
 <table class="outer" align="center" cellspacing="1" border="0">
 <tr><th colspan="2"><{$form.title}></th></tr>

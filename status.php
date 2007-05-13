@@ -1,6 +1,6 @@
 <?php
 // Changing message status
-// $Id: status.php,v 1.2 2007/03/06 17:46:56 nobu Exp $
+// $Id: status.php,v 1.3 2007/05/13 05:44:01 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -39,7 +39,8 @@ if (!empty($_POST['eval'])) {	// evaluate at last
 function change_message_status($msgid, $touid, $stat) {
     global $xoopsDB, $msg_status, $xoopsUser, $xoopsModule;
 
-    $own_status = array_slice($msg_status, 1, 3);
+    $isadmin = is_object($xoopsUser) && $xoopsUser->isAdmin($xoopsModule->getVar('mid'));
+    $own_status = array_slice($msg_status, 1, $isadmin?4:3);
     if (empty($own_status[$stat])) return false; // Invalid status
     $s = $xoopsDB->quoteString($stat);
     $res = $xoopsDB->query("SELECT onepass,status,email,title FROM ".MESSAGE.",

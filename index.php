@@ -1,6 +1,6 @@
 <?php
 // contact to member
-// $Id: index.php,v 1.4 2007/05/09 05:42:17 nobu Exp $
+// $Id: index.php,v 1.5 2007/05/13 05:44:01 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -42,6 +42,7 @@ if ($xoopsDB->getRowsNum($res)!=1) {
     $xoopsOption['template_main'] = "ccenter_index.html";
     $forms = array();
     while ($form=$xoopsDB->fetchArray($res)) {
+	if ($form['priuid']<0) continue; // need uid setting
 	$forms[] = $form;
     }
     $xoopsTpl->assign('forms', $forms);
@@ -51,6 +52,23 @@ if ($xoopsDB->getRowsNum($res)!=1) {
 if (isset($_POST['op']) && !isset($_POST['edit'])) $op = $_POST['op'];
 $form = $xoopsDB->fetchArray($res);
 $items = get_form_attribute($form['defs']);
+if ($form['priuid']< 0) {	// assign group member
+    $priuid = isset($_GET['uid'])?intval($_GET['uid']):0;
+    if ($priuid) {
+	$member_handler =& xoops_gethandler('member');
+	$priuser = $member_handler->getUser($priuid);
+	if (!is_object($priuser) || !in_array(-$form['priuid'], $priuser->groups())) $priuid=0;
+    }
+    if (empty($priuid)) {
+	$back = isset($_SERVER['HTTP_REFERER'])?$_SERVER['HTTP_REFERER']:XOOPS_URL;
+	redirect_header($back, 3, _NOPERM);
+	exit;
+    } else {
+	$form['priuser'] = array('uid'=>$priuser->getVar('uid'),
+				 'uname'=>$priuser->getVar('uname'),
+				 'name'=>$priuser->getVar('name'));
+    }
+}
 
 $errors = array();
 if ($op!="form") {
@@ -105,7 +123,15 @@ if ($cust) {
 	echo $out;
     }
 } else {
-    $form['description'] = $myts->displayTarea($form['description']);
+    $str = $rep = array();
+    if (!empty($form['priuser'])) {
+	$priuser =& $form['priuser'];
+	$str[] = "{TO_UNAME}";
+	$rep[] = $priuser['uname'];
+	$str[] = "{TO_NAME}";
+	$rep[] = $priuser['name'];
+    }
+    $form['description'] = $myts->displayTarea(str_replace($str, $rep, $form['description']));
     include XOOPS_ROOT_PATH."/header.php";
     $xoopsTpl->assign('xoops_breadcrumbs', $breadcrumbs);
 
@@ -147,7 +173,11 @@ function store_message($items, $form) {
     }
     $text = serialize_text($vals);
     $onepass = ($uid==0)?gen_onetime_ticket($email):"";
-    $touid = $form['priuid'];
+    if ($form['priuid'] < 0) {
+	$touid = empty($form['priuser'])?0:$form['priuser']['uid'];
+    } else {
+	$touid = $form['priuid'];
+    }
     $values = array(
 	'uid'=>$uid, 'touid'=>$touid,
 	'mtime'=>time(),

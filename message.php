@@ -1,6 +1,6 @@
 <?php
 // show messages file
-// $Id: message.php,v 1.2 2007/03/06 17:46:56 nobu Exp $
+// $Id: message.php,v 1.3 2007/05/13 05:44:01 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -8,6 +8,7 @@ include "functions.php";
 $myts =& MyTextSanitizer::getInstance();
 $xoopsOption['template_main'] = "ccenter_message.html";
 $uid = is_object($xoopsUser)?$xoopsUser->getVar('uid'):0;
+$isadmin = $uid && $xoopsUser->isAdmin($xoopsModule->getVar('mid'));
 
 $msgid = intval($_GET['id']);
 
@@ -16,7 +17,8 @@ if (isset($_GET['p'])) {
 }
 $pass = empty($_SESSION['onepass'])?"":$_SESSION['onepass'];
 
-$res = $xoopsDB->query("SELECT m.*, title FROM ".MESSAGE." m,".FORMS." WHERE msgid=$msgid AND status<>'x' AND fidref=formid");
+$cond = $isadmin?"":" AND status<>'x'";
+$res = $xoopsDB->query("SELECT m.*, title FROM ".MESSAGE." m,".FORMS." WHERE msgid=$msgid $cond AND fidref=formid");
 if (!$res || $xoopsDB->getRowsNum($res)==0) {
     redirect_header("message.php", 3, _NOPERM);
     exit;
@@ -27,7 +29,6 @@ if (!check_perm($data)) {
     exit;
 }
 // referer
-$uid = is_object($xoopsUser)?$xoopsUser->getVar('uid'):0;
 if ($uid && $uid == $data['touid'] && $data['status']=='-') {
     $xoopsDB->queryF("UPDATE ".MESSAGE." SET status='a' WHERE msgid=".$msgid);
     $data['status'] = 'a';
@@ -36,7 +37,7 @@ if ($uid && $uid == $data['touid'] && $data['status']=='-') {
 include XOOPS_ROOT_PATH."/header.php";
 
 $vals = unserialize_text($data['body']);
-$add = $pass?"p=".$pass:"";
+$add = $pass?"p=".urlencode($pass):"";
 $to_uname = XoopsUser::getUnameFromId($data['touid']);
 $items=array();
 foreach ($vals as $key=>$val) {

@@ -1,6 +1,6 @@
 <?php
 // contact to member
-// $Id: reception.php,v 1.2 2007/03/06 17:46:56 nobu Exp $
+// $Id: reception.php,v 1.3 2007/05/13 05:44:01 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -20,6 +20,7 @@ else {
 }
 
 if ($id) $cond .= ' AND formid='.$id;
+$cond .= " AND status<>'x'";
 
 $res = $xoopsDB->query("SELECT f.*,count(msgid) nmsg,max(m.mtime) ltime
  FROM ".FORMS." f LEFT JOIN ".MESSAGE." m ON fidref=formid WHERE $cond
@@ -50,18 +51,18 @@ $xoopsOption['template_main'] = "ccenter_reception.html";
 
 $form = $xoopsDB->fetchArray($res);
 $id = $form['formid'];
+$items = get_form_attribute($form['defs']);
 $start = isset($_GET['start'])?intval($_GET['start']):0;
 if ($start>0) {
     $form['description'] = "";
 } elseif ($form['custom']) {
     $reg = array('/\\[desc\\](.*)\\[\/desc\\]/sU', '/<form[^>]*>(.*)<\\/form[^>]*>/sU', '/{CHECK_SCRIPT}/');
     $rep = array('\\1', '', '');
-    $form['description'] = preg_replace($reg, $rep, $form['description']);
+    $form['description'] = preg_replace($reg, $rep, custom_template($form, $items));
 } else {
     $form['description'] = $myts->displayTarea($form['description']);
 }
 $form['mdate'] = formatTimestamp($form['mtime']);
-$items = get_form_attribute($form['defs']);
 foreach ($items as $k=>$item) {
     if (empty($item['label'])) unset($items[$k]);
 }
@@ -79,13 +80,15 @@ $xoopsTpl->assign('form', $form);
 
 include_once XOOPS_ROOT_PATH.'/class/pagenav.php';
 
-$res = $xoopsDB->query('SELECT count(*) FROM '.MESSAGE." WHERE fidref=$id");
+$cond = "fidref=$id AND status<>'x'";
+$res = $xoopsDB->query('SELECT count(*) FROM '.MESSAGE." WHERE $cond");
 list($count) = $xoopsDB->fetchRow($res);
-$max = 20;
+$max = $xoopsModuleConfig['max_lists'];
 $args = preg_replace('/start=\\d+/', '', $_SERVER['QUERY_STRING']);
 $nav = new XoopsPageNav($count, $max, $start, "start", $args);
 $xoopsTpl->assign('pagenav', $count>$max?$nav->renderNav():"");
-$res = $xoopsDB->query('SELECT * FROM '.MESSAGE." WHERE fidref=$id ORDER BY msgid DESC", $max, $start);
+
+$res = $xoopsDB->query('SELECT * FROM '.MESSAGE." WHERE $cond ORDER BY msgid DESC", $max, $start);
 
 $mlist = array();
 while ($data = $xoopsDB->fetchArray($res)) {

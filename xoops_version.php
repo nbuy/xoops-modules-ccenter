@@ -1,5 +1,5 @@
 <?php
-// $Id: xoops_version.php,v 1.2 2007/03/06 17:46:56 nobu Exp $
+// $Id: xoops_version.php,v 1.3 2007/05/13 05:44:01 nobu Exp $
 //  ------------------------------------------------------------------------ //
 //  This program is free software; you can redistribute it and/or modify     //
 //  it under the terms of the GNU General Public License as published by     //
@@ -22,7 +22,7 @@
 //  ------------------------------------------------------------------------ //
 
 $modversion = array('name' => _MI_CCENTER_NAME,
-		    'version' => 0.6,
+		    'version' => 0.7,
 		    'description' => _MI_CCENTER_DESC,
 		    'credits' => "Nobuhiro Yasutomi",
 		    'author' => "Nobuhiro Yasutomi",
@@ -135,14 +135,18 @@ $modversion['comments']['callback']['approve'] = 'ccenter_com_approve';
 $modversion['comments']['callback']['update'] = 'ccenter_com_update';
 
 // Config
-/*
+
 $modversion['hasconfig'] = 1;
-$modversion['config'][]=array('name' => 'max_lists',
-			      'title' => '_MI_CCENTER_LISTS',
-			      'description' => '_MI_CCENTER_LISTS_DESC',
-			      'formtype' => 'text',
-			      'valuetype' => 'int',
-			      'default' => 50);
+$modversion['config'][]=array(
+    'name' => 'max_lists',
+    'title' => '_MI_CCENTER_LISTS',
+    'description' => '_MI_CCENTER_LISTS_DESC',
+    'formtype' => 'select',
+    'valuetype' => 'int',
+    'default' => 25,
+    'options' => array(5=>5,10=>10,25=>25,50=>50,100=>100,200=>200,500=>500,1000=>1000)
+    );
+/*
 $modversion['config'][]=array('name' => 'options',
 			      'title' => '_MI_CCENTER_OPTS',
 			      'description' => '_MI_CCENTER_OPTS_DESC',

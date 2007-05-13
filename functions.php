@@ -1,6 +1,6 @@
 <?php
 // ccenter common functions
-// $Id: functions.php,v 1.4 2007/05/09 05:43:58 nobu Exp $
+// $Id: functions.php,v 1.5 2007/05/13 05:44:01 nobu Exp $
 
 global $xoopsDB;		// for blocks scope
 // using tables
@@ -109,6 +109,7 @@ function assign_post_values(&$items) {
 	}
 	switch ($type) {
 	case 'checkbox':
+	    if (empty($val)) $val = array();
 	    $idx = array_search(LABEL_ETC, $val);	 // etc
 	    if ($idx) {
 		$val[$idx] = strip_tags($item['options'][LABEL_ETC])." ".$myts->stripSlashesGPC($_POST[$name."_etc"]);
@@ -489,6 +490,7 @@ function check_form_tags($defs, $desc) {
     assign_form_widgets($items);
     $checks = array('{FORM_ATTR}', '{SUBMIT}', '{BACK}', '{CHECK_SCRIPT}');
     foreach ($items as $item) {
+	if (empty($item['type'])) continue;
 	$checks[] = '{'.preg_replace('/\*$/', '', $item['label']).'}';
     }
     $error = "";
@@ -514,6 +516,15 @@ function custom_template($form, $items, $conf=false) {
 	    $hasfile = ' enctype="multipart/form-data"';
 	}
     }
+    $action = "index.php?form=$id";
+    if (!empty($form['priuser'])) {
+	$priuser =& $form['priuser'];
+	$action .= '&amp;'.$priuser['uid'];
+	$str[] = "{TO_UNAME}";
+	$rep[] = $priuser['uname'];
+	$str[] = "{TO_NAME}";
+	$rep[] = $priuser['name'];
+    }
     $str[] = "{SUBMIT}";
     $str[] = "{BACK}";
     $str[] = "{FORM_ATTR}";
@@ -522,14 +533,14 @@ function custom_template($form, $items, $conf=false) {
 	$rep[] = "<input type='hidden' name='op' value='store'/>".
 	    "<input type='submit' value='"._MD_SUBMIT_SEND."'/>";
 	$rep[] = "<input type='submit' name='edit' value='"._MD_SUBMIT_EDIT."'/>";
-	$rep[] = " action='index.php?form=$id' method='post' name='ccenter'";
+	$rep[] = " action='$action' method='post' name='ccenter'";
 	$checkscript = "";
     } else {
 	$out = preg_replace('/\\[desc\\](.*)\\[\\/desc\]/sU', '\\1', $form['description']);
 	$rep[] = "<input type='hidden' name='op' value='confirm'/>".
 	    "<input type='submit' value='"._MD_SUBMIT_CONF."'/>";
 	$rep[] = "";		// back
-	$rep[] = " action='index.php?form=$id' method='post' name='ccenter' onsubmit='return xoopsFormValidate_ccenter();'".$hasfile;
+	$rep[] = " action='$action' method='post' name='ccenter' onsubmit='return xoopsFormValidate_ccenter();'".$hasfile;
 	$checkscript = empty($form['check_script'])?"":$form['check_script'];
     }
     $str[] = "{CHECK_SCRIPT}";

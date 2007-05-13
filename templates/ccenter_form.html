@@ -9,7 +9,7 @@
 <h2><{$form.title}></h2>
 <{$form.description}>
 <a name="form"></a>
-<form action="index.php?form=<{$form.formid}>" name="ccenter" method="post"<{if $form.check_script}> onsubmit="return xoopsFormValidate_ccenter();"<{/if}><{if $form.hasfile}> enctype="multipart/form-data"<{/if}>>
+<form action="index.php?form=<{$form.formid}><{if $form.priuser.uid}>&amp;uid=<{$form.priuser.uid}><{/if}>" name="ccenter" method="post"<{if $form.check_script}> onsubmit="return xoopsFormValidate_ccenter();"<{/if}><{if $form.hasfile}> enctype="multipart/form-data"<{/if}>>
 <input type="hidden" name="op" value="<{$op}>"/>
 
 <table class="outer" align="center" cellspacing="1" border="0">

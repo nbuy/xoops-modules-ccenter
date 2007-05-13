@@ -1,6 +1,6 @@
 <?php
 // contact to member
-// $Id: index.php,v 1.5 2007/05/13 05:44:01 nobu Exp $
+// $Id: index.php,v 1.6 2007/05/13 05:53:32 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -47,6 +47,7 @@ if ($xoopsDB->getRowsNum($res)!=1) {
     }
     $xoopsTpl->assign('forms', $forms);
     include XOOPS_ROOT_PATH."/footer.php";
+    exit;
 }
 
 if (isset($_POST['op']) && !isset($_POST['edit'])) $op = $_POST['op'];

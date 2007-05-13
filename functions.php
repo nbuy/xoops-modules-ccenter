@@ -1,6 +1,6 @@
 <?php
 // ccenter common functions
-// $Id: functions.php,v 1.5 2007/05/13 05:44:01 nobu Exp $
+// $Id: functions.php,v 1.6 2007/05/13 07:40:06 nobu Exp $
 
 global $xoopsDB;		// for blocks scope
 // using tables
@@ -235,12 +235,16 @@ function cc_make_widget($item) {
 	break;
     case 'radio':
 	$def = '';
+	$etclab = "{$fname}_etc";
 	if (isset($_POST[$fname])) { // ovarride post value
 	    $def = $myts->stripSlashesGPC($_POST[$fname]);
 	    if ($etcreg && preg_match($etcreg, $def)) {
 		$etcval = preg_replace($etcreg, '', $def);
 		$def = LABEL_ETC;
 	    }
+	}
+	if (isset($_POST[$etclab])) {
+	    $etcval = $myts->stripSlashesGPC($_POST[$etclab]);
 	}
 	$input = "";
 	$estr = isset($attr['size'])?' size="'.$attr['size'].'"':'';
@@ -251,14 +255,18 @@ function cc_make_widget($item) {
 	    }
 	    $ck = ($def === $lab)?" checked='checked'":"";
 	    if ($lab == LABEL_ETC && $lab!=strip_tags($val)) {
-		$val .= " <input name='{$fname}_etc' value='$etcval' onChange='checkedEtcText(\"$fname\")'$estr/>";
-		$ck = " checked='checked' id='{$fname}_eck'";
+		$val .= " <input name='$etclab' value='$etcval' onChange='checkedEtcText(\"$fname\")'$estr/>";
+		$ck .= " id='{$fname}_eck'";
 	    }
 	    $input .= "<span class='ccradio'><input type='radio' name='$fname' value='$lab'$ck/> $val</span> ";
 	}
 	break;
     case 'checkbox':
+	$etclab = "{$fname}_etc";
 	$def = ($_SERVER['REQUEST_METHOD']=='POST')?array():null;
+	if (isset($_POST[$etclab])) {
+	    $etcval = $myts->stripSlashesGPC($_POST[$etclab]);
+	}
 	if (isset($_POST[$fname])) { // ovarride post value
 	    foreach ($_POST[$fname] as $v) {
 		$v = $myts->stripSlashesGPC($v);

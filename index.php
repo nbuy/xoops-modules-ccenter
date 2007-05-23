@@ -1,6 +1,6 @@
 <?php
 // contact to member
-// $Id: index.php,v 1.6 2007/05/13 05:53:32 nobu Exp $
+// $Id: index.php,v 1.7 2007/05/23 07:08:45 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -236,14 +236,14 @@ function checkScript($checks, $confirm) {
 <!--//
 function checkItem(obj, lab) {
   msg = lab+\": "._MD_REQUIRE_ERR."\\n\";
-  if (obj.value == \"\" && obj.selectedIndex == null) return msg;
+  if (obj.selectedIndex && obj.value != \"\") return \"\";
+  if (obj.value == \"\") return msg;
   if (obj.length) {
      for (i=0; i<obj.length; i++) {
         if (obj[i].checked) return \"\";
      }
      return msg;
   }
-  if (obj.selectedIndex != null && obj.options[obj.selectedIndex].value==\"\") return msg;
   return \"\";
 }
 function xoopsFormValidate_ccenter() {

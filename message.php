@@ -1,6 +1,6 @@
 <?php
 // show messages file
-// $Id: message.php,v 1.3 2007/05/13 05:44:01 nobu Exp $
+// $Id: message.php,v 1.4 2007/06/01 07:12:05 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -41,7 +41,7 @@ $add = $pass?"p=".urlencode($pass):"";
 $to_uname = XoopsUser::getUnameFromId($data['touid']);
 $items=array();
 foreach ($vals as $key=>$val) {
-    if (preg_match('/^file=(\w.+)$/', $val, $d)) {
+    if (preg_match('/^file=(.+)$/', $val, $d)) {
 	$val = attach_image($data['msgid'], $d[1], false, $add);
     } else {
 	$val = $myts->displayTarea($val);

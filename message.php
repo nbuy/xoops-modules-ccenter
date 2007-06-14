@@ -1,6 +1,6 @@
 <?php
 // show messages file
-// $Id: message.php,v 1.4 2007/06/01 07:12:05 nobu Exp $
+// $Id: message.php,v 1.5 2007/06/14 04:43:15 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -20,7 +20,7 @@ $pass = empty($_SESSION['onepass'])?"":$_SESSION['onepass'];
 $cond = $isadmin?"":" AND status<>'x'";
 $res = $xoopsDB->query("SELECT m.*, title FROM ".MESSAGE." m,".FORMS." WHERE msgid=$msgid $cond AND fidref=formid");
 if (!$res || $xoopsDB->getRowsNum($res)==0) {
-    redirect_header("message.php", 3, _NOPERM);
+    redirect_header("index.php", 3, _NOPERM);
     exit;
 }
 $data = $xoopsDB->fetchArray($res);

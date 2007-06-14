@@ -1,5 +1,5 @@
 <?php
-// $Id: xoops_version.php,v 1.3 2007/05/13 05:44:01 nobu Exp $
+// $Id: xoops_version.php,v 1.4 2007/06/14 05:11:10 nobu Exp $
 //  ------------------------------------------------------------------------ //
 //  This program is free software; you can redistribute it and/or modify     //
 //  it under the terms of the GNU General Public License as published by     //
@@ -22,7 +22,7 @@
 //  ------------------------------------------------------------------------ //
 
 $modversion = array('name' => _MI_CCENTER_NAME,
-		    'version' => 0.7,
+		    'version' => 0.71,
 		    'description' => _MI_CCENTER_DESC,
 		    'credits' => "Nobuhiro Yasutomi",
 		    'author' => "Nobuhiro Yasutomi",
@@ -146,13 +146,13 @@ $modversion['config'][]=array(
     'default' => 25,
     'options' => array(5=>5,10=>10,25=>25,50=>50,100=>100,200=>200,500=>500,1000=>1000)
     );
-/*
-$modversion['config'][]=array('name' => 'options',
-			      'title' => '_MI_CCENTER_OPTS',
-			      'description' => '_MI_CCENTER_OPTS_DESC',
+$modversion['config'][]=array('name' => 'def_attrs',
+			      'title' => '_MI_CCENTER_DEF_ATTRS',
+			      'description' => '_MI_CCENTER_DEF_ATTRS_DESC',
 			      'formtype' => 'text',
 			      'valuetype' => 'string',
-			      'default' => _MI_CCENTER_OPTS_DEF);
+			      'default' => 'size=60,rows=5,cols=50');
+/*
 $modversion['config'][]=array('name' => 'search_list',
 			      'title' => '_MI_CCENTER_SEARCH',
 			      'description' => '_MI_CCENTER_SEARCH_DESC',

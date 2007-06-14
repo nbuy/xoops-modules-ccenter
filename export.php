@@ -1,6 +1,6 @@
 <?php
 // Export data in CSV format
-// $Id: export.php,v 1.2 2007/05/13 05:44:01 nobu Exp $
+// $Id: export.php,v 1.3 2007/06/14 04:39:18 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -35,7 +35,7 @@ $items = get_form_attribute($form['defs']);
 $labels = array('ID', _MD_POSTDATE, _MD_STATUS, _MD_CONTACT_FROM, _MD_CONTACT_TO);
 $n = $mpos = -1;
 foreach ($items as $item) {
-    if (empty($item['type'])) continue;	// skip comment
+    if (empty($item['label'])) continue;	// skip comment
     $n++;
     if ($mpos<0 && $item['type'] == 'mail') $mpos = $n;
     $labels[] = $item['label'];

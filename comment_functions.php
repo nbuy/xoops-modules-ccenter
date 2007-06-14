@@ -1,5 +1,5 @@
 <?php
-// $Id: comment_functions.php,v 1.2 2007/06/14 05:09:13 nobu Exp $
+// $Id: comment_functions.php,v 1.3 2007/06/14 05:58:00 nobu Exp $
 //  ------------------------------------------------------------------------ //
 //                XOOPS - PHP Content Management System                      //
 //                    Copyright (c) 2000 XOOPS.org                           //
@@ -29,7 +29,7 @@
 include_once "functions.php";
 
 function ccenter_com_update($msgid, $total_num){
-    global $xoopsDB, $xoopsUser, $xoopsModule;
+    global $xoopsDB, $xoopsUser, $xoopsModule, $xoopsConfig;
 
     $res = $xoopsDB->query("SELECT uid, touid, email, onepass, fidref, title FROM ".MESSAGE.", ".FORMS." WHERE msgid=$msgid AND formid=fidref");
 

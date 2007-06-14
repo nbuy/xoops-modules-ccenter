@@ -1,6 +1,6 @@
 <?php
 // ccenter common functions
-// $Id: functions.php,v 1.6 2007/05/13 07:40:06 nobu Exp $
+// $Id: functions.php,v 1.7 2007/06/14 04:41:19 nobu Exp $
 
 global $xoopsDB;		// for blocks scope
 // using tables
@@ -34,7 +34,7 @@ function get_form_attribute($defs) {
 	}
 	$opts = explode(",", $ln);
 	$name = array_shift($opts);
-	$type='';
+	$type='text';
 	$comment='';
 	$attr = array();
 	if (count($opts) && in_array($opts[0], $types)) {
@@ -111,7 +111,7 @@ function assign_post_values(&$items) {
 	case 'checkbox':
 	    if (empty($val)) $val = array();
 	    $idx = array_search(LABEL_ETC, $val);	 // etc
-	    if ($idx) {
+	    if ($idx!==false) {
 		$val[$idx] = strip_tags($item['options'][LABEL_ETC])." ".$myts->stripSlashesGPC($_POST[$name."_etc"]);
 	    }
 	    break;
@@ -160,9 +160,13 @@ function assign_post_values(&$items) {
 
 function assign_form_widgets(&$items, $conf=false) {
     $mconf = !$conf;
-    for ($n = 0; $n < count($items); $n++) {
-	$item =& $items[$n];
-	if (empty($item['field'])) continue;
+    $updates = array();
+    foreach ($items as $item) {
+	if ($item['type']=='hidden' && !$conf) continue;
+	if (empty($item['field'])) {
+	    $updates[] = $item;
+	    continue;
+	}
 	$val =& $item['value'];
 	$fname =& $item['field'];
 	if ($conf) {
@@ -187,17 +191,18 @@ function assign_form_widgets(&$items, $conf=false) {
 		    'label'=>sprintf(_MD_CONF_LABEL, $lab),
 		    'field'=>$cfname, 'type'=>$item['type'],
 		    'comment'=>_MD_CONF_DESC, 'attr'=>$item['attr']);
-		$citem['input'] = cc_make_widget($citem);
-		array_splice($items, ++$n, 0, array($citem));
+		$item['input'] = $input;
+		$updates[] = $item;
+		$input = cc_make_widget($citem);
+		$item = $citem;
 		$mconf = false;
 	    }
 	}
 	$item['input'] = $input;
-	if ($item['type']=='hidden' && !$conf) {
-	    unset($items[$n]);
-	    continue;
-	}
+	$updates[] = $item;
     }
+    $items = $updates;
+    return $updates;
 }
 
 function cc_make_widget($item) {
@@ -287,7 +292,7 @@ function cc_make_widget($item) {
 		$ck = in_array($lab, $def)?" checked='checked'":"";
 	    }
 	    if ($lab == LABEL_ETC && $lab!=strip_tags($val)) {
-		$val .= " <input name='{$fname}_etc' value='$etcval' onChange='checkedEtcText(\"$fname\")'$estr/>";
+		$val .= " <input name='$etclab' value='$etcval' onChange='checkedEtcText(\"$fname\")'$estr/>";
 		$ck .= " id='{$fname}_eck'";
 	    }
 	    $input .= "<span class='cccheckbox'><input type='checkbox' name='".$fname."[]' value='$lab'$ck$astr/> $val</span> ";

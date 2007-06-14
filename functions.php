@@ -1,6 +1,6 @@
 <?php
 // ccenter common functions
-// $Id: functions.php,v 1.7 2007/06/14 04:41:19 nobu Exp $
+// $Id: functions.php,v 1.8 2007/06/14 05:50:27 nobu Exp $
 
 global $xoopsDB;		// for blocks scope
 // using tables
@@ -25,6 +25,17 @@ function get_form_attribute($defs) {
     $num = 0;
     $result = array();
     $types = array('text', 'checkbox', 'radio', 'textarea', 'select', 'hidden', 'mail', 'file', 'multi');
+    global $xoopsModuleConfig;
+    $def = $xoopsModuleConfig['def_attrs'];
+    $def_attrs = array();
+    if (!empty($def)) {
+	foreach (explode(',', $def) as $ln) {
+	    if (preg_match('/^(size|rows|maxlength|cols|prop)=(\d+)$/', $ln, $d)
+		|| preg_match('/^(check)=(.+)$/', $ln, $d)) {
+		$def_attrs[$d[1]] = $d[2];
+	    }
+	}
+    }
     foreach (preg_split('/\r?\n/', $defs) as $ln) {
 	$ln = trim($ln);
 	if (empty($ln)) continue;
@@ -36,7 +47,7 @@ function get_form_attribute($defs) {
 	$name = array_shift($opts);
 	$type='text';
 	$comment='';
-	$attr = array();
+	$attr = $def_attrs;
 	if (count($opts) && in_array($opts[0], $types)) {
 	    $type = array_shift($opts);
 	}

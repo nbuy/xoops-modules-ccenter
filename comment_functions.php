@@ -1,5 +1,5 @@
 <?php
-// $Id: comment_functions.php,v 1.1 2007/03/06 17:46:55 nobu Exp $
+// $Id: comment_functions.php,v 1.2 2007/06/14 05:09:13 nobu Exp $
 //  ------------------------------------------------------------------------ //
 //                XOOPS - PHP Content Management System                      //
 //                    Copyright (c) 2000 XOOPS.org                           //
@@ -26,16 +26,49 @@
 //  ------------------------------------------------------------------------ //
 
 // comment callback functions
+include_once "functions.php";
 
-include_once XOOPS_ROOT_PATH.'/modules/news/class/class.newsstory.php';
-function ccenter_com_update($story_id, $total_num){
-    /*
-	$article = new NewsStory($story_id);
-	if (!$article->updateComments($total_num)) {
-		return false;
+function ccenter_com_update($msgid, $total_num){
+    global $xoopsDB, $xoopsUser, $xoopsModule;
+
+    $res = $xoopsDB->query("SELECT uid, touid, email, onepass, fidref, title FROM ".MESSAGE.", ".FORMS." WHERE msgid=$msgid AND formid=fidref");
+
+    $comid = intval($_POST['com_id']); // new comment?
+    if ($comid==0 && $res && $xoopsDB->getRowsNum($res)) {
+	$data = $xoopsDB->fetchArray($res);
+	$email = $data['email'];
+
+	$uid = is_object($xoopsUser)?$xoopsUser->getVar('uid'):0;
+	if ($uid && $uid == $data['touid']) { // comment by charge
+	    // status to replyed
+	    $xoopsDB->query("UPDATE ".MESSAGE." SET status='b' WHERE msgid=$msgid AND status='a'");
 	}
-    */
-	return true;
+	if ($uid==0 || $uid==$data['uid']) { // comment by order person
+	    // status back to contacting
+	    $xoopsDB->query("UPDATE ".MESSAGE." SET status='a' WHERE msgid=$msgid AND status IN ('b', 'c')");
+	}
+	// notification for guest contact
+	if (is_object($xoopsUser) && $data['uid']==0 && $email) {
+	    $subj = $data['title'];
+	    $url = XOOPS_URL."/modules/".basename(dirname(__FILE__))."/message.php?id=$msgid&p=".urlencode($data['onepass']);
+	    $tags = array('X_MODULE'=>$xoopsModule->getVar('name'),
+			  'X_ITEM_TYPE'=>'', 'X_ITEM_NAME'=>$subj,
+			  'X_COMMENT_URL'=>$url, 'EMAIL'=>$email,
+			  'SUBJECT'=>$subj);
+	    $xoopsMailer =& getMailer();
+	    $xoopsMailer->useMail();
+	    $xoopsMailer->setFromEmail($xoopsConfig['adminmail']);
+	    $xoopsMailer->setFromName($xoopsModule->getVar('name'));
+	    $xoopsMailer->setSubject(_MD_NOTIFY_SUBJ);
+	    $xoopsMailer->assign($tags);
+	    $tpl = 'guest_notify.tpl';
+	    $xoopsMailer->setTemplateDir($x=template_dir($tpl));
+	    $xoopsMailer->setTemplate($tpl);
+	    $xoopsMailer->setToEmails($email);
+	    $xoopsMailer->send();
+	}
+    }
+    return true;
 }
 
 function ccenter_com_approve(&$comment){

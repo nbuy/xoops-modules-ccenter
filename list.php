@@ -1,6 +1,6 @@
 <?php
 // show message list
-// $Id: list.php,v 1.1 2007/02/23 05:27:28 nobu Exp $
+// $Id: list.php,v 1.2 2007/07/21 14:51:57 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -20,7 +20,7 @@ include XOOPS_ROOT_PATH."/header.php";
 if ($xoopsUser->isAdmin($xoopsModule->getVar('mid'))) {
     if (isset($_GET['uid'])) $uid = intval($_GET['uid']);
 }
-$cond =  " AND NOT status IN ('x', 'f')";
+$cond =  " AND NOT (status IN ('x', 'f'))";
 if (isset($_GET['form'])) {
     $cond .= " AND formid=".intval($_GET['form']);
 }

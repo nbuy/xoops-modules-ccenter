@@ -1,5 +1,5 @@
 <?php
-// $Id: xoops_version.php,v 1.4 2007/06/14 05:11:10 nobu Exp $
+// $Id: xoops_version.php,v 1.5 2007/07/23 04:44:52 nobu Exp $
 //  ------------------------------------------------------------------------ //
 //  This program is free software; you can redistribute it and/or modify     //
 //  it under the terms of the GNU General Public License as published by     //
@@ -90,7 +90,7 @@ $modversion['blocks'][1]=array('file' => 'ccenter_receipt.php',
 			      'description' => '',
 			      'clone' => true,
 			      'show_func' => "b_ccenter_receipt_show",
-			      'edit_func' => "b_ccenter_receipt_eidt",
+			      'edit_func' => "b_ccenter_receipt_edit",
 			      'template' => 'ccenter_block_receipt.html',
 			      'options' => '-,a,b,c|5');
 /*

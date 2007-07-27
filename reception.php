@@ -1,6 +1,6 @@
 <?php
 // contact to member
-// $Id: reception.php,v 1.3 2007/05/13 05:44:01 nobu Exp $
+// $Id: reception.php,v 1.4 2007/07/27 06:20:16 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -20,11 +20,10 @@ else {
 }
 
 if ($id) $cond .= ' AND formid='.$id;
-$cond .= " AND status<>'x'";
 
 $res = $xoopsDB->query("SELECT f.*,count(msgid) nmsg,max(m.mtime) ltime
- FROM ".FORMS." f LEFT JOIN ".MESSAGE." m ON fidref=formid WHERE $cond
- GROUP BY formid");
+ FROM ".FORMS." f LEFT JOIN ".MESSAGE." m ON fidref=formid AND status<>'x'
+ WHERE $cond GROUP BY formid");
 
 if (!$res || $xoopsDB->getRowsNum($res)==0) {
     redirect_header('index.php', 3, _NOPERM);
@@ -53,9 +52,7 @@ $form = $xoopsDB->fetchArray($res);
 $id = $form['formid'];
 $items = get_form_attribute($form['defs']);
 $start = isset($_GET['start'])?intval($_GET['start']):0;
-if ($start>0) {
-    $form['description'] = "";
-} elseif ($form['custom']) {
+if ($form['custom']) {
     $reg = array('/\\[desc\\](.*)\\[\/desc\\]/sU', '/<form[^>]*>(.*)<\\/form[^>]*>/sU', '/{CHECK_SCRIPT}/');
     $rep = array('\\1', '', '');
     $form['description'] = preg_replace($reg, $rep, custom_template($form, $items));

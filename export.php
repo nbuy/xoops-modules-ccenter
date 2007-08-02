@@ -1,6 +1,6 @@
 <?php
 // Export data in CSV format
-// $Id: export.php,v 1.3 2007/06/14 04:39:18 nobu Exp $
+// $Id: export.php,v 1.4 2007/08/02 16:27:37 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -32,7 +32,7 @@ $cond = "fidref=$id AND status<>'x'";
 $res = $xoopsDB->query('SELECT * FROM '.MESSAGE." WHERE $cond ORDER BY msgid");
 
 $items = get_form_attribute($form['defs']);
-$labels = array('ID', _MD_POSTDATE, _MD_STATUS, _MD_CONTACT_FROM, _MD_CONTACT_TO);
+$labels = array('ID', _MD_POSTDATE, _CC_STATUS, _MD_CONTACT_FROM, _MD_CONTACT_TO);
 $n = $mpos = -1;
 foreach ($items as $item) {
     if (empty($item['label'])) continue;	// skip comment

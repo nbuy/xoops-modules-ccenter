@@ -2,6 +2,8 @@
 // adminstration messages
 include '../../../include/cp_header.php';
 include '../functions.php';
+include_once XOOPS_ROOT_PATH."/class/xoopsformloader.php";
+include_once 'myformselect.php';
 
 $myts =& MyTextSanitizer::getInstance();
 $op = isset($_GET['op'])?$_GET['op']:'';
@@ -19,7 +21,7 @@ if ($op == 'delform') {
     // NOTE: add function delete uploads files
     redirect_header('index.php', 1, _AM_FORM_DELETED);
     exit;
-} elseif (isset($_POST['formid']) && !isset($_POST['preview'])) {
+} elseif (isset($_POST['formdefs']) && !isset($_POST['preview'])) {
     $formid = intval($_POST['formid']);
     $data = $vals = array();
     foreach ($fields as $fname) {
@@ -57,12 +59,27 @@ if ($op == 'delform') {
     exit;
 }
 
+if( ! empty( $_GET['lib'] ) ) {
+    global $mydirpath;
+    $mydirpath = dirname(dirname(__FILE__));
+    $mydirname = basename($mydirpath);
+    // common libs (eg. altsys)
+    $lib = preg_replace( '/[^a-zA-Z0-9_-]/' , '' , $_GET['lib'] ) ;
+    $page = preg_replace( '/[^a-zA-Z0-9_-]/' , '' , @$_GET['page'] ) ;
+    
+    if( file_exists( XOOPS_TRUST_PATH.'/libs/'.$lib.'/'.$page.'.php' ) ) {
+	include XOOPS_TRUST_PATH.'/libs/'.$lib.'/'.$page.'.php' ;
+	} else if( file_exists( XOOPS_TRUST_PATH.'/libs/'.$lib.'/index.php' ) ) {
+	include XOOPS_TRUST_PATH.'/libs/'.$lib.'/index.php' ;
+    } else {
+	die( 'wrong request' ) ;
+    }
+    exit;
+}
+
 xoops_cp_header();
 
 include "mymenu.php";
-
-include_once XOOPS_ROOT_PATH.'/class/pagenav.php';
-include XOOPS_ROOT_PATH."/class/xoopsformloader.php";
 
 switch ($op) {
 case 'delete':
@@ -94,20 +111,24 @@ FROM ".FORMS." LEFT JOIN ".MESSAGE." ON fidref=formid AND status<>'x' GROUP BY f
     echo "<tr><th>ID</th><th>"._AM_FORM_TITLE."</th><th>"._AM_MSG_COUNT."</th><th>"._AM_MSG_WAIT."</th><th>"._AM_MSG_WORK."</th><th>"._AM_MSG_REPLY."</th><th>"._AM_MSG_CLOSE."</th><th>"._AM_OPERATION."</th></tr>\n";
     $n = 0;
     $mbase = XOOPS_URL."/modules/$dirname";
+    $ancfmt = "<td class='num'><a href='msgadm.php?stat=%s&formid=%d'>%d</a></td>\n";
+    $msgs = array('- a b c'=>'nmes', '-'=>'nwait', 'a'=>'nwork',
+		  'b'=>'nreply', 'c'=>'nclose');
     while ($data = $xoopsDB->fetchArray($res)) {
 	$id = $data['formid'];
 	$title = htmlspecialchars($data['title']);
 	$url = "$mbase?form=$id";
 	$form = $url.($data['priuid']<0?"&amp;uid=".$xoopsUser->getVar('uid'):"");
 	$bg = $n++%2?'even':'odd';
-	$ope = "<a href='?formid=$id'>"._EDIT."</a>";
-	$ope .= "| <a href='?op=delete&formid=$id'>"._DELETE."</a>";
-	$ope .= "| <a href='$mbase/reception.php?form=$id'>"._AM_DETAIL."</a>";
+	$ope = "<a href='?formid=$id'>"._EDIT."</a>".
+	    " | <a href='?op=delete&formid=$id'>"._DELETE."</a>".
+	    " | <a href='$mbase/reception.php?form=$id'>"._AM_DETAIL."</a>";
 	echo "<tr class='$bg'><td>$id</td>
-<td><a href='$form' target='preview'>$title</a></td>
-<td class='num'>".$data['nmes']."</td><td class='num'>".$data['nwait']."</td>
-<td class='num'>".$data['nwork']."</td><td class='num'>".$data['nreply']."</td>
-<td class='num'>".$data['nclose']."</td><td>$ope</td></tr>\n";
+<td><a href='$form' target='preview'>$title</a></td>";
+	foreach ($msgs as $stat=>$name) {
+	    printf($ancfmt, urlencode($stat), $id, $data[$name]);
+	}
+	echo "<td>$ope</td></tr>\n";
     }
     echo "</table><hr/>\n";
     return true;
@@ -117,7 +138,7 @@ function build_form($formid=0) {
     global $xoopsDB, $xoopsUser, $myts, $fields, $xoopsConfig;
     include_once dirname(dirname(__FILE__))."/language/".$xoopsConfig['language'].'/main.php';
     $start = isset($_GET['start'])?intval($_GET['start']):0;
-    if (isset($_POST['preview'])) {
+    if (isset($_POST['formid'])) {
 	$data = array();
 	$fields[] = 'priuid';
 	$fields[] = 'cgroup';
@@ -129,28 +150,29 @@ function build_form($formid=0) {
 	// form preview
 	$items = get_form_attribute($data['defs']);
 	assign_form_widgets($items);
-	echo "<h2>"._PREVIEW." : ".htmlspecialchars($data['title'])."</h2>\n";
-	echo "<div class='preview'>\n";
-	if ($data['custom']) {
-	    $data['check_script'] = "";
-	    $data['formid'] = $formid;
-	    echo custom_template($data, $items);
-	} else {
-	    echo $myts->displayTarea($data['description']);
-	    echo "<form><table class='outer' cellspacing='1' border='0'>\n";
-	    foreach ($items as $n=>$item) {
-		$bg = $n%2?'even':'odd';
-		if (empty($item['label'])) {
-		    echo "<tr class='$bg'><td colspan='2'>".$item['comment']."</td></tr>\n";
-		} else {
-		    echo "<tr class='$bg'><td class='head'>".$item['label']."</td><td>".$item['input'].$item['comment']."</td></tr>\n";
+	if ($_POST['preview']) {
+	    echo "<h2>"._PREVIEW." : ".htmlspecialchars($data['title'])."</h2>\n";
+	    echo "<div class='preview'>\n";
+	    if ($data['custom']) {
+		$data['check_script'] = "";
+		$data['formid'] = $formid;
+		echo custom_template($data, $items);
+	    } else {
+		echo $myts->displayTarea($data['description']);
+		echo "<form><table class='outer' cellspacing='1' border='0'>\n";
+		foreach ($items as $n=>$item) {
+		    $bg = $n%2?'even':'odd';
+		    if (empty($item['label'])) {
+			echo "<tr class='$bg'><td colspan='2'>".$item['comment']."</td></tr>\n";
+		    } else {
+			echo "<tr class='$bg'><td class='head'>".$item['label']."</td><td>".$item['input'].$item['comment']."</td></tr>\n";
+		    }
 		}
+		echo '</table><p style="text-align: center;"><input type="submit" value="'._SUBMIT.'" disabled="disabled"/></p>';
+		echo "\n</form>";
 	    }
-	    echo '</table><p style="text-align: center;"><input type="submit" value="'._SUBMIT.'" disabled="disabled"/></p>';
-	    echo "\n</form>";
+	    echo "</div>\n<hr size='5'/>\n";
 	}
-	echo "</div>\n<hr size='5'/>\n";
-
     } elseif ($formid) {
 	$res = $xoopsDB->query('SELECT * FROM '.FORMS." WHERE formid=$formid");
 	$data = $xoopsDB->fetchArray($res);
@@ -158,12 +180,14 @@ function build_form($formid=0) {
     } else {
 	$data = array('title'=>'', 'description'=>'', 'defs'=>'',
 		      'store'=>1, 'custom'=>0, 'weight'=>0, 'active'=>1,
-		      'priuid'=>$xoopsUser->getVar('uid'), 'cgroup'=>0,
+		      'priuid'=>$xoopsUser->getVar('uid'),
+		      'cgroup'=>XOOPS_GROUP_ADMIN,
+		      'redirect'=>'',
 		      'grpperm'=>array(XOOPS_GROUP_USERS));
     }
     $form = new XoopsThemeForm($formid?_AM_FORM_EDIT:_AM_FORM_NEW, 'myform', 'index.php');
     $form->addElement(new XoopsFormHidden('formid', $formid));
-    $form->addElement(new XoopsFormText(_AM_FORM_TITLE, 'title', 35, 80, $data['title']));
+    $form->addElement(new XoopsFormText(_AM_FORM_TITLE, 'title', 35, 80, $data['title']), true);
     if (!empty($data['mtime'])) $form->addElement(new XoopsFormLabel(_AM_FORM_MTIME, formatTimestamp($data['mtime'])));
     $desc = new XoopsFormElementTray(_AM_FORM_DESCRIPTION, "<br/>");
     $description = $data['description'];
@@ -187,30 +211,31 @@ function build_form($formid=0) {
     $defs->setDescription(_AM_FORM_DEFS_DESC);
     $form->addElement($defs);
 
-    $priuid = new XoopsFormSelect(_AM_FORM_PRIM_CONTACT, 'priuid', $data['priuid']);
-    $priuid->setDescription(_AM_FORM_PRIM_DESC);
     $member_handler =& xoops_gethandler('member');
     $groups = $member_handler->getGroupList(new Criteria('groupid', XOOPS_GROUP_ANONYMOUS, '!='));
     $options = array();
     foreach ($groups as $k=>$v) {
-	$options["-$k"] = sprintf(_AM_FORM_PRIM_GROUP, $v);
+	$options[-$k] = sprintf(_AM_FORM_PRIM_GROUP, $v);
     }
-    $options["0"] = _AM_FORM_PRIM_NONE;
-    $cond = empty($xoopsModuleConfig['mod_group'])?"":
-	" AND groupid IN (".join(',', $xoopsModuleConfig['mod_group']).")";
-    $res = $xoopsDB->query("SELECT u.uid, uname
-FROM ".$xoopsDB->prefix("groups_users_link")." l, ".$xoopsDB->prefix("users")."
- u WHERE l.uid=u.uid $cond GROUP BY u.uid ORDER BY uname", 100, $start);
-    while (list($uid, $uname) = $xoopsDB->fetchRow($res)) {
-	$options["$uid"] = htmlspecialchars($uname);
-    }
+    $options[0] = _AM_FORM_PRIM_NONE;
+
+    $priuid = new MyFormSelect(_AM_FORM_PRIM_CONTACT, 'priuid', $data['priuid']);
     $priuid->addOptionArray($options);
+    $priuid->addOptionUsers($data['cgroup']);
+    $priuid->setDescription(_AM_FORM_PRIM_DESC);
     $form->addElement($priuid) ;
 
-    $cgroup = new XoopsFormSelect(_AM_FORM_CONTACT_GROUP, 'cgroup', $data['cgroup']);
+    $cgroup = new XoopsFormSelect('', 'cgroup', $data['cgroup']);
+    $cgroup->setExtra(' onChange="setSelectUID(\'priuid\', 0);"');
     $cgroup->addOption(0, _AM_FORM_CGROUP_NONE);
+    $groups = $member_handler->getGroupList(new Criteria('groupid', XOOPS_GROUP_ANONYMOUS, '!='));
     $cgroup->addOptionArray($groups);
-    $form->addElement($cgroup) ;
+
+    $cgroup_tray = new XoopsFormElementTray(_AM_FORM_CONTACT_GROUP);
+    $cgroup_tray->addElement($cgroup) ;
+    $cgroup_tray->addElement(new XoopsFormLabel('' , '<noscript><input type="submit" name="chggrp" id="chggrp" value="'._AM_CHANGE.'"/></noscript>'));
+
+    $form->addElement($cgroup_tray) ;
 
     $form->addElement(new XoopsFormRadioYN(_AM_FORM_STORE, 'store' , $data['store']));
     $form->addElement(new XoopsFormRadioYN(_AM_FORM_ACTIVE, 'active' , $data['active']));
@@ -224,8 +249,9 @@ FROM ".$xoopsDB->prefix("groups_users_link")." l, ".$xoopsDB->prefix("users")."
 
     echo "<a name='form'></a>";
     $form->display();
-    echo '<script>
-function defsToString() {
+    echo '<script language="JavaScript">'.
+	$priuid->renderSupportJS(false).
+'function defsToString() {
     value = window.document.myform.defs.value;
     ret = "";
     lines = value.split("\\n");

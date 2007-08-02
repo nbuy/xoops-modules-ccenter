@@ -1,5 +1,5 @@
 <?php
-// $Id: xoops_version.php,v 1.5 2007/07/23 04:44:52 nobu Exp $
+// $Id: xoops_version.php,v 1.6 2007/08/02 16:27:37 nobu Exp $
 //  ------------------------------------------------------------------------ //
 //  This program is free software; you can redistribute it and/or modify     //
 //  it under the terms of the GNU General Public License as published by     //
@@ -22,7 +22,7 @@
 //  ------------------------------------------------------------------------ //
 
 $modversion = array('name' => _MI_CCENTER_NAME,
-		    'version' => 0.71,
+		    'version' => 0.72,
 		    'description' => _MI_CCENTER_DESC,
 		    'credits' => "Nobuhiro Yasutomi",
 		    'author' => "Nobuhiro Yasutomi",
@@ -40,9 +40,10 @@ $modversion['sqlfile']['mysql'] = "sql/mysql.sql";
 // Tables created by sql file (without prefix!)
 $modversion['tables'][] = "ccenter_form";
 $modversion['tables'][] = "ccenter_message";
+$modversion['tables'][] = "ccenter_log";
 
 // OnUpdate - upgrade DATABASE 
-//$modversion['onUpdate'] = "onupdate.php";
+$modversion['onUpdate'] = "onupdate.php";
 
 // Admin things
 $modversion['hasAdmin'] = 1;
@@ -53,8 +54,10 @@ $modversion['adminmenu'] = "admin/menu.php";
 $modversion['hasMain'] = 1;
 global $xoopsUser;
 if (!empty($xoopsUser)) {
-    $modversion['sub'][]=array('name'=>_MI_CCENTER_YOURCONTACT,
+    $modversion['sub'][]=array('name'=>_MI_CCENTER_MYCONTACT,
 			       'url'=>"list.php");
+    $modversion['sub'][]=array('name'=>_MI_CCENTER_MYCHARGE,
+			       'url'=>"charge.php");
     $modversion['sub'][]=array('name'=>_MI_CCENTER_STAFFDESK,
 			       'url'=>"reception.php");
 }
@@ -72,6 +75,9 @@ $modversion['templates'][] =
 $modversion['templates'][] =
     array('file' => 'ccenter_list.html',
 	  'description' => _MI_CCENTER_LIST_TPL);
+$modversion['templates'][] =
+    array('file' => 'ccenter_charge.html',
+	  'description' => _MI_CCENTER_CHARGE_TPL);
 $modversion['templates'][] =
     array('file' => 'ccenter_message.html',
 	  'description' => _MI_CCENTER_MSGS_TPL);
@@ -92,7 +98,7 @@ $modversion['blocks'][1]=array('file' => 'ccenter_receipt.php',
 			      'show_func' => "b_ccenter_receipt_show",
 			      'edit_func' => "b_ccenter_receipt_edit",
 			      'template' => 'ccenter_block_receipt.html',
-			      'options' => '-,a,b,c|5');
+			      'options' => '5|asc|-|a|b');
 /*
 $modversion['blocks'][]=array('file' => 'memberdirs_index.php',
 			      'name' => _MI_CCENTER_BLOCK_INDEX."2",
@@ -152,6 +158,12 @@ $modversion['config'][]=array('name' => 'def_attrs',
 			      'formtype' => 'text',
 			      'valuetype' => 'string',
 			      'default' => 'size=60,rows=5,cols=50');
+$modversion['config'][]=array('name' => 'status_combo',
+			      'title' => '_MI_CCENTER_STATUS_COMBO',
+			      'description' => '_MI_CCENTER_STATUS_COMBO_DESC',
+			      'formtype' => 'textarea',
+			      'valuetype' => 'string',
+			      'default' => _MI_CCENTER_STATUS_COMBO_DEF);
 /*
 $modversion['config'][]=array('name' => 'search_list',
 			      'title' => '_MI_CCENTER_SEARCH',

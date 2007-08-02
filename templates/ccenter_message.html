@@ -4,7 +4,7 @@
 <H3><{$smarty.const._MD_CCENTER_TITLE}></h3>
 
 <table class="outer" border="0" cellspacing="1">
-<tr class="head"><th><{$smarty.const._MD_POSTDATE}></th><th><{$smarty.const._MD_CONTACT_FORM}></th><th><{$smarty.const._MD_CONTACT_FROM}></th><th><{$smarty.const._MD_STATUS}></th></tr>
+<tr class="head"><th><{$smarty.const._MD_POSTDATE}></th><th><{$smarty.const._MD_CONTACT_FORM}></th><th><{$smarty.const._MD_CONTACT_FROM}></th><th><{$smarty.const._CC_STATUS}></th></tr>
 <{foreach from=$qlist item=m}>
 <tr class="<{cycle values="even, odd"}>"><td><{$m.mdate}></td><td><{$m.title}></td><td><{$m.uname}></td><td><{$m.status}></td></tr>
 <{/foreach}>
@@ -15,7 +15,7 @@
 <H3><{$smarty.const._MD_CCENTER_QUERY}></h3>
 
 <table class="outer" border="0" cellspacing="1">
-<tr class="head"><th><{$smarty.const._MD_POSTDATE}></th><th><{$smarty.const._MD_CONTACT_FORM}></th><th><{$smarty.const._MD_CONTACT_FROM}></th><th><{$smarty.const._MD_STATUS}></th></tr>
+<tr class="head"><th><{$smarty.const._MD_POSTDATE}></th><th><{$smarty.const._MD_CONTACT_FORM}></th><th><{$smarty.const._MD_CONTACT_FROM}></th><th><{$smarty.const._CC_STATUS}></th></tr>
 <{foreach from=$list item=m}>
 <tr class="<{cycle values="even, odd"}>"><td><{$m.mdate}></td><td><{$m.title}></td><td><{$m.uname}></td><td><{$m.status}></td></tr>
 <{/foreach}>
@@ -24,7 +24,7 @@
 
 <{else}>
 <h3><{$subject}></h3>
-<div class="attr"><b class="label"><{$smarty.const._MD_STATUS}></b> 
+<div class="attr"><b class="label"><{$smarty.const._CC_STATUS}></b> 
 <{$status}>
 <{if $data.value}>
 (<b class="label"><{$smarty.const._MD_EVAL_VALUE}></b> <{$data.value}>)
@@ -41,7 +41,8 @@
   </form>
 <{/if}>
 </div>
-<div class="attr"><b class="label"><{$smarty.const._MD_REGDATE}></b> <{$mdate}></div>
+<div class="attr"><b class="label"><{$smarty.const._MD_REGDATE}></b> <{$cdate}></div>
+<div class="attr"><b class="label"><{$smarty.const._MD_MODDATE}></b> <{$mdate}></div>
 <div class="attr"><b class="label"><{$smarty.const._MD_CONTACT_FROM}></b> <{$sender}><{if $data.email}> &lt;<a href="mailto:<{$data.email|escape}>"><{$data.email|escape}></a>&gt;<{/if}></div>
 <div class="attr"><b class="label"><{$smarty.const._MD_CONTACT_TO}></b> <{$sendto}>
 <{if $data.touid==0 && $xoops_isuser}>
@@ -54,23 +55,17 @@
 </div>
 
 <table class="outer" align="center" cellspacing="1" border="0" width="100%">
-<{if $avatar}>
-<tr>
-  <td class="head"><{$smarty.const._MD_AVATAR_SAMPLE}></td>
-  <td class="<{cycle values="even, odd"}>">
-    <img src="<{$xoops_upload_url}>/<{$avatar.avatar_file}>" width="150" align="right"/>
-    <{foreach from=$avatar.labels item=label key=n}>
-    <div class="aattr"><b class="alabel"><{$label.name}></b> <{$avatar.keys[$n]}></div>
-    <{/foreach}>
-    <input type="hidden" name="sample" value="<{$xoops_upload_url}>/<{$avatar.avatar_file}>"/>
-  </td>
-</tr>
-<{/if}>
 <{foreach from=$items key=label item=value}>
 <tr><td class="head"><{$label}></td><td class="<{cycle values="even, odd"}>"><{$value}></td></tr>
 <{/foreach}>
 </table>
-<hr/>
+
+<{if $xoops_isadmin}>
+<div style="text-align: right">[ <a href="admin/msgadm.php?msgid=<{$data.msgid}>"><{$smarty.const._MD_MSG_ADMIN}></a> ]</div>
+<{/if}>
+
+<br/>
+
 <div class="commentnav">
 <{$commentsnav}>
 <{$lang_notice}>

@@ -1,6 +1,6 @@
 <?php
 // show messages file
-// $Id: message.php,v 1.5 2007/06/14 04:43:15 nobu Exp $
+// $Id: message.php,v 1.6 2007/08/02 16:27:37 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -30,7 +30,9 @@ if (!check_perm($data)) {
 }
 // referer
 if ($uid && $uid == $data['touid'] && $data['status']=='-') {
-    $xoopsDB->queryF("UPDATE ".MESSAGE." SET status='a' WHERE msgid=".$msgid);
+    $now = time();
+    $xoopsDB->queryF("UPDATE ".MESSAGE." SET status='a',mtime=$now WHERE msgid=".$msgid);
+    cc_log_status($data, 'a');
     $data['status'] = 'a';
 }
 
@@ -54,14 +56,17 @@ $xoopsTpl->assign(
     array('subject'=>$data['title'],
 	  'sender'=>xoops_getLinkedUnameFromId($data['uid']),
 	  'sendto'=>$data['touid']?xoops_getLinkedUnameFromId($data['touid']):_MD_CONTACT_NOTYET,
-	  'mdate'=>formatTimestamp($data['mtime']),
+	  'cdate'=>formatTimestamp($data['ctime']),
+	  'mdate'=>myTimestamp($data['mtime'], 'l', _MD_TIME_UNIT),
 	  'data'=> $data,
 	  'items'=>$items,
 	  'status'=>$msg_status[$data['status']],
 	  'is_eval'=>is_evaluate($msgid, $uid, $pass),
 	  'is_mine'=>$data['touid']==$uid,
 	  'own_status'=>array_slice($msg_status, 1, $isadmin?4:3),
+	  'xoops_pagetitle'=> htmlspecialchars($xoopsModule->getVar('name')." | ".$data['title']),
 	));
+
 
 include XOOPS_ROOT_PATH.'/include/comment_view.php';
 

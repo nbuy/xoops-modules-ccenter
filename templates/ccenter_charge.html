@@ -1,10 +1,10 @@
-<H3><{$smarty.const._MD_CCENTER_QUERY}></h3>
+<H3><{$smarty.const._MD_CCENTER_CHARGE}></h3>
 
 <table class="ccctrl" width="100%">
 <tr>
-  <td class="ccinfo"><{$smarty.const._MD_COUNT}>: <{$total}></td>
+  <td class="ccinfo" width="30%"><{$smarty.const._MD_COUNT}>: <{$total}></td>
   <td class="ccpagenav" align="center"><{$pagenav}></td>
-  <td class="ccstatus" align="right">
+  <td class="ccstatus" width="30%" align="right" nowrap="nowrap">
     <form method="get">
       <{$smarty.const._CC_STATUS}>
 	<{$statctrl}>
@@ -15,14 +15,14 @@
   </td>
 </tr>
 </table>
-<{if $list}>
+<{if $qlist}>
 <table class="outer" border="0" cellspacing="1" width="100%">
 <tr class="head">
 <{foreach from=$labels item=lab}>
 <th><{$lab.text}><{if $lab.value}> <a href="?<{$lab.name}>=<{$lab.next}>" title="<{$smarty.const._CC_SORT_ORDER}>"<{$lab.extra}>><img src="images/<{$lab.value}>.gif"></a><{/if}></th>
 <{/foreach}>
 </tr>
-<{foreach from=$list item=m}>
+<{foreach from=$qlist item=m}>
 <tr class="<{cycle values="even, odd"}> stat<{$m.raw.status}>"><td><{$m.mdate}></td><td><{$m.title}></td><td><{$m.uname}></td><td><{$m.status}></td></tr>
 <{/foreach}>
 </table>

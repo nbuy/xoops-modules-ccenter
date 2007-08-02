@@ -1,21 +1,23 @@
 <?php
 // ccenter common functions
-// $Id: functions.php,v 1.8 2007/06/14 05:50:27 nobu Exp $
+// $Id: functions.php,v 1.9 2007/08/02 16:27:37 nobu Exp $
 
 global $xoopsDB;		// for blocks scope
 // using tables
 define("FORMS", $xoopsDB->prefix("ccenter_form"));
 define('MESSAGE', $xoopsDB->prefix('ccenter_message'));
+define('CCLOG', $xoopsDB->prefix('ccenter_log'));
 
 $myts =& MyTextSanitizer::getInstance();
 
-if (defined('_MD_STATUS_NONE')) {
+if (defined('_CC_STATUS_NONE')) {
+    global $msg_status;
     $msg_status = array(
-	'-'=>_MD_STATUS_NONE,
-	'a'=>_MD_STATUS_ACCEPT,
-	'b'=>_MD_STATUS_REPLY,
-	'c'=>_MD_STATUS_CLOSE,
-	'x'=>_MD_STATUS_DEL);
+	'-'=>_CC_STATUS_NONE,
+	'a'=>_CC_STATUS_ACCEPT,
+	'b'=>_CC_STATUS_REPLY,
+	'c'=>_CC_STATUS_CLOSE,
+	'x'=>_CC_STATUS_DEL);
 }
 
 define('LABEL_ETC', '*');	// radio, checkbox widget 'etc' text input.
@@ -122,7 +124,7 @@ function assign_post_values(&$items) {
 	case 'checkbox':
 	    if (empty($val)) $val = array();
 	    $idx = array_search(LABEL_ETC, $val);	 // etc
-	    if ($idx!==false) {
+	    if (is_int($idx)) {
 		$val[$idx] = strip_tags($item['options'][LABEL_ETC])." ".$myts->stripSlashesGPC($_POST[$name."_etc"]);
 	    }
 	    break;
@@ -173,11 +175,11 @@ function assign_form_widgets(&$items, $conf=false) {
     $mconf = !$conf;
     $updates = array();
     foreach ($items as $item) {
-	if ($item['type']=='hidden' && !$conf) continue;
-	if (empty($item['field'])) {
+	if (empty($item['field'])) { // comment only
 	    $updates[] = $item;
 	    continue;
 	}
+	if ($item['type']=='hidden' && !$conf) continue;
 	$val =& $item['value'];
 	$fname =& $item['field'];
 	if ($conf) {
@@ -195,11 +197,10 @@ function assign_form_widgets(&$items, $conf=false) {
 	    }
 	} else {
 	    $input = cc_make_widget($item);
-	    $lab = $item['label'];
-	    if ($mconf && $item['type']=='mail' && preg_match('/\*$/', $lab)) {
+	    if ($mconf && $item['type']=='mail' && $item['attr']['check']=='require') {
 		$cfname = $fname.'_conf';
 		$citem = array(
-		    'label'=>sprintf(_MD_CONF_LABEL, $lab),
+		    'label'=>sprintf(_MD_CONF_LABEL, $item['label']),
 		    'field'=>$cfname, 'type'=>$item['type'],
 		    'comment'=>_MD_CONF_DESC, 'attr'=>$item['attr']);
 		$item['input'] = $input;
@@ -315,9 +316,14 @@ function cc_make_widget($item) {
 	if (isset($_POST[$fname])) { // ovarride post value
 	    $val = $myts->stripSlashesGPC($_POST[$fname]);
 	} else {
-	    $orig = preg_replace('/_conf$/', '', $fname);
-	    if (isset($_POST[$orig])) {
-		$val = $myts->stripSlashesGPC($_POST[$orig]);
+	    global $xoopsUser;
+	    if ($type=='mail' && empty($val)) {
+		$orig = preg_replace('/_conf$/', '', $fname);
+		if (isset($_POST[$orig])) {
+		    $val = $myts->stripSlashesGPC($_POST[$orig]);
+		} elseif ($type=='mail' && is_object($xoopsUser)) {
+		    $val = $xoopsUser->getVar('email');
+		}
 	    }
 	}
 	$val = htmlspecialchars($val);
@@ -470,10 +476,11 @@ function message_entry($data, $link="message.php") {
     $id = $data['msgid'];
     return  array(
 	'msgid'=>$id,
-	'mdate'=>formatTimestamp($data['mtime']),
+	'mdate'=>myTimestamp($data['mtime'], 'm', _MD_TIME_UNIT),
 	'title'=>"<a href='message.php?id=$id'>".$data['title']."</a>", 
 	'uname'=> xoops_getLinkedUnameFromId($data['uid']),
-	'status'=>$msg_status[$data['status']]);
+	'status'=>$msg_status[$data['status']],
+	'raw'=>$data);
 }
 
 function is_evaluate($id, $uid, $pass) {
@@ -490,7 +497,7 @@ function notify_mail($tpl, $tags, $users, $email='') {
     $xoopsMailer->useMail();
     $xoopsMailer->setFromEmail($xoopsConfig['adminmail']);
     $xoopsMailer->setFromName($xoopsModule->getVar('name'));
-    $xoopsMailer->setSubject(_MD_NOTIFY_SUBJ);
+    $xoopsMailer->setSubject(_CC_NOTIFY_SUBJ);
     $xoopsMailer->assign($tags);
     $xoopsMailer->setTemplateDir(template_dir($tpl));
     $xoopsMailer->setTemplate($tpl);
@@ -576,5 +583,190 @@ function custom_template($form, $items, $conf=false) {
     $str[] = "{TITLE}";
     $rep[] = $form['title'];
     return str_replace($str, $rep, $out);
+}
+
+function cc_log_message($formid, $comment, $msgid=0) {
+    global $xoopsDB, $xoopsUser;
+    $uid = is_object($xoopsUser)?$xoopsUser->getVar('uid'):0;
+    $now = time();
+    return $xoopsDB->queryF("INSERT INTO ".CCLOG."(ltime, fidref, midref, euid, comment)VALUES($now, $formid, $msgid, $uid, ".$xoopsDB->quoteString($comment).")");
+}
+
+function cc_log_status($data, $nstat) {
+    global $msg_status;
+    $fid = empty($data['fidref'])?$data['formid']:$data['fidref'];
+    return cc_log_message($fid, sprintf(_CC_LOG_STATUS, $msg_status[$data['status']], $msg_status[$nstat]), $data['msgid']);
+}
+
+define('PAST_TIME_MIN', 3600);	     // 1hour
+define('PAST_TIME_HOUR', 24*3600);   // 1day
+define('PAST_TIME_DAY', 14*24*3600); // 2week
+
+function myTimestamp($t, $fmt="l", $unit="%dmin,%dhour,%dday,past %s") {
+    $past = time()-$t;
+    if ($past > PAST_TIME_DAY) {
+	return formatTimestamp($t, $fmt);
+    }
+    $units = split(',', $unit);
+    if ($past < PAST_TIME_MIN) {
+	$ret = sprintf($units[0], intval($past/60));
+    } elseif ($past < PAST_TIME_HOUR) {
+	$ret = sprintf($units[1], intval($past/3600)); // hours
+	$v = intval(($past % 3600)/60);	     // min
+	if ($v) $ret .= sprintf($units[0], $v);
+    } else {
+	$ret = sprintf($units[2], intval($past/86400)); // days
+	$v = intval(($past % 86400)/3600);    // hours
+	if ($v) $ret .= sprintf($units[1], $v);
+    }
+    return sprintf($units[3], $ret);
+}
+
+// adhoc class - not for reuse
+class ListCtrl {
+    var $name;
+    var $vars;
+    var $combo;
+
+    function ListCtrl($name, $init=array(), $combo='') {
+	if (empty($combo)) {
+	    global $xoopsModuleConfig;
+	    $combo = $xoopsModuleConfig['status_combo'];
+	}
+	$this->name = $name;
+	$this->combo = unserialize_text($combo);
+	if (!isset($_SESSION['listctrl'])) $_SESSION['listctrl'] = array();
+	if (!isset($_SESSION['listctrl'][$name]) ||
+	    (isset($_GET['reset'])&&$_GET['reset']=='yes')) {
+	    if (!isset($init['stat'])) {
+		list($init['stat']) = array_values($this->combo);
+	    }
+	    $_SESSION['listctrl'][$name] = $init;
+	}
+	$this->vars =& $_SESSION['listctrl'][$name];
+	$this->updateVars($_REQUEST);
+    }
+
+    function getVar($name) {
+	return isset($this->vars[$name])?$this->vars[$name]:"";
+    }
+
+    function setVar($name, $val) { $this->vars[$name]=$val; }
+
+    function getLabels($labels) {
+	$result = array();
+	$orders = $this->getVar('orders');
+	foreach ($labels as $k => $v) {
+	    $lab = array('text'=>$v, 'name'=>$k);
+	    if (isset($this->vars[$k])) { // with ctrl
+		$n = array_search($k, $orders);
+		if (is_int($n)) {
+		    $val = strtolower($this->getVar($k));
+		    $lab['value'] = $val;
+		    $lab['next'] = $val=='desc'?'asc':'desc';
+		    $lab['extra'] = " class='ccord$n'";
+		} else {
+		    $lab['value'] = 'none';
+		    $lab['next'] = 'asc';
+		}
+	    }
+	    $result[] = $lab;
+	}
+	return $result;
+    }
+
+    function updateVars($args) {
+	$myts =& MyTextSanitizer::getInstance();
+	$changes = array();
+	foreach (array_keys($this->vars) as $k) {
+	    if (isset($args[$k])) {
+		$val = trim($args[$k]);
+		if (empty($val)) continue;
+		switch ($k) {
+		case 'stat':
+		    $val = preg_replace('/[^a-dx\- ]/', '', trim($val));
+		    break;
+		default:
+		    $val = strtolower($val)=='asc'?'ASC':'DESC';
+		    $orders = $this->getVar('orders');
+		    if ($k != $orders[0]) {
+			$this->setVar('orders', array($k, $orders[0]));
+		    }
+		}
+		$this->setVar($k, $val);
+		$changes[$k] = $val;
+	    }
+	}
+	return $changes;
+    }
+
+    function sqlcondition($fname='status') {
+	global $xoopsDB;
+	$stat = $this->getVar('stat');
+	if (preg_match('/\s+/', $stat)) {
+	    return "$fname IN ('".join("','", preg_split('/\s+/',$stat))."')";
+	}
+	return "$fname=".$xoopsDB->quoteString($stat);
+    }
+
+    function sqlorder() {
+	$order = array();
+	foreach ($this->getVar('orders') as $name) {
+	    $order[] = $name." ".$this->getVar($name);
+	}
+	if ($order) return " ORDER BY ".join(',', $order);
+	return "";
+    }
+
+    function renderStat() {
+	$ctrl = "<select name='stat' onChange='submit();'>\n";
+	$stat = $this->getVar('stat');
+	foreach ($this->combo as $k => $v) {
+	    $ck = $v == $stat?" selected='selected'":"";
+	    $ctrl .= "<option value='$v'$ck>$k</option>\n";
+	}
+	$ctrl .= "</select>";
+	return $ctrl;
+    }
+}
+
+function change_message_status($msgid, $touid, $stat) {
+    global $xoopsDB, $msg_status, $xoopsUser, $xoopsModule;
+
+    $isadmin = is_object($xoopsUser) && $xoopsUser->isAdmin($xoopsModule->getVar('mid'));
+    $own_status = array_slice($msg_status, 1, $isadmin?4:3);
+    if (empty($own_status[$stat])) return false; // Invalid status
+    $s = $xoopsDB->quoteString($stat);
+    $cond = "msgid=".$msgid;
+    if ($touid) $cond .= " AND touid=".$touid;
+    $res = $xoopsDB->query("SELECT onepass,status,email,title,fidref,msgid
+  FROM ".MESSAGE.",".FORMS." WHERE $cond AND status<>$s AND formid=fidref");
+    if (!$res || $xoopsDB->getRowsNum($res)==0) return false;
+    $data = $xoopsDB->fetchArray($res);
+    $now = time();
+    $res = $xoopsDB->query("UPDATE ".MESSAGE." SET status=$s,mtime=$now WHERE msgid=$msgid");
+    if (!$res) die('DATABASE error');	// unknown error?
+    cc_log_status($data, $stat);
+    $msgurl = XOOPS_URL."/modules/".basename(dirname(__FILE__))."/message.php?id=$msgid";
+    if ($data['onepass']) $msgurl.="&p=".urlencode($data['onepass']);
+    $tags = array('PREV_STATUS'=>$msg_status[$data['status']],
+		  'NEW_STATUS'=>$msg_status[$stat],
+		  'SUBJECT'=>$data['title'],
+		  'CHANGE_BY'=>XoopsUser::getUnameFromId($touid),
+		  'MSG_URL'=>$msgurl);
+
+    $res = $xoopsDB->query("SELECT not_uid FROM ".$xoopsDB->prefix('xoopsnotifications')." WHERE not_modid=".$xoopsModule->getVar('mid')." AND not_event='comment' AND not_itemid=".$msgid);
+
+    $member_handler =& xoops_gethandler('member');
+    $users = array();
+    while (list($not_uid) = $xoopsDB->fetchRow($res)) {
+	if ($not_uid != $touid) {
+	    $users[] =& $member_handler->getUser($not_uid);
+	}
+    }
+
+    notify_mail('status_notify.tpl', $tags, $users, $data['email']);
+    
+    return true;
 }
 ?>

@@ -1,5 +1,5 @@
 <?php
-// $Id: comment_functions.php,v 1.3 2007/06/14 05:58:00 nobu Exp $
+// $Id: comment_functions.php,v 1.4 2007/08/02 16:27:37 nobu Exp $
 //  ------------------------------------------------------------------------ //
 //                XOOPS - PHP Content Management System                      //
 //                    Copyright (c) 2000 XOOPS.org                           //
@@ -39,14 +39,17 @@ function ccenter_com_update($msgid, $total_num){
 	$email = $data['email'];
 
 	$uid = is_object($xoopsUser)?$xoopsUser->getVar('uid'):0;
+	$msg = _MD_LOG_COMMENT;
 	if ($uid && $uid == $data['touid']) { // comment by charge
 	    // status to replyed
 	    $xoopsDB->query("UPDATE ".MESSAGE." SET status='b' WHERE msgid=$msgid AND status='a'");
-	}
-	if ($uid==0 || $uid==$data['uid']) { // comment by order person
+	    $msg .= _MD_LOG_BYCHARGE;
+	} elseif ($uid==0 || $uid==$data['uid']) { // comment by order person
 	    // status back to contacting
 	    $xoopsDB->query("UPDATE ".MESSAGE." SET status='a' WHERE msgid=$msgid AND status IN ('b', 'c')");
 	}
+	$xoopsDB->query("UPDATE ".MESSAGE." SET mtime=".time()." WHERE msgid=$msgid");
+	cc_log_message($data['fidref'], $msg."($total_num)", $msgid);
 	// notification for guest contact
 	if (is_object($xoopsUser) && $data['uid']==0 && $email) {
 	    $subj = $data['title'];

@@ -1,10 +1,10 @@
 <?php
-# $Id: mypagenav.php,v 1.1 2007/08/02 16:27:37 nobu Exp $
+# $Id: mypagenav.php,v 1.2 2007/08/03 05:40:44 nobu Exp $
 # page control for priuid select
 
 include_once XOOPS_ROOT_PATH.'/class/pagenav.php';
 
-define('_CC_MAX_USERS', 5);	// users/page
+define('_CC_MAX_USERS', 100);	// users/page
 
 class MyPageNav extends XoopsPageNav {
 

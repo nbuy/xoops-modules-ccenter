@@ -1,5 +1,5 @@
 <?php
-# $Id: myformselect.php,v 1.1 2007/08/02 16:27:37 nobu Exp $
+# $Id: myformselect.php,v 1.2 2007/08/03 05:28:49 nobu Exp $
 # extends support many options with Ajax
 
 include_once 'mypagenav.php';
@@ -16,6 +16,7 @@ class MyFormSelect extends XoopsFormSelect
     function addOptionUsers($gid=0) {
 	list($cuid) = $this->getValue();
 	$max = _CC_MAX_USERS;
+	$start = isset($_REQUEST['start'])?intval($_REQUEST['start']):0;
 	$users = cc_group_users($gid, $max, $start);
 	$opts = $this->getOptions();
 
@@ -48,6 +49,7 @@ class MyFormSelect extends XoopsFormSelect
 	    "<div id='{$name}_page'>".$this->pagenav."</div></td>".
 	    "<td width='100%'> &nbsp; <input size='8' name='{$name}_s' id='{$name}_s' value='$s' onChange='setSelectUID(\"$name\",0);'/><input type='submit' value='$slab' onClick='setSelectUID(\"$name\", 0); return false;'/></td></tr>\n</table>";
     }
+
     function renderSupportJS( $withtags = true ) {
 	$name = $this->getName();
         $js = "";
@@ -80,18 +82,26 @@ function setSelectUID(name, start) {
     xmlhttp.open("GET", url, false);
     xmlhttp.send(null);
     var obj = xoopsGetElementById(name);
+    var opts = obj.options;
     var defs = obj.value;
     if (xmlhttp.status == 200) {
-        re = new RegExp("<option value=\"0\".*");
-	mk = obj.innerHTML.match(re)+"";
-        if (mk=="") {
-	    sub = "";
-	} else {
-	    pos = obj.innerHTML.search(re)+mk.length;
-	    sub = obj.innerHTML.substring(0, pos);
+	len = 0;
+	for (i=0; i<opts.length; i++) {
+	    if (opts[i].value == 0) {
+		len = ++i;
+		break;
+	    }
 	}
+	opts.length = len;
 	F = xmlhttp.responseText.split("<!---->\n");
-	obj.innerHTML = sub+F[0];
+	lines = F[0].split("\n");
+	for (i in lines) {
+	    el = lines[i].split(",", 2);
+	    if (el.length < 2) continue;
+	    p = opts.length++;
+	    opts[p].value = el[0];
+	    opts[p].text = el[1];
+	}
 	obj.value = defs;
 	page = xoopsGetElementById(name+"_page");
 	page.innerHTML = F[1].replace(/\'uid\'/g, "\'"+name+"\'");

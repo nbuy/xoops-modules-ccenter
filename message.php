@@ -1,6 +1,6 @@
 <?php
 // show messages file
-// $Id: message.php,v 1.6 2007/08/02 16:27:37 nobu Exp $
+// $Id: message.php,v 1.7 2007/08/03 05:29:25 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -30,9 +30,7 @@ if (!check_perm($data)) {
 }
 // referer
 if ($uid && $uid == $data['touid'] && $data['status']=='-') {
-    $now = time();
-    $xoopsDB->queryF("UPDATE ".MESSAGE." SET status='a',mtime=$now WHERE msgid=".$msgid);
-    cc_log_status($data, 'a');
+    change_message_status($msgid, $uid, 'a');
     $data['status'] = 'a';
 }
 

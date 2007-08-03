@@ -8,7 +8,6 @@ include_once 'myformselect.php';
 $myts =& MyTextSanitizer::getInstance();
 $op = isset($_GET['op'])?$_GET['op']:'';
 if (isset($_POST['op'])) $op = $_POST['op'];
-$start = isset($_GET['start'])?intval($_GET['start']):0;
 $formid = isset($_REQUEST['formid'])?intval($_REQUEST['formid']):0;
 
 $fields = array('title', 'description', 'defs', 'priuid', 'cgroup',
@@ -137,7 +136,6 @@ FROM ".FORMS." LEFT JOIN ".MESSAGE." ON fidref=formid AND status<>'x' GROUP BY f
 function build_form($formid=0) {
     global $xoopsDB, $xoopsUser, $myts, $fields, $xoopsConfig;
     include_once dirname(dirname(__FILE__))."/language/".$xoopsConfig['language'].'/main.php';
-    $start = isset($_GET['start'])?intval($_GET['start']):0;
     if (isset($_POST['formid'])) {
 	$data = array();
 	$fields[] = 'priuid';

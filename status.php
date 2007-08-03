@@ -1,6 +1,6 @@
 <?php
 // Changing message status
-// $Id: status.php,v 1.4 2007/08/02 16:27:37 nobu Exp $
+// $Id: status.php,v 1.5 2007/08/03 05:29:25 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -29,7 +29,21 @@ if (!empty($_POST['eval'])) {	// evaluate at last
 } else {
     switch ($_POST['op']) {
     case 'myself':
-	$res = $xoopsDB->query("UPDATE ".MESSAGE." SET touid=$uid WHERE msgid=$msgid AND touid=0");
+	$res = $xoopsDB->query("SELECT fidref,status,title FROM ".MESSAGE." LEFT JOIN ".FORMS." ON formid=fidref WHERE msgid=$msgid AND touid=0");
+	if ($res && $xoopsDB->getRowsNum($res)) {
+	    list($fid, $s, $title) = $xoopsDB->fetchRow($res);
+	    $now = time();
+	    $set = "SET mtime=$now, touid=$uid, status=".$xoopsDB->quoteString('a');
+	    $res = $xoopsDB->query("UPDATE ".MESSAGE." $set WHERE msgid=$msgid");
+	    $log = sprintf(_CC_LOG_TOUSER, _CC_USER_NONE, $xoopsUser->getVar('uname'));
+	    $log .= "\n".sprintf(_CC_LOG_STATUS, $msg_status[$s], $msg_status['a']);
+	    $notification_handler =& xoops_gethandler('notification');
+	    $notification_handler->subscribe('message', $msgid, 'comment');
+	    //$notification_handler->subscribe('message', $msgid, 'status');
+
+	    cc_log_message($fid, $log, $msgid);
+	}
+	
 	break;
     }
     redirect_header($redirect, 1, _MD_UPDATE_STATUS);

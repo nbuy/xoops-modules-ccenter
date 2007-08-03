@@ -24,19 +24,19 @@ if (isset($_POST['store'])) {
 	}
 	if ($data['touid'] != $touid) {
 	    $sets[] = 'touid='.$touid;
-	    if ($log) $log .= ', ';
+	    if ($log) $log .= "\n";
 	    $log .= sprintf(_CC_LOG_TOUSER, ccUname($data['touid']), ccUname($touid));
+	} else {
+	    $touid = 0;		// not changed
 	}
 	if (count($sets)) {
 	    $sets[] = 'mtime='.time();
 	    $res = $xoopsDB->query("UPDATE ".MESSAGE." SET ".join(",", $sets)." WHERE msgid=".$msgid);
-	    if ($res) {
+	    if ($res && $touid) {
+		$notification_handler =& xoops_gethandler('notification');
+		$notification_handler->subscribe('message', $msgid, 'comment', null, null, $touid);
+		$notification_handler->subscribe('message', $msgid, 'status', null, null, $touid);
 		cc_log_message($data['fidref'], $log, $msgid);
-		if ($touid) {
-		    $notification_handler =& xoops_gethandler('notification');
-		    $notification_handler->subscribe('message', $msgid, 'comment', null, null, $touid);
-		}
-		//$notification_handler->triggerEvent('message', $id, 'new', $tags);
 		redirect_header($back, 1, _AM_MSG_UPDATED);
 		exit;
 	    }
@@ -53,8 +53,6 @@ if (isset($_POST['store'])) {
     redirect_header($back, 1, _AM_MSG_UPDATED);
     exit;
 }
-
-$start = isset($_GET['start'])?intval($_GET['start']):0;
 
 xoops_cp_header();
 
@@ -74,7 +72,7 @@ function msg_list() {
     $orders=array('mtime'=>'ASC', 'fidref'=>'ASC', 'uname'=>'ASC',
 		  'status'=>'ASC', 'uid'=>'ASC', 'orders'=>array('mtime'));
 
-    $listctrl = new ListCtrl('msgadm', $orders, $combo);
+    $listctrl = new ListCtrl('msgadm', $orders);
     
     $start = isset($_GET['start'])?intval($_GET['start']):0;
     $max = $xoopsModuleConfig['max_lists'];
@@ -93,9 +91,9 @@ function msg_list() {
 
     echo "<style>td.num { text-align: right; }</style>";
     echo "<h2>"._AM_MSG_ADMIN."</h2>\n";
-    echo "<table class='ccinfo' width='100%'><tr><td width='20%'>"._AM_MSG_COUNT." $total</td>\n";
+    echo "<table class='ccinfo' width='100%'>\n<tr><td width='30%'>"._AM_MSG_COUNT." $total</td>\n";
     echo "<td align='center'>".$nav->renderNav()."</td>\n";
-    echo "<td align='right' width='20%'>
+    echo "<td align='right' width='30%'>
   <form method='get'>"._CC_STATUS." ".$listctrl->renderStat()."
       <noscript> <input type='submit' type='submit' value='"._AM_SUBMIT_VIEW."'></noscript>
   </form>
@@ -125,7 +123,7 @@ function msg_list() {
 	    $title = htmlspecialchars($data['title']);
 	    $stat = $data['status'];
 	    $url = "$mbase/message.php?id=$id";
-	    $msg = $url.($data['priuid']<0?"&amp;uid=".$xoopsUser->getVar('uid'):"");
+	    $msg = $url.($data['touid']<0?"&amp;uid=".$xoopsUser->getVar('uid'):"");
 	    $bg = $n++%2?'even':'odd';
 	    $date = myTimestamp($data['mtime'], "m", _AM_TIME_UNIT);
 	    $priuname = empty($data['uname'])?_AM_FORM_PRIM_NONE:htmlspecialchars($data['uname']);
@@ -161,7 +159,7 @@ function select_widget($name, $sel, $def) {
 function msg_detail($msgid) {
     global $xoopsDB, $msg_status, $myts;
     $users = $xoopsDB->prefix('users');
-    $res = $xoopsDB->query("SELECT m.*,title,u.uname,cgroup,f.uname cfrom FROM ".MESSAGE." m LEFT JOIN ".FORMS." ON fidref=formid LEFT JOIN $users u ON touid=u.uid LEFT JOIN $users f ON m.uid=f.uid WHERE msgid=$msgid");
+    $res = $xoopsDB->query("SELECT m.*,title,priuid,u.uname,cgroup,f.uname cfrom FROM ".MESSAGE." m LEFT JOIN ".FORMS." ON fidref=formid LEFT JOIN $users u ON touid=u.uid LEFT JOIN $users f ON m.uid=f.uid WHERE msgid=$msgid");
     echo $xoopsDB->error();
     $data = $xoopsDB->fetchArray($res);
     $data['stat'] = $msg_status[$data['status']];
@@ -191,7 +189,7 @@ function msg_detail($msgid) {
 		    $val = htmlspecialchars($data['email']);
 		    $val = "<a href='mailto:$val'>$val</a>";
 		} else {
-		    $val = _CC_LOG_USER_NONE;
+		    $val = _CC_USER_NONE;
 		}
 	    }
 	    break;
@@ -200,7 +198,8 @@ function msg_detail($msgid) {
 	    break;
 	case 'uname':
 	    $touid = new MyFormSelect(_AM_FORM_PRIM_CONTACT, 'touid', $data['touid']);
-	    $gid = $data['cgroup'];
+	    $gid = ($data['priuid']<0)?-$data['priuid']:$data['cgroup'];
+	    $touid->addOption('0', _AM_FORM_PRIM_NONE);
 	    $touid->addOptionUsers($gid);
 	    $val = $touid->render()."\n<input type='hidden' name='cgroup' id='cgroup' value='$gid'/>\n";
 	    break;
@@ -233,8 +232,8 @@ function msg_detail($msgid) {
 	while ($data = $xoopsDB->fetchArray($res)) {
 	    $uname = htmlspecialchars($data['uname']);
 	    $comment = $myts->displayTarea($data['comment']);
-	    echo "<tr><td>".formatTimestamp($data['ltime'])."</td><td>".
-		"[$uname]</td><td>$comment</td></tr>\n";
+	    echo "<tr><td nowrap>".formatTimestamp($data['ltime'])."</td><td nowrap>".
+		"[$uname]</td><td width='100%'>$comment</td></tr>\n";
 	}
 	echo "</table>\n";
     } else {
@@ -243,7 +242,7 @@ function msg_detail($msgid) {
 }
 
 function ccUname($uid) {
-    if ($uid<=0) return _CC_LOG_USER_NONE;
+    if ($uid<=0) return _CC_USER_NONE;
     return XoopsUser::getUnameFromId($uid);
 }
 ?>

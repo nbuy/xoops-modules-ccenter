@@ -1,6 +1,6 @@
 <?php
 // ccenter common functions
-// $Id: functions.php,v 1.9 2007/08/02 16:27:37 nobu Exp $
+// $Id: functions.php,v 1.10 2007/08/03 05:29:25 nobu Exp $
 
 global $xoopsDB;		// for blocks scope
 // using tables
@@ -589,13 +589,27 @@ function cc_log_message($formid, $comment, $msgid=0) {
     global $xoopsDB, $xoopsUser;
     $uid = is_object($xoopsUser)?$xoopsUser->getVar('uid'):0;
     $now = time();
-    return $xoopsDB->queryF("INSERT INTO ".CCLOG."(ltime, fidref, midref, euid, comment)VALUES($now, $formid, $msgid, $uid, ".$xoopsDB->quoteString($comment).")");
+    $xoopsDB->queryF("INSERT INTO ".CCLOG."(ltime, fidref, midref, euid, comment)VALUES($now, $formid, $msgid, $uid, ".$xoopsDB->quoteString(preg_replace('/\n/', ", ", $comment)).")");
+    if ($msgid) {
+	$msgurl = XOOPS_URL."/modules/".basename(dirname(__FILE__))."/message.php?id=$msgid";
+	$res = $xoopsDB->query("SELECT title FROM ".FORMS." WHERE formid=".$formid);
+	list($title) = $xoopsDB->fetchRow($res);
+	$tags = array('LOG_STATUS'=>$comment,
+		      'FORM_NAME'=>$title,
+		      'CHANGE_BY'=>$xoopsUser->getVar('uname'),
+		      'MSG_ID'=>$msgid,
+		      'MSG_URL'=>$msgurl);
+	$notification_handler =& xoops_gethandler('notification');
+	$notification_handler->triggerEvent('message', $msgid, 'status', $tags);
+    }
+    return $comment;
 }
 
 function cc_log_status($data, $nstat) {
     global $msg_status;
     $fid = empty($data['fidref'])?$data['formid']:$data['fidref'];
-    return cc_log_message($fid, sprintf(_CC_LOG_STATUS, $msg_status[$data['status']], $msg_status[$nstat]), $data['msgid']);
+    $log = sprintf(_CC_LOG_STATUS, $msg_status[$data['status']], $msg_status[$nstat]);
+    return cc_log_message($fid, $log, $data['msgid']);
 }
 
 define('PAST_TIME_MIN', 3600);	     // 1hour
@@ -739,34 +753,13 @@ function change_message_status($msgid, $touid, $stat) {
     $s = $xoopsDB->quoteString($stat);
     $cond = "msgid=".$msgid;
     if ($touid) $cond .= " AND touid=".$touid;
-    $res = $xoopsDB->query("SELECT onepass,status,email,title,fidref,msgid
-  FROM ".MESSAGE.",".FORMS." WHERE $cond AND status<>$s AND formid=fidref");
+    $res = $xoopsDB->query("SELECT msgid,fidref,status FROM ".MESSAGE." WHERE $cond AND status<>$s");
     if (!$res || $xoopsDB->getRowsNum($res)==0) return false;
     $data = $xoopsDB->fetchArray($res);
     $now = time();
     $res = $xoopsDB->query("UPDATE ".MESSAGE." SET status=$s,mtime=$now WHERE msgid=$msgid");
     if (!$res) die('DATABASE error');	// unknown error?
     cc_log_status($data, $stat);
-    $msgurl = XOOPS_URL."/modules/".basename(dirname(__FILE__))."/message.php?id=$msgid";
-    if ($data['onepass']) $msgurl.="&p=".urlencode($data['onepass']);
-    $tags = array('PREV_STATUS'=>$msg_status[$data['status']],
-		  'NEW_STATUS'=>$msg_status[$stat],
-		  'SUBJECT'=>$data['title'],
-		  'CHANGE_BY'=>XoopsUser::getUnameFromId($touid),
-		  'MSG_URL'=>$msgurl);
-
-    $res = $xoopsDB->query("SELECT not_uid FROM ".$xoopsDB->prefix('xoopsnotifications')." WHERE not_modid=".$xoopsModule->getVar('mid')." AND not_event='comment' AND not_itemid=".$msgid);
-
-    $member_handler =& xoops_gethandler('member');
-    $users = array();
-    while (list($not_uid) = $xoopsDB->fetchRow($res)) {
-	if ($not_uid != $touid) {
-	    $users[] =& $member_handler->getUser($not_uid);
-	}
-    }
-
-    notify_mail('status_notify.tpl', $tags, $users, $data['email']);
-    
     return true;
 }
 ?>

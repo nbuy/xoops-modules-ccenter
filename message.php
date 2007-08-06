@@ -1,6 +1,6 @@
 <?php
 // show messages file
-// $Id: message.php,v 1.7 2007/08/03 05:29:25 nobu Exp $
+// $Id: message.php,v 1.8 2007/08/06 13:54:27 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -36,6 +36,8 @@ if ($uid && $uid == $data['touid'] && $data['status']=='-') {
 
 include XOOPS_ROOT_PATH."/header.php";
 
+$breadcrumbs = new XoopsBreadcrumbs(_MD_CCENTER_RECEPTION, 'reception.php');
+
 $vals = unserialize_text($data['body']);
 $add = $pass?"p=".urlencode($pass):"";
 $to_uname = XoopsUser::getUnameFromId($data['touid']);
@@ -50,6 +52,8 @@ foreach ($vals as $key=>$val) {
 }
 $data['comment'] = $myts->displayTarea($data['comment']);
 $isadmin = $uid && $xoopsUser->isAdmin($xoopsModule->getVar('mid'));
+$breadcrumbs->set(htmlspecialchars($form['title']), "index.php?form=$id");
+$breadcrumbs->assign();
 $xoopsTpl->assign(
     array('subject'=>$data['title'],
 	  'sender'=>xoops_getLinkedUnameFromId($data['uid']),

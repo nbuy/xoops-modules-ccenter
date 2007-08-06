@@ -1,6 +1,6 @@
 <?php
 // contact to member
-// $Id: reception.php,v 1.4 2007/07/27 06:20:16 nobu Exp $
+// $Id: reception.php,v 1.5 2007/08/06 13:54:27 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -30,8 +30,13 @@ if (!$res || $xoopsDB->getRowsNum($res)==0) {
     exit;
 }
 
+$breadcrumbs = new XoopsBreadcrumbs();
+$breadcrumbs->set(_MD_CCENTER_RECEPTION, "reception.php");
+
 if ($xoopsDB->getRowsNum($res)>1) {
     include XOOPS_ROOT_PATH."/header.php";
+    echo "<h2>"._MD_CCENTER_RECEPTION."</h2>\n";
+    $breadcrumbs->assign();
     if ($xoopsDB->getRowsNum($res)) {
 	echo "<ul>\n";
 	while ($form=$xoopsDB->fetchArray($res)) {
@@ -51,6 +56,9 @@ $xoopsOption['template_main'] = "ccenter_reception.html";
 $form = $xoopsDB->fetchArray($res);
 $id = $form['formid'];
 $items = get_form_attribute($form['defs']);
+$breadcrumbs->set(htmlspecialchars($form['title']), "reception.php?formid=$id");
+$breadcrumbs->assign();
+
 $start = isset($_GET['start'])?intval($_GET['start']):0;
 if ($form['custom']) {
     $reg = array('/\\[desc\\](.*)\\[\/desc\\]/sU', '/<form[^>]*>(.*)<\\/form[^>]*>/sU', '/{CHECK_SCRIPT}/');

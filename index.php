@@ -1,6 +1,6 @@
 <?php
 // contact to member
-// $Id: index.php,v 1.8 2007/08/02 16:27:37 nobu Exp $
+// $Id: index.php,v 1.9 2007/08/06 13:54:27 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -32,13 +32,10 @@ if (!$res) {
     exit;
 }
 
-$modurl = XOOPS_URL."/modules/".$xoopsModule->getVar('dirname').'/';
-$breadcrumbs = array();
-$breadcrumbs[] = array('name'=>$xoopsModule->getVar('name'), 'url'=>$modurl);
+$breadcrumbs = new XoopsBreadcrumbs();
 
 if ($xoopsDB->getRowsNum($res)!=1) {
     include XOOPS_ROOT_PATH."/header.php";
-    $xoopsTpl->assign('xoops_breadcrumbs', $breadcrumbs);
     $xoopsOption['template_main'] = "ccenter_index.html";
     $forms = array();
     while ($form=$xoopsDB->fetchArray($res)) {
@@ -111,13 +108,13 @@ $form['confirm'] = $confirm;
 $form['hasfile'] = $hasfile;
 
 $title = htmlspecialchars($form['title']);
-$breadcrumbs[] = array('name'=>$title, 'url'=>$modurl."index.php?form=$id");
+$breadcrumbs->set($title, "index.php?form=$id");
 
 if ($cust) {
     $out = custom_template($form, $items, $op == 'confirm');
     if ($cust==1) {
 	include XOOPS_ROOT_PATH."/header.php";
-	$xoopsTpl->assign('xoops_breadcrumbs', $breadcrumbs);
+	$breadcrumbs->assign();
 	$xoopsTpl->assign('xoops_pagetitle', $title);
 	if ($errors) xoops_error($errors);
 	echo $out;
@@ -136,7 +133,7 @@ if ($cust) {
     }
     $form['description'] = $myts->displayTarea(str_replace($str, $rep, $form['description']));
     include XOOPS_ROOT_PATH."/header.php";
-    $xoopsTpl->assign('xoops_breadcrumbs', $breadcrumbs);
+    $breadcrumbs->assign();
     $xoopsTpl->assign('xoops_pagetitle', $title);
     $xoopsOption['template_main'] = ($op=='confirm')?"ccenter_confirm.html":"ccenter_form.html";
 

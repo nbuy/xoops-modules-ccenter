@@ -1,6 +1,6 @@
 <?php
 # ccenter module onUpdate proceeding.
-# $Id: onupdate.php,v 1.1 2007/08/02 16:27:37 nobu Exp $
+# $Id: onupdate.php,v 1.2 2007/08/06 13:54:27 nobu Exp $
 
 global $xoopsDB;
 
@@ -8,6 +8,7 @@ global $xoopsDB;
 define('LOG', $xoopsDB->prefix('ccenter_log'));
 define('MSG', $xoopsDB->prefix('ccenter_message'));
 
+// add logging (after ccenter-0.80)
 $xoopsDB->query('SELECT * FROM '.LOG, 1);
 if ($xoopsDB->errno()) { // check exists
     $msgs[] = "Update Database...";
@@ -24,7 +25,7 @@ if ($xoopsDB->errno()) { // check exists
 )");
 }
 
-// add create time fields (after ccenter-0.72)
+// add create time fields (after ccenter-0.80)
 if (add_field(MSG, "ctime", "INT DEFAULT 0 NOT NULL", "touid")) {
     $msgs[] = "&nbsp;&nbsp; Add new field: <b>ctime</b> in ccenter_message";
     // copy mtime to new ctime at first

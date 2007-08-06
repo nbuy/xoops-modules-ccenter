@@ -1,6 +1,8 @@
 <?php
 // Person receipt blocks
-// $Id: ccenter_receipt.php,v 1.2 2007/08/02 16:27:37 nobu Exp $
+// $Id: ccenter_receipt.php,v 1.3 2007/08/06 13:54:27 nobu Exp $
+
+global $xoopsConfig;
 
 $moddir = dirname(dirname(__FILE__));
 $lang = $xoopsConfig['language'];

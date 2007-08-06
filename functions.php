@@ -1,6 +1,6 @@
 <?php
 // ccenter common functions
-// $Id: functions.php,v 1.10 2007/08/03 05:29:25 nobu Exp $
+// $Id: functions.php,v 1.11 2007/08/06 13:54:26 nobu Exp $
 
 global $xoopsDB;		// for blocks scope
 // using tables
@@ -757,9 +757,36 @@ function change_message_status($msgid, $touid, $stat) {
     if (!$res || $xoopsDB->getRowsNum($res)==0) return false;
     $data = $xoopsDB->fetchArray($res);
     $now = time();
-    $res = $xoopsDB->query("UPDATE ".MESSAGE." SET status=$s,mtime=$now WHERE msgid=$msgid");
+    $res = $xoopsDB->queryF("UPDATE ".MESSAGE." SET status=$s,mtime=$now WHERE msgid=$msgid");
     if (!$res) die('DATABASE error');	// unknown error?
     cc_log_status($data, $stat);
     return true;
 }
+
+class XoopsBreadcrumbs {
+    var $moddir;
+    var $pairs;
+
+    function XoopsBreadcrumbs() {
+	global $xoopsTpl, $xoopsModule;
+	$this->moddir = XOOPS_URL."/modules/".$xoopsModule->getVar('dirname').'/';
+	$this->pairs = array(array('name'=>$xoopsModule->getVar('name'), 'url'=>$this->moddir));
+    }
+
+    function set($name, $url) {
+	if (preg_match('/^\w+:\/\//', $url)) $url = $this->moddir.$url;
+	$this->pairs[] = array('name'=>$name, 'url'=>$url);
+    }
+
+    function get() {
+	return $this->pairs;
+    }
+
+    function assign() {
+	global $xoopsTpl;
+	return $xoopsTpl->assign('xoops_breadcrumbs', $this->get());
+    }
+
+}
+
 ?>

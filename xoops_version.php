@@ -1,5 +1,5 @@
 <?php
-// $Id: xoops_version.php,v 1.8 2007/08/06 13:54:27 nobu Exp $
+// $Id: xoops_version.php,v 1.9 2007/08/20 04:19:36 nobu Exp $
 //  ------------------------------------------------------------------------ //
 //  This program is free software; you can redistribute it and/or modify     //
 //  it under the terms of the GNU General Public License as published by     //
@@ -84,52 +84,18 @@ $modversion['templates'][] =
 $modversion['templates'][] =
     array('file' => 'ccenter_reception.html',
 	  'description' => _MI_CCENTER_RECEPT_TPL);
-/*
-$modversion['templates'][] =
-    array('file' => 'memberdirs_preference.html',
-	  'description' => '');
-*/
 
 // Blocks
-$modversion['blocks'][1]=array('file' => 'ccenter_receipt.php',
-			      'name' => _MI_CCENTER_BLOCK_RECEIPT,
-			      'description' => '',
-			      'clone' => true,
-			      'show_func' => "b_ccenter_receipt_show",
-			      'edit_func' => "b_ccenter_receipt_edit",
-			      'template' => 'ccenter_block_receipt.html',
-			      'options' => '5|asc|-|a|b');
-/*
-$modversion['blocks'][]=array('file' => 'memberdirs_index.php',
-			      'name' => _MI_CCENTER_BLOCK_INDEX."2",
-			      'description' => '',
-			      'clone' => true,
-			      'show_func' => "b_memberdirs_index_show",
-			      'edit_func' => "b_memberdirs_index_edit",
-			      'template' => 'memberdirs_block_index.html',
-			      'options' => '2');
+$modversion['blocks'][1]=
+    array('file' => 'ccenter_receipt.php',
+	  'name' => _MI_CCENTER_BLOCK_RECEIPT,
+	  'description' => '',
+	  'clone' => true,
+	  'show_func' => "b_ccenter_receipt_show",
+	  'edit_func' => "b_ccenter_receipt_edit",
+	  'template' => 'ccenter_block_receipt.html',
+	  'options' => '5|asc|-|a|b');
 
-$modversion['blocks'][]=array('file' => 'memberdirs_search.php',
-			      'name' => _MI_CCENTER_BLOCK_SEARCH,
-			      'description' => '',
-			      'show_func' => "b_memberdirs_search_show",
-			      'edit_func' => "b_memberdirs_search_edit",
-			      'template' => 'memberdirs_block_search.html');
-
-$modversion['blocks'][]=array('file' => 'memberdirs_avatar.php',
-			      'name' => _MI_CCENTER_BLOCK_AVATAR,
-			      'description' => '',
-			      'show_func' => "b_memberdirs_avatar_show",
-			      'edit_func' => "b_memberdirs_avatar_edit",
-			      'template' => 'memberdirs_block_avatar.html');
-
-$modversion['blocks'][]=array('file' => 'memberdirs_myavatar.php',
-			      'name' => _MI_CCENTER_BLOCK_MYAVATAR,
-			      'description' => '',
-			      'show_func' => "b_memberdirs_myavatar_show",
-			      'edit_func' => "b_memberdirs_myavatar_edit",
-			      'template' => 'memberdirs_block_myavatar.html');
-*/
 // Comments
 $modversion['hasComments'] = 1;
 $modversion['comments']['pageName'] = 'message.php';
@@ -143,95 +109,30 @@ $modversion['comments']['callback']['update'] = 'ccenter_com_update';
 // Config
 
 $modversion['hasconfig'] = 1;
-$modversion['config'][]=array(
-    'name' => 'max_lists',
-    'title' => '_MI_CCENTER_LISTS',
-    'description' => '_MI_CCENTER_LISTS_DESC',
-    'formtype' => 'select',
-    'valuetype' => 'int',
-    'default' => 25,
-    'options' => array(5=>5,10=>10,25=>25,50=>50,100=>100,200=>200,500=>500,1000=>1000)
-    );
-$modversion['config'][]=array('name' => 'def_attrs',
-			      'title' => '_MI_CCENTER_DEF_ATTRS',
-			      'description' => '_MI_CCENTER_DEF_ATTRS_DESC',
-			      'formtype' => 'text',
-			      'valuetype' => 'string',
+$modversion['config'][]=
+    array('name' => 'max_lists',
+	  'title' => '_MI_CCENTER_LISTS',
+	  'description' => '_MI_CCENTER_LISTS_DESC',
+	  'formtype' => 'select',
+	  'valuetype' => 'int',
+	  'default' => 25,
+	  'options' => array(5=>5,10=>10,25=>25,50=>50,100=>100,200=>200,500=>500,1000=>1000)
+	  );
+$modversion['config'][]=
+    array('name' => 'def_attrs',
+	  'title' => '_MI_CCENTER_DEF_ATTRS',
+	  'description' => '_MI_CCENTER_DEF_ATTRS_DESC',
+	  'formtype' => 'text',
+	  'valuetype' => 'string',
 			      'default' => 'size=60,rows=5,cols=50');
-$modversion['config'][]=array('name' => 'status_combo',
-			      'title' => '_MI_CCENTER_STATUS_COMBO',
-			      'description' => '_MI_CCENTER_STATUS_COMBO_DESC',
-			      'formtype' => 'textarea',
-			      'valuetype' => 'string',
-			      'default' => _MI_CCENTER_STATUS_COMBO_DEF);
-/*
-$modversion['config'][]=array('name' => 'search_list',
-			      'title' => '_MI_CCENTER_SEARCH',
-			      'description' => '_MI_CCENTER_SEARCH_DESC',
-			      'formtype' => 'textarea',
-			      'valuetype' => 'string',
-			      'default' => _MI_CCENTER_SEARCH_DEF);
-$modversion['config'][]=array('name' => 'max_avatar',
-			      'title' => '_MI_CCENTER_MAX_AVATAR',
-			      'description' => '_MI_CCENTER_MAX_AVATAR_DSC',
-			      'formtype' => 'text',
-			      'valuetype' => 'int',
-			      'default' => 6);
-$modversion['config'][]=array('name' => 'contact_form',
-			      'title' => '_MI_CCENTER_CONTACT',
-			      'description' => '_MI_CCENTER_CONTACT_DESC',
-			      'formtype' => 'textarea',
-			      'valuetype' => 'string',
-			      'default' => _MI_CCENTER_CONTACT_DEF);
-$modversion['config'][]=array('name' => 'contact_uri',
-			      'title' => '_MI_CCENTER_CONTACTURI',
-			      'description' => '_MI_CCENTER_CONTACTURI_DSC',
-			      'formtype' => 'text',
-			      'valuetype' => 'string',
-			      'default' => '');
-$modversion['config'][]=array('name' => 'contact_mail',
-			      'title' => '_MI_CCENTER_CONTACTML',
-			      'description' => '_MI_CCENTER_CONTACTML_DSC',
-			      'formtype' => 'yesno',
-			      'valuetype' => 'int',
-			      'default' => 1);
-$modversion['config'][]=array('name' => 'avatar',
-			      'title' => '_MI_CCENTER_AVATAR',
-			      'description' => '_MI_CCENTER_AVATAR_DESC',
-			      'formtype' => 'textarea',
-			      'valuetype' => 'string',
-			      'default' => _MI_CCENTER_AVATAR_DEF);
-$modversion['config'][]=array('name' => 'avatar_form',
-			      'title' => '_MI_CCENTER_AVATARFORM',
-			      'description' => '_MI_CCENTER_AVATARFORM_DSC',
-			      'formtype' => 'textarea',
-			      'valuetype' => 'string',
-			      'default' => _MI_CCENTER_AVATARFORM_DEF);
-$modversion['config'][]=array('name' => 'avatar_uri',
-			      'title' => '_MI_CCENTER_AVATAR_URI',
-			      'description' => '_MI_CCENTER_AVATAR_URI_DSC',
-			      'formtype' => 'text',
-			      'valuetype' => 'string',
-			      'default' => '');
-$modversion['config'][]=array('name' => 'avatar_mail',
-			      'title' => '_MI_CCENTER_AVATARML',
-			      'description' => '_MI_CCENTER_AVATARML_DSC',
-			      'formtype' => 'yesno',
-			      'valuetype' => 'int',
-			      'default' => 1);
-$modversion['config'][]=array('name' => 'pref_form',
-			      'title' => '_MI_CCENTER_PREFFORM',
-			      'description' => '_MI_CCENTER_PRIFFORM_DSC',
-			      'formtype' => 'textarea',
-			      'valuetype' => 'string',
-			      'default' => _MI_CCENTER_PREFFORM_DEF);
-$modversion['config'][]=array('name' => 'notice',
-			      'title' => '_MI_CCENTER_NOTICE',
-			      'description' => '_MI_CCENTER_NOTICE_DESC',
-			      'formtype' => 'textarea',
-			      'valuetype' => 'string',
-			      'default' => _MI_CCENTER_NOTICE_DEF);
-*/
+$modversion['config'][]=
+    array('name' => 'status_combo',
+	  'title' => '_MI_CCENTER_STATUS_COMBO',
+	  'description' => '_MI_CCENTER_STATUS_COMBO_DESC',
+	  'formtype' => 'textarea',
+	  'valuetype' => 'string',
+	  'default' => _MI_CCENTER_STATUS_COMBO_DEF);
+
 // Notification
 
 $modversion['hasNotification'] = 1;
@@ -284,15 +185,4 @@ $modversion['notification']['event'][]=
 	  'description' => '',
 	  'mail_template' => 'status_notify',
 	  'mail_subject' => _MI_CCENTER_STATUS_SUBJECT);
-/*
-$modversion['notification']['event'][1]=
-    array('name' => 'new',
-	  'category' => 'form',
-	  'admin_only'=>1,
-	  'title' => _MI_CCENTER_NEWPOSTFORM_NOTIFY,
-	  'caption' => _MI_CCENTER_NEWPOSTFORM_NOTIFY_DESC,
-	  'description' => '',
-	  'mail_template' => 'notify',
-	  'mail_subject' => _MI_CCENTER_NEWPOST_SUBJECT);
-*/
 ?>

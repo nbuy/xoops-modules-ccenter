@@ -10,7 +10,7 @@
 <{$form.description}>
 <a name="form"></a>
 <form action="index.php?form=<{$form.formid}><{if $form.priuser.uid}>&amp;uid=<{$form.priuser.uid}><{/if}>" name="ccenter" method="post"<{if $form.check_script}> onsubmit="return xoopsFormValidate_ccenter();"<{/if}><{if $form.hasfile}> enctype="multipart/form-data"<{/if}>>
-<input type="hidden" name="op" value="<{$op}>"/>
+<input type="hidden" name="op" value="<{$op}>" />
 
 <table class="outer" align="center" cellspacing="1" border="0">
 <{foreach from=$form.items item=fm}>
@@ -20,7 +20,7 @@
 </tr>
 <{/foreach}>
 </table>
-<p style="text-align: center;"><input type="submit" value="<{$smarty.const._SUBMIT}>" <{$form.submit_opts}>/></p>
+<p style="text-align: center;"><input type="submit" value="<{$smarty.const._SUBMIT}>" <{$form.submit_opts}> /></p>
 </form>
 <{$form.check_script}>
 <{if $form.lang_note || $form.note}>

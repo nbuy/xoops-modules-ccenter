@@ -31,13 +31,13 @@
 <p><{$data.comment}></p>
 <{elseif $is_mine && isset($own_status[$data.status])}>
   <form action="status.php" method="post">
-  <input type="hidden" name="id" value="<{$data.msgid}>"/>
+  <input type="hidden" name="id" value="<{$data.msgid}>" />
   <select name="status">
   <{foreach from=$own_status item=label key=val}>
     <option value="<{$val}>"<{if $val==$data.status}> selected="selected"<{/if}>><{$label}></option>
   <{/foreach}>
   </select>
-  <input type="submit" value="<{$smarty.const._MD_SUBMIT}>"/>
+  <input type="submit" value="<{$smarty.const._MD_SUBMIT}>" />
   </form>
 <{/if}>
 </div>
@@ -47,8 +47,8 @@
 <div class="attr"><b class="label"><{$smarty.const._MD_CONTACT_TO}></b> <{$sendto}>
 <{if $data.touid==0 && $xoops_isuser}>
 <form action="status.php" method="post" style="display: inline;">
-<input type="hidden" name="id" value="<{$data.msgid}>"/>
-<input type="hidden" name="op" value="myself"/>
+<input type="hidden" name="id" value="<{$data.msgid}>" />
+<input type="hidden" name="op" value="myself" />
 <input type="submit" value="<{$smarty.const._MD_CONTACT_MYSELF}>">
 </from>
 <{/if}>
@@ -64,7 +64,7 @@
 <div style="text-align: right">[ <a href="admin/msgadm.php?msgid=<{$data.msgid}>"><{$smarty.const._MD_MSG_ADMIN}></a> ]</div>
 <{/if}>
 
-<br/>
+<br />
 
 <div class="commentnav">
 <{$commentsnav}>
@@ -112,9 +112,9 @@ table.evaluate td { width: 20%; text-align: center; }
 <h4><{$smarty.const._MD_EVAL_COMMENT}>:</h4>
 <textarea name="comment" cols="50" rows="4"></textarea>
 <p>
-<input type="hidden" name="id" value="<{$data.msgid}>"/>
-<input type="hidden" name="pass" value="<{$data.onepass|escape}>"/>
-<input type="submit" value="<{$smarty.const._MD_EVAL_SUBMIT}>"/>
+<input type="hidden" name="id" value="<{$data.msgid}>" />
+<input type="hidden" name="pass" value="<{$data.onepass|escape}>" />
+<input type="submit" value="<{$smarty.const._MD_EVAL_SUBMIT}>" />
 </p>
 </from>
 </div>

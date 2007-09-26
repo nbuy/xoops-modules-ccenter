@@ -1,6 +1,6 @@
 <?php
 // show message list
-// $Id: list.php,v 1.3 2007/08/02 16:27:37 nobu Exp $
+// $Id: list.php,v 1.4 2007/09/26 07:08:58 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -35,7 +35,7 @@ if (isset($_GET['form'])) {
     $cond .= " AND formid=".intval($_GET['form']);
 }
 
-$sqlx = "FROM ".MESSAGE." m,".FORMS." WHERE uid=$uid $cond AND fidref=formid";
+$sqlx = "FROM ".CCMES." m,".FORMS." WHERE uid=$uid $cond AND fidref=formid";
 
 $res = $xoopsDB->query("SELECT count(msgid) $sqlx");
 list($total) = $xoopsDB->fetchRow($res);
@@ -54,7 +54,7 @@ $res = $xoopsDB->query("SELECT m.*, title $sqlx ".$listctrl->sqlorder(), $max, $
 $list = array();
 
 while ($data = $xoopsDB->fetchArray($res)) {
-    $list[] = message_entry($data);
+    $list[] = cc_message_entry($data);
 }
 $xoopsTpl->assign('list', $list);
 

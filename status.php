@@ -1,6 +1,6 @@
 <?php
 // Changing message status
-// $Id: status.php,v 1.5 2007/08/03 05:29:25 nobu Exp $
+// $Id: status.php,v 1.6 2007/09/26 07:08:58 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -14,8 +14,8 @@ if (!empty($_POST['eval'])) {	// evaluate at last
     $pass = $myts->stripSlashesGPC($_POST['pass']);
     $com = $xoopsDB->quoteString($myts->stripSlashesGPC($_POST['comment']));
     $now = time();
-    if (is_evaluate($msgid, $uid, $pass)) {
-	$xoopsDB->query("UPDATE ".MESSAGE." SET comment=$com,value=$eval,comtime=$now,status='c' WHERE msgid=$msgid");
+    if (is_cc_evaluate($msgid, $uid, $pass)) {
+	$xoopsDB->query("UPDATE ".CCMES." SET comment=$com,value=$eval,comtime=$now,status='c' WHERE msgid=$msgid");
 	redirect_header($redirect, 1, _MD_EVAL_THANKYOU);
     } else {
 	redirect_header($redirect, 3, _NOPERM);
@@ -29,12 +29,12 @@ if (!empty($_POST['eval'])) {	// evaluate at last
 } else {
     switch ($_POST['op']) {
     case 'myself':
-	$res = $xoopsDB->query("SELECT fidref,status,title FROM ".MESSAGE." LEFT JOIN ".FORMS." ON formid=fidref WHERE msgid=$msgid AND touid=0");
+	$res = $xoopsDB->query("SELECT fidref,status,title FROM ".CCMES." LEFT JOIN ".FORMS." ON formid=fidref WHERE msgid=$msgid AND touid=0");
 	if ($res && $xoopsDB->getRowsNum($res)) {
 	    list($fid, $s, $title) = $xoopsDB->fetchRow($res);
 	    $now = time();
 	    $set = "SET mtime=$now, touid=$uid, status=".$xoopsDB->quoteString('a');
-	    $res = $xoopsDB->query("UPDATE ".MESSAGE." $set WHERE msgid=$msgid");
+	    $res = $xoopsDB->query("UPDATE ".CCMES." $set WHERE msgid=$msgid");
 	    $log = sprintf(_CC_LOG_TOUSER, _CC_USER_NONE, $xoopsUser->getVar('uname'));
 	    $log .= "\n".sprintf(_CC_LOG_STATUS, $msg_status[$s], $msg_status['a']);
 	    $notification_handler =& xoops_gethandler('notification');

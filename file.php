@@ -1,6 +1,6 @@
 <?php
 // show attachment file
-// $Id: file.php,v 1.2 2007/03/06 17:46:55 nobu Exp $
+// $Id: file.php,v 1.3 2007/09/26 07:08:58 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -15,16 +15,16 @@ $msgid = isset($_GET['id'])?intval($_GET['id']):0;
 $file = $_GET['file'];
 
 if ($msgid) {
-    $res = $xoopsDB->query("SELECT msgid,uid,touid,onepass FROM ".MESSAGE." WHERE msgid=$msgid");
+    $res = $xoopsDB->query("SELECT msgid,uid,touid,onepass FROM ".CCMES." WHERE msgid=$msgid");
     if (!$res || $xoopsDB->getRowsNum($res)==0) die("No File");
     $data = $xoopsDB->fetchArray($res);
-    if (!check_perm($data)) {
+    if (!cc_check_perm($data)) {
 	redirect_header(XOOPS_URL.'/user.php', 3, _NOPERM);
 	exit;
     }
 }
 
-$path = XOOPS_UPLOAD_PATH.attach_path($msgid, $file);
+$path = XOOPS_UPLOAD_PATH.cc_attach_path($msgid, $file);
 $type = mime_content_type($path);
 $stat = stat($file);
 //header("Last-Modified: ".formatTimestamp($stat['mtime'], "r"));

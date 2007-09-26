@@ -1,5 +1,5 @@
 <?php
-// $Id: comment_functions.php,v 1.4 2007/08/02 16:27:37 nobu Exp $
+// $Id: comment_functions.php,v 1.5 2007/09/26 07:08:58 nobu Exp $
 //  ------------------------------------------------------------------------ //
 //                XOOPS - PHP Content Management System                      //
 //                    Copyright (c) 2000 XOOPS.org                           //
@@ -31,7 +31,7 @@ include_once "functions.php";
 function ccenter_com_update($msgid, $total_num){
     global $xoopsDB, $xoopsUser, $xoopsModule, $xoopsConfig;
 
-    $res = $xoopsDB->query("SELECT uid, touid, email, onepass, fidref, title FROM ".MESSAGE.", ".FORMS." WHERE msgid=$msgid AND formid=fidref");
+    $res = $xoopsDB->query("SELECT uid, touid, email, onepass, fidref, title FROM ".CCMES.", ".FORMS." WHERE msgid=$msgid AND formid=fidref");
 
     $comid = intval($_POST['com_id']); // new comment?
     if ($comid==0 && $res && $xoopsDB->getRowsNum($res)) {
@@ -42,13 +42,13 @@ function ccenter_com_update($msgid, $total_num){
 	$msg = _MD_LOG_COMMENT;
 	if ($uid && $uid == $data['touid']) { // comment by charge
 	    // status to replyed
-	    $xoopsDB->query("UPDATE ".MESSAGE." SET status='b' WHERE msgid=$msgid AND status='a'");
+	    $xoopsDB->query("UPDATE ".CCMES." SET status='b' WHERE msgid=$msgid AND status='a'");
 	    $msg .= _MD_LOG_BYCHARGE;
 	} elseif ($uid==0 || $uid==$data['uid']) { // comment by order person
 	    // status back to contacting
-	    $xoopsDB->query("UPDATE ".MESSAGE." SET status='a' WHERE msgid=$msgid AND status IN ('b', 'c')");
+	    $xoopsDB->query("UPDATE ".CCMES." SET status='a' WHERE msgid=$msgid AND status IN ('b', 'c')");
 	}
-	$xoopsDB->query("UPDATE ".MESSAGE." SET mtime=".time()." WHERE msgid=$msgid");
+	$xoopsDB->query("UPDATE ".CCMES." SET mtime=".time()." WHERE msgid=$msgid");
 	cc_log_message($data['fidref'], $msg."($total_num)", $msgid);
 	// notification for guest contact
 	if (is_object($xoopsUser) && $data['uid']==0 && $email) {

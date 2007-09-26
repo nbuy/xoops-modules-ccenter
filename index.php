@@ -1,6 +1,6 @@
 <?php
 // contact to member
-// $Id: index.php,v 1.9 2007/08/06 13:54:27 nobu Exp $
+// $Id: index.php,v 1.10 2007/09/26 07:08:58 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -172,7 +172,7 @@ function store_message($items, $form) {
 	}
     }
     $text = serialize_text($vals);
-    $onepass = ($uid==0)?gen_onetime_ticket($email):"";
+    $onepass = ($uid==0)?cc_onetime_ticket($email):"";
     if ($form['priuid'] < 0) {
 	$touid = empty($form['priuser'])?0:$form['priuser']['uid'];
     } else {
@@ -188,7 +188,7 @@ function store_message($items, $form) {
     $parg = $onepass?"&p=".urlencode($onepass):"";
     if ($form['store']) $values['body']=$xoopsDB->quoteString($text);
 
-    $res = $xoopsDB->query("INSERT INTO ".MESSAGE. "(".join(',',array_keys($values)).") VALUES (".join(',', $values).")");
+    $res = $xoopsDB->query("INSERT INTO ".CCMES. "(".join(',',array_keys($values)).") VALUES (".join(',', $values).")");
     if ($res===false) return array("Error in DATABASE insert");
     $id = $xoopsDB->getInsertID();
     if ($touid) {
@@ -203,7 +203,7 @@ function store_message($items, $form) {
 	$text .= "\n"._MD_ATTACHMENT."\n";
 	foreach ($attach as $i=>$file) {
 	    move_attach_file('', $file, $id);
-	    $text .= attach_image($id, $file, true)."$parg\n";
+	    $text .= cc_attach_image($id, $file, true)."$parg\n";
 	}
 	rmdir(XOOPS_UPLOAD_PATH.attach_path(0, ''));
     }
@@ -223,7 +223,7 @@ function store_message($items, $form) {
     }
     $msgurl .= $parg;
     $tags['MSG_URL'] = $msgurl;
-    notify_mail('form_confirm.tpl', $tags, $toUser, $email);
+    cc_notify_mail('form_confirm.tpl', $tags, $toUser, $email);
     //$url = str_replace('{UID}', $touid, $url);
     //$url = str_replace('{ID}', $id, $url);
     if (!empty($form['redirect'])) $msgurl = $form['redirect'];

@@ -12,7 +12,7 @@ if (isset($_POST['store'])) {
     $msgid = intval($_POST['msgid']);
     $touid = intval($_POST['touid']);
     $stat = $myts->stripSlashesGPC($_POST['status']);
-    $res = $xoopsDB->query("SELECT * FROM ".MESSAGE." WHERE msgid=".$msgid);
+    $res = $xoopsDB->query("SELECT * FROM ".CCMES." WHERE msgid=".$msgid);
     $back = isset($_SERVER['HTTP_REFERER'])?$_SERVER['HTTP_REFERER']:"msgadm.php";
     if ($res && $xoopsDB->getRowsNum($res)==1) {
 	$data = $xoopsDB->fetchArray($res);
@@ -31,7 +31,7 @@ if (isset($_POST['store'])) {
 	}
 	if (count($sets)) {
 	    $sets[] = 'mtime='.time();
-	    $res = $xoopsDB->query("UPDATE ".MESSAGE." SET ".join(",", $sets)." WHERE msgid=".$msgid);
+	    $res = $xoopsDB->query("UPDATE ".CCMES." SET ".join(",", $sets)." WHERE msgid=".$msgid);
 	    if ($res && $touid) {
 		$notification_handler =& xoops_gethandler('notification');
 		$notification_handler->subscribe('message', $msgid, 'comment', null, null, $touid);
@@ -78,7 +78,7 @@ function msg_list() {
     $max = $xoopsModuleConfig['max_lists'];
 
     $users = $xoopsDB->prefix('users');
-    $sql0 = "FROM ".MESSAGE." m LEFT JOIN ".FORMS." ON fidref=formid LEFT JOIN $users u ON touid=u.uid LEFT JOIN $users f ON m.uid=f.uid WHERE ".$listctrl->sqlcondition();
+    $sql0 = "FROM ".CCMES." m LEFT JOIN ".FORMS." ON fidref=formid LEFT JOIN $users u ON touid=u.uid LEFT JOIN $users f ON m.uid=f.uid WHERE ".$listctrl->sqlcondition();
     $formid = isset($_REQUEST['formid'])?intval($_REQUEST['formid']):0;
     if ($formid) $sql0 .= " AND fidref=$formid";
 
@@ -159,7 +159,7 @@ function select_widget($name, $sel, $def) {
 function msg_detail($msgid) {
     global $xoopsDB, $msg_status, $myts;
     $users = $xoopsDB->prefix('users');
-    $res = $xoopsDB->query("SELECT m.*,title,priuid,u.uname,cgroup,f.uname cfrom FROM ".MESSAGE." m LEFT JOIN ".FORMS." ON fidref=formid LEFT JOIN $users u ON touid=u.uid LEFT JOIN $users f ON m.uid=f.uid WHERE msgid=$msgid");
+    $res = $xoopsDB->query("SELECT m.*,title,priuid,u.uname,cgroup,f.uname cfrom FROM ".CCMES." m LEFT JOIN ".FORMS." ON fidref=formid LEFT JOIN $users u ON touid=u.uid LEFT JOIN $users f ON m.uid=f.uid WHERE msgid=$msgid");
     echo $xoopsDB->error();
     $data = $xoopsDB->fetchArray($res);
     $data['stat'] = $msg_status[$data['status']];

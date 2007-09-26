@@ -15,7 +15,7 @@ $fields = array('title', 'description', 'defs', 'priuid', 'cgroup',
 if ($op == 'delform') {
     $formid = intval($_POST['formid']);
     $xoopsDB->query("DELETE FROM ".FORMS." WHERE formid=".$formid);
-    $xoopsDB->query("DELETE FROM ".MESSAGE." WHERE fidref=".$formid);
+    $xoopsDB->query("DELETE FROM ".CCMES." WHERE fidref=".$formid);
     // NOTE: add function delete XOOPS comments.
     // NOTE: add function delete uploads files
     redirect_header('index.php', 1, _AM_FORM_DELETED);
@@ -103,7 +103,7 @@ sum(if(status='-',1,0)) nwait,
 sum(if(status='a',1,0)) nwork,
 sum(if(status='b',1,0)) nreply,
 sum(if(status='c',1,0)) nclose
-FROM ".FORMS." LEFT JOIN ".MESSAGE." ON fidref=formid AND status<>'x' GROUP BY formid");
+FROM ".FORMS." LEFT JOIN ".CCMES." ON fidref=formid AND status<>'x' GROUP BY formid");
     if (!$res || $xoopsDB->getRowsNum($res)==0) return false;
     echo "<style>td.num { text-align: right; }</style>";
     echo "<table class='outer' border='0' cellspacing='1'>\n";

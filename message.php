@@ -1,6 +1,6 @@
 <?php
 // show messages file
-// $Id: message.php,v 1.8 2007/08/06 13:54:27 nobu Exp $
+// $Id: message.php,v 1.9 2007/09/26 07:08:58 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -18,13 +18,13 @@ if (isset($_GET['p'])) {
 $pass = empty($_SESSION['onepass'])?"":$_SESSION['onepass'];
 
 $cond = $isadmin?"":" AND status<>'x'";
-$res = $xoopsDB->query("SELECT m.*, title FROM ".MESSAGE." m,".FORMS." WHERE msgid=$msgid $cond AND fidref=formid");
+$res = $xoopsDB->query("SELECT m.*, title FROM ".CCMES." m,".FORMS." WHERE msgid=$msgid $cond AND fidref=formid");
 if (!$res || $xoopsDB->getRowsNum($res)==0) {
     redirect_header("index.php", 3, _NOPERM);
     exit;
 }
 $data = $xoopsDB->fetchArray($res);
-if (!check_perm($data)) {
+if (!cc_check_perm($data)) {
     redirect_header(XOOPS_URL.'/user.php', 3, _NOPERM);
     exit;
 }
@@ -44,7 +44,7 @@ $to_uname = XoopsUser::getUnameFromId($data['touid']);
 $items=array();
 foreach ($vals as $key=>$val) {
     if (preg_match('/^file=(.+)$/', $val, $d)) {
-	$val = attach_image($data['msgid'], $d[1], false, $add);
+	$val = cc_attach_image($data['msgid'], $d[1], false, $add);
     } else {
 	$val = $myts->displayTarea($val);
     }
@@ -63,7 +63,7 @@ $xoopsTpl->assign(
 	  'data'=> $data,
 	  'items'=>$items,
 	  'status'=>$msg_status[$data['status']],
-	  'is_eval'=>is_evaluate($msgid, $uid, $pass),
+	  'is_eval'=>is_cc_evaluate($msgid, $uid, $pass),
 	  'is_mine'=>$data['touid']==$uid,
 	  'own_status'=>array_slice($msg_status, 1, $isadmin?4:3),
 	  'xoops_pagetitle'=> htmlspecialchars($xoopsModule->getVar('name')." | ".$data['title']),

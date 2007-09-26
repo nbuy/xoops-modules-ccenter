@@ -1,6 +1,6 @@
 <?php
 // contact to member
-// $Id: reception.php,v 1.5 2007/08/06 13:54:27 nobu Exp $
+// $Id: reception.php,v 1.6 2007/09/26 07:08:58 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -22,7 +22,7 @@ else {
 if ($id) $cond .= ' AND formid='.$id;
 
 $res = $xoopsDB->query("SELECT f.*,count(msgid) nmsg,max(m.mtime) ltime
- FROM ".FORMS." f LEFT JOIN ".MESSAGE." m ON fidref=formid AND status<>'x'
+ FROM ".FORMS." f LEFT JOIN ".CCMES." m ON fidref=formid AND status<>'x'
  WHERE $cond GROUP BY formid");
 
 if (!$res || $xoopsDB->getRowsNum($res)==0) {
@@ -86,14 +86,14 @@ $xoopsTpl->assign('form', $form);
 include_once XOOPS_ROOT_PATH.'/class/pagenav.php';
 
 $cond = "fidref=$id AND status<>'x'";
-$res = $xoopsDB->query('SELECT count(*) FROM '.MESSAGE." WHERE $cond");
+$res = $xoopsDB->query('SELECT count(*) FROM '.CCMES." WHERE $cond");
 list($count) = $xoopsDB->fetchRow($res);
 $max = $xoopsModuleConfig['max_lists'];
 $args = preg_replace('/start=\\d+/', '', $_SERVER['QUERY_STRING']);
 $nav = new XoopsPageNav($count, $max, $start, "start", $args);
 $xoopsTpl->assign('pagenav', $count>$max?$nav->renderNav():"");
 
-$res = $xoopsDB->query('SELECT * FROM '.MESSAGE." WHERE $cond ORDER BY msgid DESC", $max, $start);
+$res = $xoopsDB->query('SELECT * FROM '.CCMES." WHERE $cond ORDER BY msgid DESC", $max, $start);
 
 $mlist = array();
 while ($data = $xoopsDB->fetchArray($res)) {

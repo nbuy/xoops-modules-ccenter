@@ -1,6 +1,6 @@
 <?php
 // Export data in CSV format
-// $Id: export.php,v 1.4 2007/08/02 16:27:37 nobu Exp $
+// $Id: export.php,v 1.5 2007/09/26 07:08:58 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -29,7 +29,7 @@ if (!$res || $xoopsDB->getRowsNum($res)==0) {
 $form = $xoopsDB->fetchArray($res);
 
 $cond = "fidref=$id AND status<>'x'";
-$res = $xoopsDB->query('SELECT * FROM '.MESSAGE." WHERE $cond ORDER BY msgid");
+$res = $xoopsDB->query('SELECT * FROM '.CCMES." WHERE $cond ORDER BY msgid");
 
 $items = get_form_attribute($form['defs']);
 $labels = array('ID', _MD_POSTDATE, _CC_STATUS, _MD_CONTACT_FROM, _MD_CONTACT_TO);

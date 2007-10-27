@@ -1,6 +1,6 @@
 <?php
 // ccenter common functions
-// $Id: functions.php,v 1.13 2007/10/27 07:27:08 nobu Exp $
+// $Id: functions.php,v 1.14 2007/10/27 10:11:56 nobu Exp $
 
 global $xoopsDB;		// for blocks scope
 // using tables
@@ -226,7 +226,8 @@ function cc_make_widget($item) {
     global $myts, $xoopsUser, $defuser;
     if (empty($defuser)) {
 	$defuser = array();
-	$keys = array_keys($xoopsUser->getVars());
+	$user = is_object($xoopsUser)?$xoopsUser:new XoopsUser;
+	$keys = array_keys($user->getVars());
 	if (is_object($xoopsUser)) {
 	    foreach ($keys as $k) {
 		$defuser['{X_'.strtoupper($k).'}'] = $xoopsUser->getVar($k, 'e');

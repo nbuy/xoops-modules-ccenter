@@ -1,6 +1,6 @@
 <?php
 // show messages file
-// $Id: message.php,v 1.9 2007/09/26 07:08:58 nobu Exp $
+// $Id: message.php,v 1.10 2007/10/27 07:27:08 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -52,10 +52,13 @@ foreach ($vals as $key=>$val) {
 }
 $data['comment'] = $myts->displayTarea($data['comment']);
 $isadmin = $uid && $xoopsUser->isAdmin($xoopsModule->getVar('mid'));
-$breadcrumbs->set(htmlspecialchars($form['title']), "index.php?form=$id");
+$title = $data['title'];
+list($lab) = array_keys($items);
+$breadcrumbs->set($title, "index.php?form=".$data['fidref']);
+$breadcrumbs->set($lab.': '.$items[$lab], "message.php?id=".$data['msgid']);
 $breadcrumbs->assign();
 $xoopsTpl->assign(
-    array('subject'=>$data['title'],
+    array('subject'=>$title,
 	  'sender'=>xoops_getLinkedUnameFromId($data['uid']),
 	  'sendto'=>$data['touid']?xoops_getLinkedUnameFromId($data['touid']):_MD_CONTACT_NOTYET,
 	  'cdate'=>formatTimestamp($data['ctime']),

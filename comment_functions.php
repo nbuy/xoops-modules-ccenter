@@ -1,5 +1,5 @@
 <?php
-// $Id: comment_functions.php,v 1.5 2007/09/26 07:08:58 nobu Exp $
+// $Id: comment_functions.php,v 1.6 2007/10/27 07:27:08 nobu Exp $
 //  ------------------------------------------------------------------------ //
 //                XOOPS - PHP Content Management System                      //
 //                    Copyright (c) 2000 XOOPS.org                           //
@@ -29,34 +29,39 @@
 include_once "functions.php";
 
 function ccenter_com_update($msgid, $total_num){
+    return true;
+}
+
+function ccenter_com_approve(&$comment){
     global $xoopsDB, $xoopsUser, $xoopsModule, $xoopsConfig;
 
+    $msgid = $comment->getVar('com_itemid');
     $res = $xoopsDB->query("SELECT uid, touid, email, onepass, fidref, title FROM ".CCMES.", ".FORMS." WHERE msgid=$msgid AND formid=fidref");
 
-    $comid = intval($_POST['com_id']); // new comment?
-    if ($comid==0 && $res && $xoopsDB->getRowsNum($res)) {
+    $comid = $comment->getVar('com_id');
+    if ($res && $xoopsDB->getRowsNum($res)) {
 	$data = $xoopsDB->fetchArray($res);
 	$email = $data['email'];
 
 	$uid = is_object($xoopsUser)?$xoopsUser->getVar('uid'):0;
-	$msg = _MD_LOG_COMMENT;
+	$msg = _CC_LOG_COMMENT;
 	if ($uid && $uid == $data['touid']) { // comment by charge
 	    // status to replyed
 	    $xoopsDB->query("UPDATE ".CCMES." SET status='b' WHERE msgid=$msgid AND status='a'");
-	    $msg .= _MD_LOG_BYCHARGE;
+	    $msg .= _CC_LOG_BYCHARGE;
 	} elseif ($uid==0 || $uid==$data['uid']) { // comment by order person
 	    // status back to contacting
 	    $xoopsDB->query("UPDATE ".CCMES." SET status='a' WHERE msgid=$msgid AND status IN ('b', 'c')");
 	}
 	$xoopsDB->query("UPDATE ".CCMES." SET mtime=".time()." WHERE msgid=$msgid");
-	cc_log_message($data['fidref'], $msg."($total_num)", $msgid);
+	cc_log_message($data['fidref'], $msg." (comid=$comid)", $msgid);
 	// notification for guest contact
 	if (is_object($xoopsUser) && $data['uid']==0 && $email) {
 	    $subj = $data['title'];
-	    $url = XOOPS_URL."/modules/".basename(dirname(__FILE__))."/message.php?id=$msgid&p=".urlencode($data['onepass']);
+	    $url = XOOPS_URL."/modules/".basename(dirname(__FILE__))."/message.php?id=$msgid&p=".urlencode($data['onepass'])."#comment$comid";
 	    $tags = array('X_MODULE'=>$xoopsModule->getVar('name'),
 			  'X_ITEM_TYPE'=>'', 'X_ITEM_NAME'=>$subj,
-			  'X_COMMENT_URL'=>$url, 'EMAIL'=>$email,
+			  'X_COMMENT_URL'=>$url, 'FROM_EMAIL'=>$email,
 			  'SUBJECT'=>$subj);
 	    $xoopsMailer =& getMailer();
 	    $xoopsMailer->useMail();
@@ -65,16 +70,11 @@ function ccenter_com_update($msgid, $total_num){
 	    $xoopsMailer->setSubject(_MD_NOTIFY_SUBJ);
 	    $xoopsMailer->assign($tags);
 	    $tpl = 'guest_notify.tpl';
-	    $xoopsMailer->setTemplateDir($x=template_dir($tpl));
+	    $xoopsMailer->setTemplateDir(template_dir($tpl));
 	    $xoopsMailer->setTemplate($tpl);
 	    $xoopsMailer->setToEmails($email);
 	    $xoopsMailer->send();
 	}
     }
-    return true;
-}
-
-function ccenter_com_approve(&$comment){
-	// notification mail here
 }
 ?>

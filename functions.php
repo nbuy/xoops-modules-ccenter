@@ -1,6 +1,6 @@
 <?php
 // ccenter common functions
-// $Id: functions.php,v 1.12 2007/09/26 07:08:58 nobu Exp $
+// $Id: functions.php,v 1.13 2007/10/27 07:27:08 nobu Exp $
 
 global $xoopsDB;		// for blocks scope
 // using tables
@@ -18,6 +18,11 @@ if (defined('_CC_STATUS_NONE')) {
 	'b'=>_CC_STATUS_REPLY,
 	'c'=>_CC_STATUS_CLOSE,
 	'x'=>_CC_STATUS_DEL);
+
+    define('_CC_TPL_NONE',  0);
+    define('_CC_TPL_BLOCK', 1);
+    define('_CC_TPL_FULL',  2);
+    define('_CC_TPL_FRAME', 3);
 }
 
 define('LABEL_ETC', '*');	// radio, checkbox widget 'etc' text input.
@@ -197,7 +202,7 @@ function assign_form_widgets(&$items, $conf=false) {
 	    }
 	} else {
 	    $input = cc_make_widget($item);
-	    if ($mconf && $item['type']=='mail' && $item['attr']['check']=='require') {
+	    if ($mconf && isset($item['type']) && $item['type']=='mail' && $item['attr']['check']=='require') {
 		$cfname = $fname.'_conf';
 		$citem = array(
 		    'label'=>sprintf(_MD_CONF_LABEL, $item['label']),
@@ -218,7 +223,20 @@ function assign_form_widgets(&$items, $conf=false) {
 }
 
 function cc_make_widget($item) {
-    global $myts;
+    global $myts, $xoopsUser, $defuser;
+    if (empty($defuser)) {
+	$defuser = array();
+	$keys = array_keys($xoopsUser->getVars());
+	if (is_object($xoopsUser)) {
+	    foreach ($keys as $k) {
+		$defuser['{X_'.strtoupper($k).'}'] = $xoopsUser->getVar($k, 'e');
+	    }
+	} else {
+	    foreach ($keys as $k) {
+		$defuser['{X_'.strtoupper($k).'}'] = '';
+	    }
+	}
+    }
     $input = '';
     $fname = $item['field'];
     $names = "name='$fname' id='$fname'";
@@ -321,12 +339,12 @@ function cc_make_widget($item) {
 		$orig = preg_replace('/_conf$/', '', $fname);
 		if (isset($_POST[$orig])) {
 		    $val = $myts->stripSlashesGPC($_POST[$orig]);
-		} elseif ($type=='mail' && is_object($xoopsUser)) {
-		    $val = $xoopsUser->getVar('email');
+		} elseif ($type=='mail') {
+		    $val = "{X_EMAIL}";
 		}
 	    }
 	}
-	$val = htmlspecialchars($val);
+	$val = htmlspecialchars(str_replace(array_keys($defuser), $defuser, $val));
 	if ($type == 'textarea') {
 	    if (isset($attr['rows'])) $astr .= ' rows="'.$attr['rows'].'"';
 	    if (isset($attr['cols'])) $astr .= ' cols="'.$attr['cols'].'"';
@@ -601,7 +619,7 @@ function cc_log_message($formid, $comment, $msgid=0) {
 	list($title) = $xoopsDB->fetchRow($res);
 	$tags = array('LOG_STATUS'=>$comment,
 		      'FORM_NAME'=>$title,
-		      'CHANGE_BY'=>$xoopsUser->getVar('uname'),
+		      'CHANGE_BY'=>$xoopsUser?$xoopsUser->getVar('uname'):"",
 		      'MSG_ID'=>$msgid,
 		      'MSG_URL'=>$msgurl);
 	$notification_handler =& xoops_gethandler('notification');
@@ -753,7 +771,7 @@ function change_message_status($msgid, $touid, $stat) {
     global $xoopsDB, $msg_status, $xoopsUser, $xoopsModule;
 
     $isadmin = is_object($xoopsUser) && $xoopsUser->isAdmin($xoopsModule->getVar('mid'));
-    $own_status = array_slice($msg_status, 1, $isadmin?4:3);
+    $own_status = array_slice($msg_status, $isadmin?0:1, $isadmin?5:3);
     if (empty($own_status[$stat])) return false; // Invalid status
     $s = $xoopsDB->quoteString($stat);
     $cond = "msgid=".$msgid;
@@ -780,7 +798,7 @@ class XoopsBreadcrumbs {
 
     function set($name, $url) {
 	if (preg_match('/^\w+:\/\//', $url)) $url = $this->moddir.$url;
-	$this->pairs[] = array('name'=>$name, 'url'=>$url);
+	$this->pairs[] = array('name'=>htmlspecialchars($name), 'url'=>$url);
     }
 
     function get() {

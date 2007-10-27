@@ -32,14 +32,14 @@ if (isset($_POST['store'])) {
 	if (count($sets)) {
 	    $sets[] = 'mtime='.time();
 	    $res = $xoopsDB->query("UPDATE ".CCMES." SET ".join(",", $sets)." WHERE msgid=".$msgid);
-	    if ($res && $touid) {
+	    if ($res && $touid) { // switch person in charge
 		$notification_handler =& xoops_gethandler('notification');
 		$notification_handler->subscribe('message', $msgid, 'comment', null, null, $touid);
 		$notification_handler->subscribe('message', $msgid, 'status', null, null, $touid);
-		cc_log_message($data['fidref'], $log, $msgid);
-		redirect_header($back, 1, _AM_MSG_UPDATED);
-		exit;
 	    }
+	    cc_log_message($data['fidref'], $log, $msgid);
+	    redirect_header($back, 1, _AM_MSG_UPDATED);
+	    exit;
 	}
     }
     redirect_header($back, 3, _AM_MSG_UPDATE_FAIL);
@@ -174,12 +174,13 @@ function msg_detail($msgid) {
     echo "<input type='hidden' name='msgid' value='$msgid'/>\n";
     echo "<table class='ccinfo' cellspacing='1' width='100%'>\n";
     $n = 0;
+    $upage = "../message.php?id=$msgid";
     foreach ($labs as $k=>$lab) {
 	$bg = ($n++%2)?'even':'odd';
 	$val = htmlspecialchars($data[$k]);
 	switch($k) {
 	case 'title':
-	    $val = "<a href='../message.php?id=$msgid'>$val</a>\n";
+	    $val = "<a href='$upage'>$val</a>\n";
 	    break;
 	case 'uid':
 	    if ($val>0) {
@@ -228,10 +229,14 @@ function msg_detail($msgid) {
     echo '<a id="logging"></a><h3>'._AM_LOGGING."</h3>\n";
 
     if ($xoopsDB->getRowsNum($res)) {
+	$anon = $GLOBALS['xoopsConfig']['anonymous'];
 	echo "<table>\n";
+	$reg = array('/\(comid=(\d+)\)/');
+	$rep = array('(<a href="'.$upage.'#comment\1">comid=\1</a>)');
 	while ($data = $xoopsDB->fetchArray($res)) {
-	    $uname = htmlspecialchars($data['uname']);
-	    $comment = $myts->displayTarea($data['comment']);
+	    $uname = htmlspecialchars(empty($data['uname'])?$anon:$data['uname']);
+	    $comment = preg_replace($reg, $rep,
+				    $myts->displayTarea($data['comment']));
 	    echo "<tr><td nowrap>".formatTimestamp($data['ltime'])."</td><td nowrap>".
 		"[$uname]</td><td width='100%'>$comment</td></tr>\n";
 	}

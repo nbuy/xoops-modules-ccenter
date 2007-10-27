@@ -200,7 +200,8 @@ function build_form($formid=0) {
     $form->addElement($desc);
     $custom = new XoopsFormSelect(_AM_FORM_CUSTOM, 'custom' , $data['custom']);
     $custom->setExtra(' onChange="myform.ins_tpl.disabled = (this.value==0);"');
-    $custom->addOptionArray(array(_AM_CUSTOM_NONE, _AM_CUSTOM_TPL_BLOCK,_AM_CUSTOM_TPL_FULL));
+    $custom->addOptionArray(array(_AM_CUSTOM_NONE, _AM_CUSTOM_TPL_BLOCK,
+				  _AM_CUSTOM_TPL_FULL, _AM_CUSTOM_TPL_FRAME));
     $form->addElement($custom);
     $grpperm = new XoopsFormSelectGroup(_AM_FORM_ACCEPT_GROUPS, 'grpperm', true, $data['grpperm'], 4, true);
     $grpperm->setDescription(_AM_FORM_ACCEPT_GROUPS_DESC);

@@ -1,6 +1,6 @@
 <?php
 // contact to member
-// $Id: index.php,v 1.10 2007/09/26 07:08:58 nobu Exp $
+// $Id: index.php,v 1.11 2007/10/27 07:27:08 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -112,15 +112,23 @@ $breadcrumbs->set($title, "index.php?form=$id");
 
 if ($cust) {
     $out = custom_template($form, $items, $op == 'confirm');
-    if ($cust==1) {
+    switch ($cust) {
+    case _CC_TPL_FRAME:
+    case _CC_TPL_BLOCK:
 	include XOOPS_ROOT_PATH."/header.php";
+	if ($cust == _CC_TPL_FRAME) {
+	    $xoopsTpl->assign(array('xoops_showcblock'=>0,'xoops_showlblock'=>0,'xoops_showrblock'=>0));
+	}
 	$breadcrumbs->assign();
 	$xoopsTpl->assign('xoops_pagetitle', $title);
 	if ($errors) xoops_error($errors);
 	echo $out;
 	include XOOPS_ROOT_PATH."/footer.php";
-    } else {
+	break;
+	
+    default:
 	echo $out;
+	break;
     }
 } else {
     $str = $rep = array();
@@ -209,11 +217,14 @@ function store_message($items, $form) {
     }
     $dirname = basename(dirname(__FILE__));
     $msgurl = XOOPS_URL."/modules/$dirname/message.php?id=$id";
-    $uname = $xoopsUser?$xoopsUser->getVar('uname'):$email;
+    $uname = $xoopsUser?$xoopsUser->getVar('uname'):$GLOBALS['xoopsConfig']['anonymous'];
     $tags = array('VALUES'=>$text,
 		  'SUBJECT'=>$form['title'],
 		  'TO_USER'=>$toUname,
-		  'FROM_USER'=>$uname);
+		  'FROM_USER'=>$uname,
+		  'FROM_EMAIL'=>$email,
+		  'REMOTE_ADDR'=>$_SERVER["REMOTE_ADDR"],
+		  'HTTP_USER_AGENT'=>$_SERVER["HTTP_USER_AGENT"]);
     if ($id) {
 	$notification_handler =& xoops_gethandler('notification');
 	$notification_handler->triggerEvent('global', $id, 'new', $tags);

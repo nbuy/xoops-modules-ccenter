@@ -1,6 +1,6 @@
 <?php
 // Export data in CSV format
-// $Id: export.php,v 1.6 2007/11/01 05:01:15 nobu Exp $
+// $Id: export.php,v 1.7 2007/11/01 14:01:34 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -29,7 +29,7 @@ if (!$res || $xoopsDB->getRowsNum($res)==0) {
 $form = $xoopsDB->fetchArray($res);
 
 $cond = "fidref=$id AND status<>'x'";
-$range = isset($_GET['range'])?$myts->stripSlashesGPC($_GET['range']);
+$range = isset($_GET['range'])?$myts->stripSlashesGPC($_GET['range']):"";
 switch ($range) {
 case 'm0':
     // start this month

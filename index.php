@@ -1,6 +1,6 @@
 <?php
 // contact to member
-// $Id: index.php,v 1.12 2007/11/01 05:01:15 nobu Exp $
+// $Id: index.php,v 1.13 2007/11/01 17:29:47 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -250,6 +250,7 @@ function store_message($items, $form) {
 	cc_notify_mail($tpl, $tags, $users);
     }
 
+    $msgurl .= $parg;
     if (!empty($form['redirect'])) $msgurl = $form['redirect'];
     redirect_header($msgurl, 3, _MD_CONTACT_DONE);
     exit;

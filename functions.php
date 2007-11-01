@@ -1,6 +1,6 @@
 <?php
 // ccenter common functions
-// $Id: functions.php,v 1.14 2007/10/27 10:11:56 nobu Exp $
+// $Id: functions.php,v 1.15 2007/11/01 05:01:15 nobu Exp $
 
 global $xoopsDB;		// for blocks scope
 // using tables
@@ -18,6 +18,13 @@ if (defined('_CC_STATUS_NONE')) {
 	'b'=>_CC_STATUS_REPLY,
 	'c'=>_CC_STATUS_CLOSE,
 	'x'=>_CC_STATUS_DEL);
+
+    $export_range = array(
+	'm0'=>_CC_EXPORT_THIS_MONTH,
+	'm1'=>_CC_EXPORT_LAST_MONTH,
+	'y0'=>_CC_EXPORT_THIS_YEAR,
+	'y1'=>_CC_EXPORT_LAST_YEAR,
+	'all'=>_CC_EXPORT_ALL);
 
     define('_CC_TPL_NONE',  0);
     define('_CC_TPL_BLOCK', 1);
@@ -471,10 +478,12 @@ function cc_check_perm($data) {
     $uid = is_object($xoopsUser)?$xoopsUser->getVar('uid'):0;
 
     $pass = isset($_GET['p'])?$_GET['p']:(empty($_SESSION['onepass'])?"":$_SESSION['onepass']);
-    if (strlen($data['onepass'])>4 && $data['onepass']==$pass) return true;
+    if (!empty($data['onepass']) && $data['onepass']==$pass) return true;
 
     $mid = is_object($xoopsModule)?$xoopsModule->getVar('mid'):0;
     if ($uid && $xoopsUser->isAdmin($mid)) return true;
+    $cgrp = $data['cgroup'];
+    if ($cgrp && $uid && in_array($cgrp, $xoopsUser->getGroups())) return true;
     if ($uid && ($data['uid']==$uid || $data['touid'] == $uid)) return true;
     return false;
 }
@@ -515,24 +524,44 @@ function is_cc_evaluate($id, $uid, $pass) {
     return $ret;
 }
 
-function cc_notify_mail($tpl, $tags, $users, $email='') {
+function cc_notify_mail($tpl, $tags, $users) { // return: error count
     global $xoopsConfig, $xoopsModuleConfig, $xoopsUser, $xoopsModule;
     $xoopsMailer =& getMailer();
-    $xoopsMailer->useMail();
+    if (is_array($users)) {
+	$err = 0;
+	foreach ($users as $u) {
+	    $err += cc_notify_mail($tpl, $tags, $u);
+	}
+	return $err;
+    }
+    if (is_object($users)) {
+	switch ($users->getVar('notify_method')) {
+        case XOOPS_NOTIFICATION_METHOD_PM:
+            $xoopsMailer->usePM();
+	    $xoopsMailer->setFromUser(new XoopsUser); // dummy
+	    break;
+        case XOOPS_NOTIFICATION_METHOD_EMAIL:
+            $xoopsMailer->useMail();
+	    break;
+	case XOOPS_NOTIFICATION_METHOD_DISABLE:
+	    return 0;
+        default:
+            return 1;
+        }
+	$xoopsMailer->setToUsers($users);
+    } else {
+	if (empty($users)) return 0;
+	$xoopsMailer->useMail();
+	$xoopsMailer->setToEmails($users);
+    }
+
     $xoopsMailer->setFromEmail($xoopsConfig['adminmail']);
     $xoopsMailer->setFromName($xoopsModule->getVar('name'));
     $xoopsMailer->setSubject(_CC_NOTIFY_SUBJ);
     $xoopsMailer->assign($tags);
     $xoopsMailer->setTemplateDir(template_dir($tpl));
     $xoopsMailer->setTemplate($tpl);
-    if (empty($users)) {	// no reciever fallback
-	$xoopsMailer->setToEmails($xoopsConfig['adminmail']);
-    } else {
-	$xoopsMailer->setToUsers($users);
-    }
-    if ($email) $xoopsMailer->setToEmails($email);
-    else $xoopsMailer->setToUsers($xoopsUser);
-    return $xoopsMailer->send();
+    return $xoopsMailer->send()?0:1;
 }
 
 function check_form_tags($defs, $desc) {

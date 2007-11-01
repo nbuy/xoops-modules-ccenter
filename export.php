@@ -1,6 +1,6 @@
 <?php
 // Export data in CSV format
-// $Id: export.php,v 1.5 2007/09/26 07:08:58 nobu Exp $
+// $Id: export.php,v 1.6 2007/11/01 05:01:15 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -29,6 +29,40 @@ if (!$res || $xoopsDB->getRowsNum($res)==0) {
 $form = $xoopsDB->fetchArray($res);
 
 $cond = "fidref=$id AND status<>'x'";
+$range = isset($_GET['range'])?$myts->stripSlashesGPC($_GET['range']);
+switch ($range) {
+case 'm0':
+    // start this month
+    $ym = explode('-', formatTimestamp(time(), 'Y-m'));
+    $stime = userTimeToServerTime(mktime(0, 0, 0, $ym[1], 1, $ym[0]));
+    $cond .= " AND ctime>$stime";
+    break;
+case 'm1':
+    // last month
+    $ym = explode('-', formatTimestamp(time(), 'Y-m'));
+    $stime = userTimeToServerTime(mktime(0, 0, 0, $ym[1]-1, 1, $ym[0]));
+    $ym = explode('-', formatTimestamp(time(), 'Y-m'));
+    $ltime = userTimeToServerTime(mktime(0, 0, 0, $ym[1], 1, $ym[0])-1);
+    $cond .= " AND ctime BETWEEN $stime AND $ltime";
+    break;
+case 'y0':
+    // start this year
+    $ym = explode('-', formatTimestamp(time(), 'Y-m'));
+    $stime = userTimeToServerTime(mktime(0, 0, 0, 1, 1, $ym[0]));
+    $cond .= " AND ctime>$stime";
+    break;
+case 'y1':
+    $ym = explode('-', formatTimestamp(time(), 'Y-m'));
+    $stime = userTimeToServerTime(mktime(0, 0, 0, 0, 1, $ym[0]));
+    $ym = explode('-', formatTimestamp(time(), 'Y-m'));
+    $ltime = userTimeToServerTime(mktime(0, 0, 0, 1, 1, $ym[0])-1);
+    $cond .= " AND ctime BETWEEN $stime AND $ltime";
+    break;
+default:
+    $range = "all";
+    break;
+}
+
 $res = $xoopsDB->query('SELECT * FROM '.CCMES." WHERE $cond ORDER BY msgid");
 
 $items = get_form_attribute($form['defs']);
@@ -55,7 +89,7 @@ while ($data = $xoopsDB->fetchArray($res)) {
 }
 
 $tm=formatTimestamp(time(), 'Ymd');
-$file = "ccenter_form$id-$tm.csv";
+$file = "ccenter_form$id-$range-$tm.csv";
 header("Content-type: text/csv; charset="._MD_EXPORT_CHARSET);
 header('Content-Disposition:attachment;filename="'.$file.'"');
 header("Cache-Control: public");

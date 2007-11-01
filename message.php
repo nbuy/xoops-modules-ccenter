@@ -1,6 +1,6 @@
 <?php
 // show messages file
-// $Id: message.php,v 1.10 2007/10/27 07:27:08 nobu Exp $
+// $Id: message.php,v 1.11 2007/11/01 05:01:15 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -17,8 +17,12 @@ if (isset($_GET['p'])) {
 }
 $pass = empty($_SESSION['onepass'])?"":$_SESSION['onepass'];
 
-$cond = $isadmin?"":" AND status<>'x'";
-$res = $xoopsDB->query("SELECT m.*, title FROM ".CCMES." m,".FORMS." WHERE msgid=$msgid $cond AND fidref=formid");
+if ($isadmin) {
+    $cond = "";
+} else {
+    $cond = " AND status<>'x' AND (cgroup IN (".join(',', $xoopsUser->getGroups()).") OR touid=$uid)";
+}
+$res = $xoopsDB->query("SELECT m.*, title, cgroup FROM ".CCMES." m,".FORMS." WHERE msgid=$msgid $cond AND fidref=formid");
 if (!$res || $xoopsDB->getRowsNum($res)==0) {
     redirect_header("index.php", 3, _NOPERM);
     exit;

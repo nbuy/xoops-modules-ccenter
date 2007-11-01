@@ -1,6 +1,6 @@
 <?php
 // contact to member
-// $Id: reception.php,v 1.6 2007/09/26 07:08:58 nobu Exp $
+// $Id: reception.php,v 1.7 2007/11/01 05:01:15 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -12,8 +12,8 @@ if (!is_object($xoopsUser)) {
 
 $myts =& MyTextSanitizer::getInstance();
 $id= isset($_GET['form'])?intval($_GET['form']):0;
-
-if ($xoopsUser->isAdmin($xoopsModule->getVar('mid'))) $cond = "1";
+$isadmin = $xoopsUser->isAdmin($xoopsModule->getVar('mid'));
+if ($isadmin) $cond = "1";
 else {
     $cond = '(priuid='.$xoopsUser->getVar('uid').
 	' OR cgroup IN ('.join(',', $xoopsUser->getGroups()).'))';
@@ -35,25 +35,44 @@ $breadcrumbs->set(_MD_CCENTER_RECEPTION, "reception.php");
 
 if ($xoopsDB->getRowsNum($res)>1) {
     include XOOPS_ROOT_PATH."/header.php";
-    echo "<h2>"._MD_CCENTER_RECEPTION."</h2>\n";
+    $xoopsOption['template_main'] = "ccenter_reception.html";
     $breadcrumbs->assign();
-    if ($xoopsDB->getRowsNum($res)) {
-	echo "<ul>\n";
-	while ($form=$xoopsDB->fetchArray($res)) {
-	    echo "<li><a href='?form=".$form['formid']."'>".htmlspecialchars($form['title'])."</a> (".$form['nmsg'].") ".($form['ltime']?formatTimestamp($form['ltime']):'')."</li>\n";
+    $forms = array();
+    $member_handler =& xoops_gethandler('member');
+    $groups = $member_handler->getGroupList(new Criteria('groupid', XOOPS_GROUP_ANONYMOUS, '!='));
+    while ($form=$xoopsDB->fetchArray($res)) {
+	$form['title'] = htmlspecialchars($form['title']);
+	$form['ltime'] = $form['ltime']?formatTimestamp($form['ltime']):"";
+	if ($form['priuid']) {
+	    if ($form['priuid']<0) {
+		$form['contact'] = '['.$groups[-$form['priuid']].']';
+	    } else {
+		$form['contact'] = xoops_getLinkedUnameFromId($form['priuid']);
+	    }
+	} elseif ($form['cgroup']) {
+	    $form['contact'] = '['.$groups[$form['cgroup']].']';
+	} else {
+	    $form['contact'] = _MD_CONTACT_NOTYET;
 	}
-	echo "</ul>\n";
+	$forms[] = $form;
     }
+    $xoopsTpl->assign('forms', $forms);
     include XOOPS_ROOT_PATH."/footer.php";
     exit;
 }
 
 
+// check access permition
+$form = $xoopsDB->fetchArray($res);
+if (!cc_check_perm($form)) {
+    redirect_header('index.php', 3, _NOPERM);
+    exit;
+}
+
 include XOOPS_ROOT_PATH."/header.php";
 
 $xoopsOption['template_main'] = "ccenter_reception.html";
 
-$form = $xoopsDB->fetchArray($res);
 $id = $form['formid'];
 $items = get_form_attribute($form['defs']);
 $breadcrumbs->set(htmlspecialchars($form['title']), "reception.php?formid=$id");
@@ -81,7 +100,6 @@ foreach ($form['items'] as $item) {
 	break;
     }
 }
-$xoopsTpl->assign('form', $form);
 
 include_once XOOPS_ROOT_PATH.'/class/pagenav.php';
 
@@ -93,7 +111,15 @@ $args = preg_replace('/start=\\d+/', '', $_SERVER['QUERY_STRING']);
 $nav = new XoopsPageNav($count, $max, $start, "start", $args);
 $xoopsTpl->assign('pagenav', $count>$max?$nav->renderNav():"");
 
+if ($form['priuid'] < 0 && !$isadmin) {
+    $cond .= " AND touid=".$xoopsUser->getVar('uid');
+    $form['description'] = str_replace('{TO_NAME}', $xoopsUser->getVar('name'), $form['description']);
+}
+
+$xoopsTpl->assign('form', $form);
+
 $res = $xoopsDB->query('SELECT * FROM '.CCMES." WHERE $cond ORDER BY msgid DESC", $max, $start);
+$xoopsTpl->assign('export_range', $export_range);
 
 $mlist = array();
 while ($data = $xoopsDB->fetchArray($res)) {

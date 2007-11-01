@@ -98,7 +98,7 @@ xoops_cp_footer();
 function list_forms() {
     global $xoopsDB, $xoopsUser;
     $dirname = basename(dirname(dirname(__FILE__)));
-    $res = $xoopsDB->query("SELECT formid, title,count(msgid) nmes, priuid,
+    $res = $xoopsDB->query("SELECT formid,title,count(msgid) nmes,priuid,cgroup,
 sum(if(status='-',1,0)) nwait,
 sum(if(status='a',1,0)) nwork,
 sum(if(status='b',1,0)) nreply,
@@ -107,23 +107,39 @@ FROM ".FORMS." LEFT JOIN ".CCMES." ON fidref=formid AND status<>'x' GROUP BY for
     if (!$res || $xoopsDB->getRowsNum($res)==0) return false;
     echo "<style>td.num { text-align: right; }</style>";
     echo "<table class='outer' border='0' cellspacing='1'>\n";
-    echo "<tr><th>ID</th><th>"._AM_FORM_TITLE."</th><th>"._AM_MSG_COUNT."</th><th>"._AM_MSG_WAIT."</th><th>"._AM_MSG_WORK."</th><th>"._AM_MSG_REPLY."</th><th>"._AM_MSG_CLOSE."</th><th>"._AM_OPERATION."</th></tr>\n";
+    echo "<tr><th>ID</th><th>"._AM_FORM_TITLE."</th><th>"._AM_FORM_PRIM_CONTACT."</th><th>"._AM_MSG_COUNT."</th><th>"._AM_MSG_WAIT."</th><th>"._AM_MSG_WORK."</th><th>"._AM_MSG_REPLY."</th><th>"._AM_MSG_CLOSE."</th><th>"._AM_OPERATION."</th></tr>\n";
     $n = 0;
     $mbase = XOOPS_URL."/modules/$dirname";
     $ancfmt = "<td class='num'><a href='msgadm.php?stat=%s&formid=%d'>%d</a></td>\n";
     $msgs = array('- a b c'=>'nmes', '-'=>'nwait', 'a'=>'nwork',
 		  'b'=>'nreply', 'c'=>'nclose');
+    $member_handler =& xoops_gethandler('member');
+    $groups = $member_handler->getGroupList(new Criteria('groupid', XOOPS_GROUP_ANONYMOUS, '!='));
     while ($data = $xoopsDB->fetchArray($res)) {
 	$id = $data['formid'];
 	$title = htmlspecialchars($data['title']);
 	$url = "$mbase?form=$id";
-	$form = $url.($data['priuid']<0?"&amp;uid=".$xoopsUser->getVar('uid'):"");
+	$priuid = $data['priuid'];
+	$form = $url;
+	
+	if ($priuid<0) {
+	    $form .= "&amp;uid=".$xoopsUser->getVar('uid');
+	    $contact = sprintf(_CC_FORM_PRIM_GROUP, $groups[-$priuid]);
+	} elseif ($priuid) {
+	    $contact = xoops_getLinkedUnameFromId($priuid);
+	} elseif ($form['cgroup']) {
+	    $contact = '['.$groups[$data['cgroup']].']';
+	} else {
+	    $contact = _MD_CONTACT_NOTYET;
+	}
+	
 	$bg = $n++%2?'even':'odd';
 	$ope = "<a href='?formid=$id'>"._EDIT."</a>".
 	    " | <a href='?op=delete&formid=$id'>"._DELETE."</a>".
 	    " | <a href='$mbase/reception.php?form=$id'>"._AM_DETAIL."</a>";
 	echo "<tr class='$bg'><td>$id</td>
-<td><a href='$form' target='preview'>$title</a></td>";
+<td><a href='$form' target='preview'>$title</a></td>
+<td>$contact</td>";
 	foreach ($msgs as $stat=>$name) {
 	    printf($ancfmt, urlencode($stat), $id, $data[$name]);
 	}
@@ -214,7 +230,7 @@ function build_form($formid=0) {
     $groups = $member_handler->getGroupList(new Criteria('groupid', XOOPS_GROUP_ANONYMOUS, '!='));
     $options = array();
     foreach ($groups as $k=>$v) {
-	$options[-$k] = sprintf(_AM_FORM_PRIM_GROUP, $v);
+	$options[-$k] = sprintf(_CC_FORM_PRIM_GROUP, $v);
     }
     $options[0] = _AM_FORM_PRIM_NONE;
 

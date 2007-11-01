@@ -1,5 +1,5 @@
 <?php
-// $Id: xoops_version.php,v 1.10 2007/10/27 07:27:08 nobu Exp $
+// $Id: xoops_version.php,v 1.11 2007/11/01 05:01:15 nobu Exp $
 //  ------------------------------------------------------------------------ //
 //  This program is free software; you can redistribute it and/or modify     //
 //  it under the terms of the GNU General Public License as published by     //
@@ -22,7 +22,7 @@
 //  ------------------------------------------------------------------------ //
 
 $modversion = array('name' => _MI_CCENTER_NAME,
-		    'version' => "0.82",
+		    'version' => "0.83",
 		    'description' => _MI_CCENTER_DESC,
 		    'credits' => "Nobuhiro Yasutomi",
 		    'author' => "Nobuhiro Yasutomi",
@@ -171,7 +171,6 @@ $modversion['notification']['event'][1]=
 $modversion['notification']['event'][]=
     array('name' => 'new',
 	  'category' => 'form',
-	  'admin_only'=>1,
 	  'title' => _MI_CCENTER_NEWPOST_NOTIFY,
 	  'caption' => _MI_CCENTER_NEWPOST_NOTIFY_CAP,
 	  'description' => '',

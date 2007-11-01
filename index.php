@@ -1,6 +1,6 @@
 <?php
 // contact to member
-// $Id: index.php,v 1.11 2007/10/27 07:27:08 nobu Exp $
+// $Id: index.php,v 1.12 2007/11/01 05:01:15 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -199,44 +199,57 @@ function store_message($items, $form) {
     $res = $xoopsDB->query("INSERT INTO ".CCMES. "(".join(',',array_keys($values)).") VALUES (".join(',', $values).")");
     if ($res===false) return array("Error in DATABASE insert");
     $id = $xoopsDB->getInsertID();
+    if (empty($id)) return array("Internal Error in Store Message");
+    $member_handler =& xoops_gethandler('member');
     if ($touid) {
-	$member_handler =& xoops_gethandler('member');
 	$toUser = $member_handler->getUser($touid);
 	$toUname = $toUser->getVar('uname');
     } else {
 	$toUser = false;
 	$toUname = _MD_CONTACT_NOTYET;
     }
+    $atext = "";		// reply sender
+    $btext = "";		// to contact and monitors
     if (count($attach)) {
-	$text .= "\n"._MD_ATTACHMENT."\n";
+	$atext = $btext = "\n"._MD_ATTACHMENT."\n";
 	foreach ($attach as $i=>$file) {
 	    move_attach_file('', $file, $id);
-	    $text .= cc_attach_image($id, $file, true)."$parg\n";
+	    $a = cc_attach_image($id, $file, true);
+	    $atext .= "$a$parg\n";
+	    $btext .= "$a\n";
 	}
 	rmdir(XOOPS_UPLOAD_PATH.attach_path(0, ''));
     }
     $dirname = basename(dirname(__FILE__));
     $msgurl = XOOPS_URL."/modules/$dirname/message.php?id=$id";
     $uname = $xoopsUser?$xoopsUser->getVar('uname'):$GLOBALS['xoopsConfig']['anonymous'];
-    $tags = array('VALUES'=>$text,
-		  'SUBJECT'=>$form['title'],
+    $tags = array('SUBJECT'=>$form['title'],
 		  'TO_USER'=>$toUname,
 		  'FROM_USER'=>$uname,
 		  'FROM_EMAIL'=>$email,
 		  'REMOTE_ADDR'=>$_SERVER["REMOTE_ADDR"],
 		  'HTTP_USER_AGENT'=>$_SERVER["HTTP_USER_AGENT"]);
-    if ($id) {
-	$notification_handler =& xoops_gethandler('notification');
-	$notification_handler->triggerEvent('global', $id, 'new', $tags);
-	// force subscribe sender and recipient
-	$notification_handler->subscribe('message', $id, 'comment');
-	if ($touid) $notification_handler->subscribe('message', $id, 'comment', null, null, $touid);
+    $tpl = 'form_confirm.tpl';
+    if ($email) {
+	$tags['VALUES'] = "$text$atext";
+	$tags['MSG_URL'] = "$msgurl$parg";
+	cc_notify_mail($tpl, $tags, $email);
     }
-    $msgurl .= $parg;
+    $tags['VALUES'] = "$text$btext";
     $tags['MSG_URL'] = $msgurl;
-    cc_notify_mail('form_confirm.tpl', $tags, $toUser, $email);
-    //$url = str_replace('{UID}', $touid, $url);
-    //$url = str_replace('{ID}', $id, $url);
+
+    $notification_handler =& xoops_gethandler('notification');
+    $notification_handler->triggerEvent('global', $id, 'new', $tags);
+    // force subscribe sender and recipient
+    $notification_handler->subscribe('message', $id, 'comment');
+    if ($touid) {
+	$notification_handler->subscribe('message', $id, 'comment', null, null, $touid);
+	cc_notify_mail($tpl, $tags, $toUser);
+    } elseif ($form['cgroup']) { // contact group notify
+	$users = $member_handler->getUsersByGroup($form['cgroup'], true);
+	cc_notify_mail($tpl, $tags, $users);
+    }
+
     if (!empty($form['redirect'])) $msgurl = $form['redirect'];
     redirect_header($msgurl, 3, _MD_CONTACT_DONE);
     exit;

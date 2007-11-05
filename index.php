@@ -1,6 +1,6 @@
 <?php
 // contact to member
-// $Id: index.php,v 1.13 2007/11/01 17:29:47 nobu Exp $
+// $Id: index.php,v 1.14 2007/11/05 08:04:35 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -218,7 +218,7 @@ function store_message($items, $form) {
 	    $atext .= "$a$parg\n";
 	    $btext .= "$a\n";
 	}
-	rmdir(XOOPS_UPLOAD_PATH.attach_path(0, ''));
+	rmdir(XOOPS_UPLOAD_PATH.cc_attach_path(0, ''));
     }
     $dirname = basename(dirname(__FILE__));
     $msgurl = XOOPS_URL."/modules/$dirname/message.php?id=$id";

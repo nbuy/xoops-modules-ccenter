@@ -1,6 +1,6 @@
 <?php
 // ccenter common functions
-// $Id: functions.php,v 1.15 2007/11/01 05:01:15 nobu Exp $
+// $Id: functions.php,v 1.16 2007/11/05 07:58:39 nobu Exp $
 
 global $xoopsDB;		// for blocks scope
 // using tables
@@ -538,7 +538,8 @@ function cc_notify_mail($tpl, $tags, $users) { // return: error count
 	switch ($users->getVar('notify_method')) {
         case XOOPS_NOTIFICATION_METHOD_PM:
             $xoopsMailer->usePM();
-	    $xoopsMailer->setFromUser(new XoopsUser); // dummy
+	    $sender = is_object($xoopsUser)?$xoopsUser:new XoopsUser;
+	    $xoopsMailer->setFromUser($sender);
 	    break;
         case XOOPS_NOTIFICATION_METHOD_EMAIL:
             $xoopsMailer->useMail();

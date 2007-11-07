@@ -1,6 +1,6 @@
 <?php
 // show messages file
-// $Id: message.php,v 1.12 2007/11/01 17:28:14 nobu Exp $
+// $Id: message.php,v 1.13 2007/11/07 17:21:10 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -20,7 +20,7 @@ $pass = empty($_SESSION['onepass'])?"":$_SESSION['onepass'];
 $cond = " AND status<>'x'";
 if (!$isadmin) {
     if (is_object($xoopsUser)) {
-        $cond .= " AND (cgroup IN (".join(',', $xoopsUser->getGroups()).") OR touid=$uid)";
+        $cond .= " AND (cgroup IN (".join(',', $xoopsUser->getGroups()).") OR touid=$uid OR uid=$uid)";
     } else {
         $cond .= " AND onepass=".$xoopsDB->quoteString($pass);
     }
@@ -75,6 +75,7 @@ $xoopsTpl->assign(
 	  'status'=>$msg_status[$data['status']],
 	  'is_eval'=>is_cc_evaluate($msgid, $uid, $pass),
 	  'is_mine'=>$data['touid']==$uid,
+	  'is_getmine'=>$data['touid']==0 && $uid && in_array($data['cgroup'], $xoopsUser->getGroups()),
 	  'own_status'=>array_slice($msg_status, 1, $isadmin?4:3),
 	  'xoops_pagetitle'=> htmlspecialchars($xoopsModule->getVar('name')." | ".$data['title']),
 	));

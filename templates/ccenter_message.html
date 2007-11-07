@@ -45,7 +45,7 @@
 <div class="attr"><b class="label"><{$smarty.const._MD_MODDATE}></b> <{$mdate}></div>
 <div class="attr"><b class="label"><{$smarty.const._MD_CONTACT_FROM}></b> <{$sender}><{if $data.email}> &lt;<a href="mailto:<{$data.email|escape}>"><{$data.email|escape}></a>&gt;<{/if}></div>
 <div class="attr"><b class="label"><{$smarty.const._MD_CONTACT_TO}></b> <{$sendto}>
-<{if $data.touid==0 && $xoops_isuser}>
+<{if $is_getmine}>
 <form action="status.php" method="post" style="display: inline;">
 <input type="hidden" name="id" value="<{$data.msgid}>" />
 <input type="hidden" name="op" value="myself" />

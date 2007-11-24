@@ -1,5 +1,5 @@
 <?php
-// $Id: xoops_version.php,v 1.11 2007/11/01 05:01:15 nobu Exp $
+// $Id: xoops_version.php,v 1.12 2007/11/24 09:49:12 nobu Exp $
 //  ------------------------------------------------------------------------ //
 //  This program is free software; you can redistribute it and/or modify     //
 //  it under the terms of the GNU General Public License as published by     //
@@ -65,7 +65,7 @@ if (!empty($xoopsUser)) {
 // Templates
 $modversion['templates'][1] =
     array('file' => 'ccenter_index.html',
-	  'description' => _MI_CCENTER_FORM_TPL);
+	  'description' => _MI_CCENTER_INDEX_TPL);
 $modversion['templates'][] =
     array('file' => 'ccenter_form.html',
 	  'description' => _MI_CCENTER_FORM_TPL);

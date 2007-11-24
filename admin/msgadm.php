@@ -160,7 +160,6 @@ function msg_detail($msgid) {
     global $xoopsDB, $msg_status, $myts;
     $users = $xoopsDB->prefix('users');
     $res = $xoopsDB->query("SELECT m.*,title,priuid,u.uname,cgroup,f.uname cfrom FROM ".CCMES." m LEFT JOIN ".FORMS." ON fidref=formid LEFT JOIN $users u ON touid=u.uid LEFT JOIN $users f ON m.uid=f.uid WHERE msgid=$msgid");
-    echo $xoopsDB->error();
     $data = $xoopsDB->fetchArray($res);
     $data['stat'] = $msg_status[$data['status']];
     $data['cdate'] = formatTimestamp($data['ctime'], 'm');

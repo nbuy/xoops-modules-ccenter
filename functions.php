@@ -1,6 +1,6 @@
 <?php
 // ccenter common functions
-// $Id: functions.php,v 1.16 2007/11/05 07:58:39 nobu Exp $
+// $Id: functions.php,v 1.17 2008/01/02 10:00:37 nobu Exp $
 
 global $xoopsDB;		// for blocks scope
 // using tables
@@ -196,14 +196,14 @@ function assign_form_widgets(&$items, $conf=false) {
 	$fname =& $item['field'];
 	if ($conf) {
 	    if (is_array($val)) {
-		$input = htmlspecialchars(join(', ', $val));
+		$input = htmlspecialchars(join(', ', $val), ENT_QUOTES);
 		$fmt = "<input type='hidden' name='{$fname}[]' value='%s' />";
 		foreach ($val as $v) {
-		    $v = htmlspecialchars($v);
+		    $v = htmlspecialchars($v, ENT_QUOTES);
 		    $input .= sprintf($fmt, $v);
 		}
 	    } else {
-		$v = htmlspecialchars($val);
+		$v = htmlspecialchars($val, ENT_QUOTES);
 		if ($item['type']=='hidden') $input = $v;
 		else $input = "$v<input type='hidden' name='$fname' value='$v' />";
 	    }
@@ -257,21 +257,21 @@ function cc_make_widget($item) {
     $etcval = '';
     switch($item['type']) {
     case 'hidden':
-	$input=htmlspecialchars(join(',', $options));
+	$input=htmlspecialchars(join(',', $options), ENT_QUOTES);
 	break;
     case 'select':
 	$def = '';
 	if (isset($_POST[$fname])) { // ovarride post value
 	    $def = $myts->stripSlashesGPC($_POST[$fname]);
 	}
-	$input = "<select name='".htmlspecialchars($fname)."'$astr>\n";
+	$input = "<select name='".htmlspecialchars($fname, ENT_QUOTES)."'$astr>\n";
 	foreach ($options as $key=>$val) {
 	    $lab = preg_replace('/\+$/', '', $key);
 	    if (empty($def) && $lab != $key) {
 		$def = $lab;
 	    }
 	    $ck = ($def == $lab)?" selected='selected'":"";
-	    $lab = htmlspecialchars($lab);
+	    $lab = htmlspecialchars($lab, ENT_QUOTES);
 	    $input .= "<option value='$lab'$ck />$val</option>\n";
 	}
 	$input .= "</select>\n";
@@ -352,7 +352,7 @@ function cc_make_widget($item) {
 		}
 	    }
 	}
-	$val = htmlspecialchars(str_replace(array_keys($defuser), $defuser, $val));
+	$val = htmlspecialchars(str_replace(array_keys($defuser), $defuser, $val), ENT_QUOTES);
 	if ($type == 'textarea') {
 	    if (isset($attr['rows'])) $astr .= ' rows="'.$attr['rows'].'"';
 	    if (isset($attr['cols'])) $astr .= ' cols="'.$attr['cols'].'"';
@@ -450,7 +450,7 @@ function cc_attach_image($id, $file, $urlonly=false, $add='') {
 	if ($xy[0]>$xy[1] && $xy[0]>300) $extra = " width='300'";
 	elseif ($xy[1]>300) $extra = " height='300'";
 	else $extra = "";
-	$extra .= " alt='".htmlspecialchars($file)."'";
+	$extra .= " alt='".htmlspecialchars($file, ENT_QUOTES)."'";
 	return "<img src='$rurl' class='myphoto' $extra />";
     } else {
 	$size = return_unit_bytes(filesize($path));
@@ -601,7 +601,7 @@ function custom_template($form, $items, $conf=false) {
 	    $hasfile = ' enctype="multipart/form-data"';
 	}
     }
-    $action = "index.php?form=$id";
+    $action = $form['action'];
     if (!empty($form['priuser'])) {
 	$priuser =& $form['priuser'];
 	$action .= '&amp;'.$priuser['uid'];
@@ -817,6 +817,77 @@ function change_message_status($msgid, $touid, $stat) {
     return true;
 }
 
+function checkScript($checks, $confirm) {
+    $script = "<script type=\"text/javascript\">
+<!--//
+function checkItem(obj, lab) {
+  msg = lab+\": "._MD_REQUIRE_ERR."\\n\";
+  if (obj.selectedIndex && obj.value != \"\") return \"\";
+  if (obj.value == \"\") return msg;
+  if (obj.length) {
+     for (i=0; i<obj.length; i++) {
+        if (obj[i].checked) return \"\";
+     }
+     return msg;
+  }
+  return \"\";
+}
+function xoopsFormValidate_ccenter() {
+    myform = window.document.ccenter;
+    msg = \"\";
+    obj = null;
+";
+    foreach ($checks as $name => $msg) {
+	$script .= "
+    msg = msg+checkItem(myform.$name, \"$msg\");
+    if(msg && obj==null)obj=myform.$name;\n";
+    }
+    if (count($confirm)) {
+	foreach ($confirm as $name => $msg) {
+	    $script .= "
+    if ( myform.$name.value != myform.{$name}_conf.value ) {
+        msg = msg+\"$msg: "._MD_CONFIRM_ERR."\\n\";
+        if(obj==null)obj=myform.{$name}_conf;
+}\n";
+	}
+    }
+    $script .= "
+    if (msg == \"\") return true;
+    window.alert(msg);
+    if (obj.length==null) obj.focus();
+    return false;
+}
+function checkedEtcText(lab) {
+   obj = xoopsGetElementById(lab+\"_eck\");
+   if (obj) obj.checked=true;
+}
+//--></script>";
+    return $script;
+}
+
+function set_checkvalue(&$form) {
+    $hasfile = false;
+    $require = array();
+    $confirm = array();
+    foreach ($form['items'] as $item) {
+	if (empty($item['field'])) continue;
+	$fname = $item['field'];
+	$type = $item['type'];
+	$lab = $item['label'];
+	if ($type == 'file') {
+	    $hasfile=true;
+	} elseif (preg_match('/_conf$/', $fname)) {
+	    $confirm[preg_replace('/_conf$/', '', $fname)] = $lab;
+	} elseif (preg_match('/\*$/', $lab)) {
+	    $require[$fname] = $lab;
+	}
+    }
+
+    $form['check_script'] = checkScript($require, $confirm);
+    $form['confirm'] = $confirm;
+    $form['hasfile'] = $hasfile;
+}
+
 class XoopsBreadcrumbs {
     var $moddir;
     var $pairs;
@@ -829,7 +900,7 @@ class XoopsBreadcrumbs {
 
     function set($name, $url) {
 	if (preg_match('/^\w+:\/\//', $url)) $url = $this->moddir.$url;
-	$this->pairs[] = array('name'=>htmlspecialchars($name), 'url'=>$url);
+	$this->pairs[] = array('name'=>htmlspecialchars($name, ENT_QUOTES), 'url'=>$url);
     }
 
     function get() {

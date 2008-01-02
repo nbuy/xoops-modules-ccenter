@@ -1,6 +1,6 @@
 <?php
 // contact to member
-// $Id: index.php,v 1.14 2007/11/05 08:04:35 nobu Exp $
+// $Id: index.php,v 1.15 2008/01/02 10:00:37 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -21,11 +21,8 @@ if (is_object($xoopsUser)) {
 } else {
     $cond .= " AND grpperm LIKE '%|".XOOPS_GROUP_ANONYMOUS."|%'";
 }
-if ($id) {
-    $res = $xoopsDB->query("SELECT * FROM ".FORMS." WHERE $cond AND formid=$id");
-} else {
-    $res = $xoopsDB->query("SELECT * FROM ".FORMS." WHERE $cond ORDER BY weight,formid");
-}
+if ($id) $cond .= " AND formid=$id";
+$res = $xoopsDB->query("SELECT * FROM ".FORMS." WHERE $cond ORDER BY weight,formid");
 
 if (!$res) {
     redirect_header('index.php', 3, _NOPERM);
@@ -84,28 +81,13 @@ if ($op!="form") {
 }
 
 $cust = $form['custom'];
-$form['items'] = $items;
+$form['items'] =& $items;
+$dirname = basename(dirname(__FILE__));
+$action = XOOPS_URL."/modules/$dirname/index.php?form=".$form['formid'];
+if (!empty($form['priuser'])) $action .= '&amp;uid='.$form['priuser']['uid'];
+$form['action'] = $action;
 
-$hasfile = false;
-$require = array();
-$confirm = array();
-foreach ($items as $item) {
-    if (empty($item['field'])) continue;
-    $fname = $item['field'];
-    $type = $item['type'];
-    $lab = $item['label'];
-    if ($type == 'file') {
-	$hasfile=true;
-    } elseif (preg_match('/_conf$/', $fname)) {
-	$confirm[preg_replace('/_conf$/', '', $fname)] = $lab;
-    } elseif (preg_match('/\*$/', $lab)) {
-	$require[$fname] = $lab;
-    }
-}
-
-$form['check_script'] = checkScript($require, $confirm);
-$form['confirm'] = $confirm;
-$form['hasfile'] = $hasfile;
+set_checkvalue($form);
 
 $title = htmlspecialchars($form['title']);
 $breadcrumbs->set($title, "index.php?form=$id");
@@ -255,53 +237,4 @@ function store_message($items, $form) {
     redirect_header($msgurl, 3, _MD_CONTACT_DONE);
     exit;
 }
-
-function checkScript($checks, $confirm) {
-    $script = "<script type=\"text/javascript\">
-<!--//
-function checkItem(obj, lab) {
-  msg = lab+\": "._MD_REQUIRE_ERR."\\n\";
-  if (obj.selectedIndex && obj.value != \"\") return \"\";
-  if (obj.value == \"\") return msg;
-  if (obj.length) {
-     for (i=0; i<obj.length; i++) {
-        if (obj[i].checked) return \"\";
-     }
-     return msg;
-  }
-  return \"\";
-}
-function xoopsFormValidate_ccenter() {
-    myform = window.document.ccenter;
-    msg = \"\";
-    obj = null;
-";
-    foreach ($checks as $name => $msg) {
-	$script .= "
-    msg = msg+checkItem(myform.$name, \"$msg\");
-    if(msg && obj==null)obj=myform.$name;\n";
-    }
-    if (count($confirm)) {
-	foreach ($confirm as $name => $msg) {
-	    $script .= "
-    if ( myform.$name.value != myform.{$name}_conf.value ) {
-        msg = msg+\"$msg: "._MD_CONFIRM_ERR."\\n\";
-        if(obj==null)obj=myform.{$name}_conf;
-}\n";
-	}
-    }
-    $script .= "
-    if (msg == \"\") return true;
-    window.alert(msg);
-    if (obj.length==null) obj.focus();
-    return false;
-}
-function checkedEtcText(lab) {
-   obj = xoopsGetElementById(lab+\"_eck\");
-   if (obj) obj.checked=true;
-}
-//--></script>";
-    return $script;
-}
-
 ?>

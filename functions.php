@@ -1,6 +1,6 @@
 <?php
 // ccenter common functions
-// $Id: functions.php,v 1.17 2008/01/02 10:00:37 nobu Exp $
+// $Id: functions.php,v 1.18 2008/01/27 09:49:34 nobu Exp $
 
 global $xoopsDB;		// for blocks scope
 // using tables
@@ -38,9 +38,8 @@ define('LABEL_ETC', '*');	// radio, checkbox widget 'etc' text input.
 function get_form_attribute($defs) {
     $num = 0;
     $result = array();
-    $types = array('text', 'checkbox', 'radio', 'textarea', 'select', 'hidden', 'mail', 'file', 'multi');
-    global $xoopsModuleConfig;
-    $def = $xoopsModuleConfig['def_attrs'];
+    $types = array('text', 'checkbox', 'radio', 'textarea', 'select', 'hidden','const', 'mail', 'file', 'multi');
+    $def = $GLOBALS['xoopsModuleConfig']['def_attrs'];
     $def_attrs = array();
     if (!empty($def)) {
 	foreach (explode(',', $def) as $ln) {
@@ -59,13 +58,22 @@ function get_form_attribute($defs) {
 	}
 	$opts = explode(",", $ln);
 	$name = array_shift($opts);
+	if (preg_match('/=(.*)$/', $name, $d)) {
+	    $label = $d[1];
+	    $name = preg_replace('/=(.*)$/', '', $name);
+	} else {
+	    $label = $name;
+	}
 	$type='text';
 	$comment='';
 	$attr = $def_attrs;
 	if (count($opts) && in_array($opts[0], $types)) {
 	    $type = array_shift($opts);
 	}
-	if (preg_match('/\*$/', $name)) $attr['check'] = 'require';
+	if (preg_match('/\*$/', $name)) {
+	    $attr['check'] = 'require';
+	    $name = preg_replace('/\*$/', '', $name);
+	}
 	while (isset($opts[0]) && (preg_match('/^(size|rows|maxlength|cols|prop)=(\d+)$/', $opts[0], $d) || preg_match('/^(check)=(.+)$/', $opts[0], $d))) {
 	    array_shift($opts);
 	    $attr[$d[1]] = $d[2];
@@ -87,9 +95,10 @@ function get_form_attribute($defs) {
 	    }
 	}
 	$fname = "cc".++$num;
-	$result[] = array(
-	    'label'=>$name, 'field'=>$fname, 'options'=>$options,
-	    'type'=>$type, 'comment'=>$comment, 'attr'=>$attr);
+	$result[$name] = array(
+	    'name'=>$name, 'label'=>$label, 'field'=>$fname,
+	    'options'=>$options, 'type'=>$type, 'comment'=>$comment,
+	    'attr'=>$attr);
     }
     return $result;
 }
@@ -576,7 +585,7 @@ function check_form_tags($defs, $desc) {
     $checks = array('{FORM_ATTR}', '{SUBMIT}', '{BACK}', '{CHECK_SCRIPT}');
     foreach ($items as $item) {
 	if (empty($item['type'])) continue;
-	$checks[] = '{'.preg_replace('/\*$/', '', $item['label']).'}';
+	$checks[] = '{'.$item['name'].'}';
     }
     $error = "";
     foreach ($checks as $check) {
@@ -594,7 +603,7 @@ function custom_template($form, $items, $conf=false) {
     $hasfile = "";
     $id = $form['formid'];
     foreach ($items as $item) {
-	$str[] = '{'.preg_replace('/\*$/', '', $item['label']).'}';
+	$str[] = '{'.$item['name'].'}';
 	$rep[] = empty($item['input'])?"":$item['input'];
 	$fname = $item['field'];
 	if ($item['type']=='file') {
@@ -822,7 +831,7 @@ function checkScript($checks, $confirm) {
 <!--//
 function checkItem(obj, lab) {
   msg = lab+\": "._MD_REQUIRE_ERR."\\n\";
-  if (obj.selectedIndex && obj.value != \"\") return \"\";
+  if (obj.selectedIndex!=null && obj.value != \"\") return \"\";
   if (obj.value == \"\") return msg;
   if (obj.length) {
      for (i=0; i<obj.length; i++) {
@@ -874,11 +883,12 @@ function set_checkvalue(&$form) {
 	$fname = $item['field'];
 	$type = $item['type'];
 	$lab = $item['label'];
+	$check = isset($item['attr']['check'])?$item['attr']['check']:'';
 	if ($type == 'file') {
 	    $hasfile=true;
 	} elseif (preg_match('/_conf$/', $fname)) {
 	    $confirm[preg_replace('/_conf$/', '', $fname)] = $lab;
-	} elseif (preg_match('/\*$/', $lab)) {
+	} elseif ($check=='require') {
 	    $require[$fname] = $lab;
 	}
     }

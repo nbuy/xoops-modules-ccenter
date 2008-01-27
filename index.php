@@ -1,6 +1,6 @@
 <?php
 // contact to member
-// $Id: index.php,v 1.15 2008/01/02 10:00:37 nobu Exp $
+// $Id: index.php,v 1.16 2008/01/27 09:49:34 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -142,8 +142,8 @@ function store_message($items, $form) {
     $attach = array();
     $vals = array();
     foreach ($items as $item) {
-	if (empty($item['label'])) continue;
-	$name = preg_replace('/\*$/', '', $item['label']);
+	if (empty($item['name'])) continue;
+	$name = $item['name'];
 	$vals[$name] = $item['value'];
 	switch ($item['type']) {
 	case 'mail':

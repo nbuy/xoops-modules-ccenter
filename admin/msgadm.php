@@ -64,11 +64,12 @@ else msg_detail(intval($_GET['msgid']));
 xoops_cp_footer();
 
 function msg_list() {
-    global $msg_status, $xoopsDB, $xoopsUser, $xoopsModuleConfig;
+    global $msg_status, $xoopsDB, $xoopsUser, $xoopsModuleConfig, $xoopsModule;
 
     $labels=array('mtime'=>_AM_FORM_MTIME, 'status'=>_AM_MSG_STATUS,
 		  'fidref'=>_AM_FORM_TITLE, 'cfrom'=>_AM_MSG_FROM,
-		  'uname'=>_AM_MSG_CHARGE,  'ope'=>_AM_OPERATION);
+		  'uname'=>_AM_MSG_CHARGE, 'comms'=>_AM_MSG_COMMS,
+		  'ope'=>_AM_OPERATION);
     $orders=array('mtime'=>'ASC', 'fidref'=>'ASC', 'uname'=>'ASC',
 		  'status'=>'ASC', 'uid'=>'ASC', 'orders'=>array('mtime'));
 
@@ -78,18 +79,23 @@ function msg_list() {
     $max = $xoopsModuleConfig['max_lists'];
 
     $users = $xoopsDB->prefix('users');
-    $sql0 = "FROM ".CCMES." m LEFT JOIN ".FORMS." ON fidref=formid LEFT JOIN $users u ON touid=u.uid LEFT JOIN $users f ON m.uid=f.uid WHERE ".$listctrl->sqlcondition();
+    $comms = $xoopsDB->prefix('xoopscomments');
+    $mid = $xoopsModule->getVar('mid');
+    $sql0 = "FROM ".CCMES." m LEFT JOIN ".FORMS." ON fidref=formid 
+LEFT JOIN $users u ON touid=u.uid LEFT JOIN $users f ON m.uid=f.uid";
+    $sql1 = "LEFT JOIN $comms ON com_modid=$mid AND com_itemid=msgid";
+    $sql2 = "WHERE ".$listctrl->sqlcondition();
     $formid = isset($_REQUEST['formid'])?intval($_REQUEST['formid']):0;
-    if ($formid) $sql0 .= " AND fidref=$formid";
+    if ($formid) $sql2 .= " AND fidref=$formid";
 
-    $res = $xoopsDB->query("SELECT count(msgid) $sql0");
+    $res = $xoopsDB->query("SELECT count(msgid) $sql0 $sql2");
     list($total) = $xoopsDB->fetchRow($res);
     $args = $formid?"formid=$formid":"";
     $nav = new XoopsPageNav($total, $max, $start, "start", $args);
 
-    $res = $xoopsDB->query("SELECT m.*,title,u.uname, f.uname cfrom $sql0 ".$listctrl->sqlorder(), $max, $start);
-
-    echo "<style>td.num { text-align: right; }</style>";
+    $res = $xoopsDB->query("SELECT m.*,title,u.uname, f.uname cfrom, count(com_id) comms $sql0 $sql1 $sql2 GROUP BY msgid".$listctrl->sqlorder(), $max, $start);
+    echo $xoopsDB->error();
+    echo "<style>td.num { text-align: right; }</style>\n";
     echo "<h2>"._AM_MSG_ADMIN."</h2>\n";
     echo "<table class='ccinfo' width='100%'>\n<tr><td width='30%'>"._AM_MSG_COUNT." $total</td>\n";
     echo "<td align='center'>".$nav->renderNav()."</td>\n";
@@ -101,7 +107,7 @@ function msg_list() {
     echo "</table>\n";
 
     if ($res && $xoopsDB->getRowsNum($res)) {
-	$sorts = array('mtime', 'status', 'fidref', 'touid');
+	$sorts = array('mtime', 'status', 'fidref', 'touid', 'comms');
 	echo "<form method='post' name='msglist'>\n";
 	echo "<table class='outer' border='0' cellspacing='1'>\n";
 	echo "<tr><th><input type='checkbox' id='checkall' name='checkall' onClick='xoopsCheckAll(\"msglist\", \"checkall\");'/>";
@@ -130,7 +136,7 @@ function msg_list() {
 	    $from = empty($data['uid'])?$data['email']:htmlspecialchars($data['cfrom']);
 	    $box = "<input type='checkbox' name='ids[]' value='$id'/>";
 	    $ope = " <a href='$msg'>"._AM_DETAIL."</a>";
-	    echo "<tr class='$bg stat$stat'><td align='center'>$box</td><td>$date</td><td>".$msg_status[$stat]."</td><td><a href='?msgid=$id'>$title</a></td><td>$from</td><td>$priuname</td><td>$ope</td></tr>\n";
+	    echo "<tr class='$bg stat$stat'><td align='center'>$box</td><td>$date</td><td>".$msg_status[$stat]."</td><td><a href='?msgid=$id'>$title</a></td><td>$from</td><td>$priuname</td><td class='num'>".$data['comms']."</td><td>$ope</td></tr>\n";
 	}
 	echo "</table>\n";
 	echo "<div>"._AM_MSG_CHANGESTATUS." <select name='op'><option></option>\n";

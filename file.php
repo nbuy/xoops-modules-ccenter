@@ -1,6 +1,6 @@
 <?php
 // show attachment file
-// $Id: file.php,v 1.3 2007/09/26 07:08:58 nobu Exp $
+// $Id: file.php,v 1.4 2008/01/27 09:49:34 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";

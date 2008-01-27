@@ -1,6 +1,6 @@
 <?php
 // show messages file
-// $Id: message.php,v 1.13 2007/11/07 17:21:10 nobu Exp $
+// $Id: message.php,v 1.14 2008/01/27 09:49:34 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -25,7 +25,7 @@ if (!$isadmin) {
         $cond .= " AND onepass=".$xoopsDB->quoteString($pass);
     }
 }
-$res = $xoopsDB->query("SELECT m.*, title, cgroup FROM ".CCMES." m,".FORMS." WHERE msgid=$msgid $cond AND fidref=formid");
+$res = $xoopsDB->query("SELECT m.*, title, cgroup, defs FROM ".CCMES." m,".FORMS." WHERE msgid=$msgid $cond AND fidref=formid");
 if (!$res || $xoopsDB->getRowsNum($res)==0) {
     redirect_header("index.php", 3, _NOPERM);
     exit;
@@ -48,21 +48,23 @@ $breadcrumbs = new XoopsBreadcrumbs(_MD_CCENTER_RECEPTION, 'reception.php');
 $vals = unserialize_text($data['body']);
 $add = $pass?"p=".urlencode($pass):"";
 $to_uname = XoopsUser::getUnameFromId($data['touid']);
-$items=array();
+$items = get_form_attribute($data['defs']);
+$values=array();
 foreach ($vals as $key=>$val) {
+    if (isset($items[$key])) $key = $items[$key]['label'];
     if (preg_match('/^file=(.+)$/', $val, $d)) {
 	$val = cc_attach_image($data['msgid'], $d[1], false, $add);
     } else {
 	$val = $myts->displayTarea($val);
     }
-    $items[$key] = $val;
+    $values[$key] = $val;
 }
 $data['comment'] = $myts->displayTarea($data['comment']);
 $isadmin = $uid && $xoopsUser->isAdmin($xoopsModule->getVar('mid'));
 $title = $data['title'];
-list($lab) = array_keys($items);
+list($lab) = array_keys($values);
 $breadcrumbs->set($title, "index.php?form=".$data['fidref']);
-$breadcrumbs->set($lab.': '.$items[$lab], "message.php?id=".$data['msgid']);
+$breadcrumbs->set($lab.': '.$values[$lab], "message.php?id=".$data['msgid']);
 $breadcrumbs->assign();
 $xoopsTpl->assign(
     array('subject'=>$title,
@@ -71,7 +73,7 @@ $xoopsTpl->assign(
 	  'cdate'=>formatTimestamp($data['ctime']),
 	  'mdate'=>myTimestamp($data['mtime'], 'l', _MD_TIME_UNIT),
 	  'data'=> $data,
-	  'items'=>$items,
+	  'items'=>$values,
 	  'status'=>$msg_status[$data['status']],
 	  'is_eval'=>is_cc_evaluate($msgid, $uid, $pass),
 	  'is_mine'=>$data['touid']==$uid,

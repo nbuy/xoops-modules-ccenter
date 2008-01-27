@@ -20,10 +20,17 @@
 </tr>
 <{/foreach}>
 </table>
-<p style="text-align: center;"><input type="submit" value="<{$smarty.const._SUBMIT}>" <{$form.submit_opts}> /></p>
+<p style="text-align: center;"><input type="submit" value="<{$smarty.const._MD_SUBMIT_CONF}>" <{$form.submit_opts}> /></p>
 </form>
 <{$form.check_script}>
 <{if $form.lang_note || $form.note}>
   <p align="right"><{$form.lang_note}> <{$form.note}></p>
 <{/if}>
 </div>
+<{if $xoops_isadmin}>
+  <div class="ccadmin" style="text-align: right">[
+    <a href="admin/index.php?formid=<{$form.formid}>"><{$smarty.const._EDIT}></a>
+    | <a href="admin/msgadm.php?msgid=<{$data.msgid}>"><{$smarty.const._MD_MSG_ADMIN}></a>
+    ]
+  </div>
+<{/if}>

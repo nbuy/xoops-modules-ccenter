@@ -18,6 +18,7 @@ if ($op == 'delform') {
     $xoopsDB->query("DELETE FROM ".CCMES." WHERE fidref=".$formid);
     // NOTE: add function delete XOOPS comments.
     // NOTE: add function delete uploads files
+    // NOTE: add function delete notifications
     redirect_header('index.php', 1, _AM_FORM_DELETED);
     exit;
 } elseif (isset($_POST['formdefs']) && !isset($_POST['preview'])) {

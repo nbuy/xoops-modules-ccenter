@@ -1,6 +1,6 @@
 <?php
 // ccenter common functions
-// $Id: functions.php,v 1.18 2008/01/27 09:49:34 nobu Exp $
+// $Id: functions.php,v 1.19 2008/01/28 18:28:15 nobu Exp $
 
 global $xoopsDB;		// for blocks scope
 // using tables
@@ -831,7 +831,7 @@ function checkScript($checks, $confirm) {
 <!--//
 function checkItem(obj, lab) {
   msg = lab+\": "._MD_REQUIRE_ERR."\\n\";
-  if (obj.selectedIndex!=null && obj.value != \"\") return \"\";
+  if (typeof(obj.selectedIndex)!=\"undefined\" && obj.value != \"\") return \"\";
   if (obj.value == \"\") return msg;
   if (obj.length) {
      for (i=0; i<obj.length; i++) {

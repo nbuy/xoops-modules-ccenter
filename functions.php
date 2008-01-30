@@ -1,6 +1,6 @@
 <?php
 // ccenter common functions
-// $Id: functions.php,v 1.19 2008/01/28 18:28:15 nobu Exp $
+// $Id: functions.php,v 1.20 2008/01/30 17:06:48 nobu Exp $
 
 global $xoopsDB;		// for blocks scope
 // using tables
@@ -831,9 +831,9 @@ function checkScript($checks, $confirm) {
 <!--//
 function checkItem(obj, lab) {
   msg = lab+\": "._MD_REQUIRE_ERR."\\n\";
-  if (typeof(obj.selectedIndex)!=\"undefined\" && obj.value != \"\") return \"\";
+  if (typeof(obj.selectedIndex)==\"number\" && obj.value != \"\") return \"\";
   if (obj.value == \"\") return msg;
-  if (obj.length) {
+  if (typeof(obj.length)==\"number\") {
      for (i=0; i<obj.length; i++) {
         if (obj[i].checked) return \"\";
      }
@@ -848,8 +848,8 @@ function xoopsFormValidate_ccenter() {
 ";
     foreach ($checks as $name => $msg) {
 	$script .= "
-    msg = msg+checkItem(myform.$name, \"$msg\");
-    if(msg && obj==null)obj=myform.$name;\n";
+    msg = msg+checkItem(myform['$name'], \"$msg\");
+    if(msg && obj==null)obj=myform['$name'];\n";
     }
     if (count($confirm)) {
 	foreach ($confirm as $name => $msg) {
@@ -889,7 +889,8 @@ function set_checkvalue(&$form) {
 	} elseif (preg_match('/_conf$/', $fname)) {
 	    $confirm[preg_replace('/_conf$/', '', $fname)] = $lab;
 	} elseif ($check=='require') {
-	    $require[$fname] = $lab;
+	    if ($type == 'checkbox') $fname .= '[]';
+	    $require[$fname] = htmlspecialchars(strip_tags($lab));
 	}
     }
 

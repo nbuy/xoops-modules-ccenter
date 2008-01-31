@@ -1,6 +1,6 @@
 <?php
 // ccenter common functions
-// $Id: functions.php,v 1.20 2008/01/30 17:06:48 nobu Exp $
+// $Id: functions.php,v 1.21 2008/01/31 09:02:25 nobu Exp $
 
 global $xoopsDB;		// for blocks scope
 // using tables
@@ -58,7 +58,7 @@ function get_form_attribute($defs) {
 	}
 	$opts = explode(",", $ln);
 	$name = array_shift($opts);
-	if (preg_match('/=(.*)$/', $name, $d)) {
+	if (preg_match('/=(.*)$/', $name, $d)) { // use alternative label
 	    $label = $d[1];
 	    $name = preg_replace('/=(.*)$/', '', $name);
 	} else {
@@ -70,9 +70,9 @@ function get_form_attribute($defs) {
 	if (count($opts) && in_array($opts[0], $types)) {
 	    $type = array_shift($opts);
 	}
-	if (preg_match('/\*$/', $name)) {
+	if (preg_match('/\*$/', $name)) { // syntax convention
 	    $attr['check'] = 'require';
-	    $name = preg_replace('/\*$/', '', $name);
+	    $name = preg_replace('/\s*\*$/', '', $name);
 	}
 	while (isset($opts[0]) && (preg_match('/^(size|rows|maxlength|cols|prop)=(\d+)$/', $opts[0], $d) || preg_match('/^(check)=(.+)$/', $opts[0], $d))) {
 	    array_shift($opts);
@@ -155,6 +155,7 @@ function assign_post_values(&$items) {
 	    }
 	    break;
 	case 'hidden':
+	case 'const':
 	    $val = join(',', $item['options']);
 	    break;
 	case 'file':
@@ -264,8 +265,9 @@ function cc_make_widget($item) {
     if (isset($attr['prop'])) $astr .= ' '.$attr['prop'];
     $etcreg = empty($item['options'][LABEL_ETC])?'':'/^'.preg_quote(strip_tags($item['options'][LABEL_ETC]), '/').'\s+/';
     $etcval = '';
-    switch($item['type']) {
+    switch($type) {
     case 'hidden':
+    case 'const':
 	$input=htmlspecialchars(join(',', $options), ENT_QUOTES);
 	break;
     case 'select':

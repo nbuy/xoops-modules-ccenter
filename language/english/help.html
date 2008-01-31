@@ -1,0 +1,269 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html languagee="ja">
+<head>
+<title>Contact Center module</title>
+<style>
+.outer { background-color: #808080; }
+td,th { padding: 4px; background: #e8e8e8;}
+.head th  { padding: 4px; background: #d0d0d0; }
+.bnf { color: #008000; }
+.note { font-size: 80%; color: #800000; padding: 0.5em;}
+h1, h2, h3, h4 { color: #000040; }
+pre { color: #600000; }
+</style>
+</head>
+<body>
+  <h1>Contact Center module</h1>
+  <ul>
+  <li><a href="#intro">Abstruct</a></li>
+  <li><a href="#form">Form defunitions</a></li>
+  <li><a href="#custom">Custom Form</a></li>
+  <li><a href="#tips">Tips for using</a></li>
+  <li><a href="#changes">Changes</a></li>
+  </ul>
+
+  <hr>
+
+  <a name="intro"></a><h2>Abstruct of Contact Center module</h2>
+
+  <p>"Contact Center" is a module for web forms like "Contact us".
+    This module has features following:</p>
+  <ul>
+    <li>Handling highly custamizable contact forms</li>
+    <li>Store contact message in Database</li>
+    <li>Response management</li>
+    <li>Evaluate contact work</li>
+  </ul>
+
+  <p>Most different point to ordinay form mail module,
+    This module store in database and support and following contact messages.
+  </p>
+
+  <a name="form"></a><h2>Form defunitions</h2>
+
+  Form define in admin menu at "Forms". The "Form defunitions" following syntax.
+  <blockquote class="bnf">
+      line ::= label["*"][,type][,attribute...][,argument...]<p />
+      type ::= {text|checkbox|radio|textarea|select|const|hidden|mail|multi|file}<br />
+      argument ::= [value ["+"] "="] display-value<br />
+      attribute ::= aname "=" value<br />
+      aname ::= {size|rows|maxlength|cols|prop|check}
+  </blockquote>
+  <ul>
+    <li>"*" mean required</li>
+    <li>"#" mean adding description in form</li>
+    <li>"," is a seperater</li>
+    <li>argument abbreviation value, that is equivalent display-value</li>
+    <li>"+" means default selection in selecting types (checkbox, radio, select)</li>
+    <li>The other arguments are makes default value in text types(text, textarea)</li>
+    <li>Valid attribute depend types (e.g. text: "size=n", textarea: "cols=n" "rows=n")</li>
+    <li>"check" attribute mean checking input value (require: same as "*" follow label, "num": numeirc, "mail": mail format, others: using reguler expressions)</li>
+    <li>type of "checkbox" or "radio" argument value makes "*"
+      that is mean 'etc' field. And it takes a text input field.</li>
+    <li>type of "mail" handle special input field. That is makes automaticaly confirm field, and check match value. That is only one use in a form.</li>
+    <li>type of "file" mean upload attachment file</li>
+    <li>
+      Default value string can include variables expand user information.
+      The variables like <tt>{X_<em>LABEL</em>}</tt> style, <em>LABEL</em>
+      will be userinfo capitalized field name. (e.g. {X_UNAME}, {X_NAME}, {X_EMAIL}, {X_BIO})
+      Guest user will be empty string.
+    </li>
+  </ul>
+
+  <h3>Examples:</h3>
+
+  <blockquote>
+  <form>
+    <table border="0" cellspacing="1" cellpadding="4" class="outer">
+      <tr class="head"><th>Define</th><th>Represent</th><th>Description</th></tr>
+      <tr class="even"><td>Name*</td><td>Name* <input name="samp1" /></td><td>The item name add "*", makes required. Abbreviat type mean "text".</td></tr>
+      <tr class="odd"><td>Name*,size=5</td><td>名前* <input name="samp2" size="5" /></td><td>Setting attribute(size of input field).</td></tr>
+      <tr class="even"><td>Name*,size=10,Default,#Comment</td><td>Name* <input name="samp3" size="10" value="Default" /> Comment</td><td>Argument prefix makes "#" following value makes display comment.</td></tr>
+      <tr class="odd"><td>Name,size=10,check=reqire,{X_NAME},#Comment</td><td>Name <input name="samp3" size="10" value="expand your name"/> Comment</td><td>checking requirement like this. Default value  <tt>{X_NAME}</tt> are expand user information.</td></tr>
+      <tr class="even"><td>Selection,radio,Item1+,Item2&lt;br/&gt;,*=others</td><td>Selection <input type="radio" name="samp4" value="Item1" checked /> Item1
+	  &nbsp; <input type="radio" name="samp4" value="Item2" /> 項目2<br/>
+	  <input type="radio" name="samp4" value="*" /> others <input name="etc4" size="8"/> </td><td>Include HTML tags in label, but ignore in
+	  value. The value use "*", that use text input.</td></tr>
+      <tr class="odd"><td>Selection,checkbox,Item1+,Item2,Item3</td><td>Selection <input type="checkbox" name="samp5_1" checked /> Item1 &nbsp;
+	  <input type="checkbox" name="samp5_2" /> Item2 &nbsp;
+	  <input type="checkbox" name="samp5_3" /> Item3</td>
+	<td>Selection value default checked adding "+".</td></tr>
+      <tr class="even"><td>Selection,select,Item1,Item2,Item3</td><td>Selection <select name="samp6"><option>Item1</option><option>Item2</option><option>Item3</option></select></td><td></td></tr>
+      <tr class="odd"><td>Label,hidden,value</td><td><em>(Not display in form)</em></td><td>This is handle input value.</td></tr>
+      <tr class="even"><td>#Comment</td><td>Comment</td><td></td></tr>
+    </table>
+  </form>
+  </blockquote>
+
+  <a name="custom"></a><h2>Custom Form</h2>
+
+  <p>"Description" use template in "Description type" settings
+    not "Normal[bb]". In "template" types insert form element
+    make variables like <tt>{Name}</tt> style.</p>
+
+  <blockquote>
+    <table border="0" cellspacing="1" cellpadding="4" class="outer">
+      <tr class="head"><th>variables</th><th>Description</th></tr>
+      <tr class="even"><td>{FORM_ATTR}</td><td>form attributes</td></tr>
+      <tr class="odd"><td>{SUBMIT}</td><td>Submit button</td></tr>
+      <tr class="even"><td>{BACK}</td><td>Re-Edit button</td></tr>
+      <tr class="odd"><td>{CHECK_SCRIPT}</td><td>Checking JavaScript</td></tr>
+      <tr class="even"><td>{Name}</td><td>Input field element of Name</td></tr>
+      <tr class="odd"><td>{TO_UNAME} {TO_NAME}</td><td>Member of group settings, uid setting user's uname and name</td></tr>
+    </table>
+  <ul>
+  <li>Need every variable represent once.</li>
+  <li>Edit contact form page's "Adding template" button makes set of variables adding in description.</li>
+  <li>Basicaly custom template form following variable sets (The element will be arrangement in a form tag)</li>
+    <pre>&lt;form {FORM_ATTR}&gt;
+Item1: {Item1}
+Item2*: {Item2}
+  :
+Item-n: {Item-n}
+{SUBMIT} {BACK}
+&lt;/form&gt;
+{CHECK_SCRIPT}</pre>
+  <li><tt>[desc]Description[/desc]</tt> mean display "Description" only
+    Input page, Not display in confirm page.</li>
+  <li>{TO_UNAME}, {TO_NAME} can use in normal description.</li>
+  <li>"Overall template" not use XOOPS themes. Display direct HTML page.</li>
+  <li>"Wide template" settings makes setting smarty variables <tt>$xoops_show{c,l,r}block</tt> to 0. This function to be work need to depend themes.</li>
+  </ul>
+  </blockquote>
+
+  <a name="tips"></a><h2>Tips for using</h2>
+
+  <h3>Notification</h3>
+  <p>
+    Notification using XOOPS notification system.
+    Except for contact person/group setting.
+    Contact person/group notification occurrence any time.
+  </p>
+  <ul>
+    <li>Event notification method is use user settings.</li>
+    <li>Contact Person setting 'None', notification to Contact group.</li>
+    <li>Contact Person subscribe notification setting at the message.</li>
+    <li>Contact Group member can setting notification each forms.</li>
+    <li>Administrator can setting notification for all message.</li>
+  </ul>
+
+  <h3>Note for Security</h3>
+  <p>In this module using XOOPS comment system.
+    When you use Comment custamization (modules/blocks/plugins/hacks...)
+    to display, need to carefully. Comments in this module, include private
+    information.
+  </p>
+  <p>
+    For example, Using "System" module's "Recent Comments" block,
+    there is display comment title in this module.
+    In this case, can not read message body, but some other information
+    will be leak.
+  </p>
+  <p>
+    Otherwise, Like "Whatsnew" module using, comment body display.
+  </p>
+
+  <h3>"Contact person" setting member of group</h3>
+  <p>
+    "Contact person" setting "Member[group]" mean choose a person
+    when form sending, using HTTP argument "uid=YY" (YY is userid that
+    member of group).
+  </p>
+
+  <pre>XOOPS_URL/modules/ccenter/index.php?form=XX<b>&amp;uid=YY</b></pre>
+
+  <p>
+    This setting to use assume link from other pages. Can not use
+    stand alone in this module.
+  </p>
+
+  <p>
+    Typical use, In case "Some page that contact to auther" form.
+    Modify template other module, for adding the link to form.
+  </p>
+
+  <a name="changes"></a><h2>Changes</h2>
+  <dl>
+  <dt>2008-01-31 ccenter 0.84</dt>
+  <dd>
+    <ul>
+      <li>Add language english</li>
+      <li>Extent alternate label to Item name</li>
+      <li>Add a item type "const"</li>
+      <li>Add form block</li>
+      <li>Fix bug handling quote(')</li>
+      <li>Fix require checking in JavaScript on IE</li>
+    </ul>
+  </dd>
+  <dt>2007-11-01 ccenter 0.83</dt>
+  <dd>
+    <ul>
+      <li>add CSV output limit range</li>
+      <li>Fix member of group to work</li>
+      <li>Logging and notification when evaluation</li>
+    </ul>
+  </dd>
+  <dt>2007-10-27 ccenter 0.82</dt>
+  <dd>
+    <ul>
+      <li>add notification variable {REMOTE_ADDR}, {HTTP_USER_AGENT}</li>
+      <li>add "Wide template" mode</li>
+      <li>Fix guset comment and logging failer</li>
+      <li>add item initialize variable ({X_UNAME}=username etc)</li>
+      <li>Fix admin status bulk change failer</li>
+      <li>Fix admin status change reporting error</li>
+    </ul>
+  </dd>
+  <dt>2007-08-06 ccenter 0.81</dt>
+  <dd>
+    <ul>
+      <li>Rivised breadcrumbs</li>
+      <li>Fix blocks declear global for XCL 2.1</li>
+    </ul>
+  </dd>
+  <dt>2007-08-03 ccenter 0.8</dt>
+  <dd>
+    <ul>
+      <li>Add status change notification</li>
+      <li>Add message admin page</li>
+      <li>Revised contact person selecting</li>
+      <li>Using functionaly list</li>
+      <li>Add block conditions</li>
+      <li>Revised page title</li>
+      <li>separate Sending/Contact page and enhancement</li>
+      <li>Fix can not access when no messages</li>
+      <li>Add logging table</li>
+      <li>Using altsys when exists</li>
+    </ul>
+  </dd>
+  <dt>2007-06-14 ccenter 0.71</dt>
+  <dd>
+    <ul>
+      <li>Allow form item use default value</li>
+      <li>Fix comment reply notify to guest</li>
+      <li>Fix multibyte filename handling</li>
+      <li>Fix hilien and mail item conflict failer</li>
+      <li>Fix radio item using others default checked</li>
+    </ul>
+  </dd>
+  <dt>2007-05-13 ccenter 0.7</dt>
+  <dd>
+    <ul>
+      <li>Add contact person set group</li>
+      <li>Change CSV output encode SJIS to UTF-8</li>
+      <li>Fix can use DELETE status</li>
+      <li>Add others with text with checkbox/radio items</li>
+      <li>Checking attribute extention (check=xx)</li>
+      <li>Add hilien type</li>
+      <li>fix comment display</li>
+    </ul>
+  </dd>
+  <dt>2007-03-07 ccenter 0.6</dt>
+  </dl>
+
+<hr/>
+<aliress>安富 伸浩 &lt;<a href="mailto:nobuhiro.yasutomi@nifty.ne.jp">nobuhiro.yasutomi@nifty.ne.jp</a>&gt;</aliress>
+マイサイト ユーザーズ <a href="http://mysite.ddo.jp/">http://mysite.ddo.jp/</a><br/>
+$Id: help.html,v 1.1 2008/01/31 09:05:58 nobu Exp $
+</body>
+</html>

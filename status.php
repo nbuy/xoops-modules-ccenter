@@ -1,6 +1,6 @@
 <?php
 // Changing message status
-// $Id: status.php,v 1.9 2008/02/29 06:22:10 nobu Exp $
+// $Id: status.php,v 1.10 2008/02/29 06:40:11 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -12,15 +12,16 @@ $redirect = "message.php?id=".$msgid;
 if (!empty($_POST['eval'])) {	// evaluate at last
     $eval = intval($_POST['eval']);
     $pass = $myts->stripSlashesGPC($_POST['pass']);
-    $com = $xoopsDB->quoteString($myts->stripSlashesGPC($_POST['comment']));
+    $com = $myts->stripSlashesGPC($_POST['comment']);
     $now = time();
     if (is_cc_evaluate($msgid, $uid, $pass)) {
 	$res = $xoopsDB->query("SELECT fidref,status FROM ".CCMES." WHERE msgid=$msgid");
 	list($formid, $s) = $xoopsDB->fetchRow($res);
-	$xoopsDB->query("UPDATE ".CCMES." SET comment=$com,value=$eval,comtime=$now,status=".$xoopsDB->quoteString(_STATUS_CLOSE)." WHERE msgid=$msgid");
+	$xoopsDB->query("UPDATE ".CCMES." SET comment=".$xoopsDB->quoteString($com).",value=$eval,comtime=$now,status=".$xoopsDB->quoteString(_STATUS_CLOSE)." WHERE msgid=$msgid");
 	$log = _MD_EVALS." ($eval)";
 	$log .= "\n".sprintf(_CC_LOG_STATUS, $msg_status[$s], $msg_status[_STATUS_CLOSE]);
-	$tags = array('X_COMMENT_URL'=>_MD_EVALS." ($eval)\n".XOOPS_URL."/modules/".basename(dirname(__FILE__))."/message.php?id=$msgid");
+	$evalmsg = _MD_EVALS." ($eval)\n$com";
+	$tags = array('X_COMMENT_URL'=>XOOPS_URL."/modules/".basename(dirname(__FILE__))."/message.php?id=$msgid\n\n".$evalmsg);
 	$notification_handler =& xoops_gethandler('notification');
 	$notification_handler->triggerEvent('message', $msgid, 'comment', $tags);
 	cc_log_message($formid, $log, $msgid);

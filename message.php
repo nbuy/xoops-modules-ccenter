@@ -1,6 +1,6 @@
 <?php
 // show messages file
-// $Id: message.php,v 1.16 2008/02/29 06:22:10 nobu Exp $
+// $Id: message.php,v 1.17 2008/02/29 06:50:11 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -41,7 +41,7 @@ if (!cc_check_perm($data)) {
 }
 // referer
 if ($uid && $uid == $data['touid'] && $data['status']==_STATUS_NONE) {
-    change_message_status($msgid, $uid, _STATUS_ACCEPT));
+    change_message_status($msgid, $uid, _STATUS_ACCEPT);
     $data['status'] = _STATUS_ACCEPT;
 }
 

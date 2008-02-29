@@ -1,6 +1,6 @@
 <?php
 // show messages file
-// $Id: message.php,v 1.14 2008/01/27 09:49:34 nobu Exp $
+// $Id: message.php,v 1.15 2008/02/29 06:06:55 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -27,7 +27,11 @@ if (!$isadmin) {
 }
 $res = $xoopsDB->query("SELECT m.*, title, cgroup, defs FROM ".CCMES." m,".FORMS." WHERE msgid=$msgid $cond AND fidref=formid");
 if (!$res || $xoopsDB->getRowsNum($res)==0) {
-    redirect_header("index.php", 3, _NOPERM);
+    if (is_object($xoopsUser)) {
+	redirect_header("index.php", 3, _NOPERM);
+    } else {
+	redirect_header(XOOPS_URL.'/user.php', 3, _NOPERM);
+    }
     exit;
 }
 $data = $xoopsDB->fetchArray($res);
@@ -63,8 +67,12 @@ $data['comment'] = $myts->displayTarea($data['comment']);
 $isadmin = $uid && $xoopsUser->isAdmin($xoopsModule->getVar('mid'));
 $title = $data['title'];
 list($lab) = array_keys($values);
-$breadcrumbs->set($title, "index.php?form=".$data['fidref']);
-$breadcrumbs->set($lab.': '.$values[$lab], "message.php?id=".$data['msgid']);
+if ($isadmin) {
+    $breadcrumbs->set($title, "reception.php?form=".$data['fidref']);
+} else {
+    $breadcrumbs->set($title, "index.php?form=".$data['fidref']);
+}
+$breadcrumbs->set($lab.': '.$values[$lab], '');
 $breadcrumbs->assign();
 $xoopsTpl->assign(
     array('subject'=>$title,

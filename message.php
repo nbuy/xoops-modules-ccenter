@@ -1,6 +1,6 @@
 <?php
 // show messages file
-// $Id: message.php,v 1.15 2008/02/29 06:06:55 nobu Exp $
+// $Id: message.php,v 1.16 2008/02/29 06:22:10 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -40,9 +40,9 @@ if (!cc_check_perm($data)) {
     exit;
 }
 // referer
-if ($uid && $uid == $data['touid'] && $data['status']=='-') {
-    change_message_status($msgid, $uid, 'a');
-    $data['status'] = 'a';
+if ($uid && $uid == $data['touid'] && $data['status']==_STATUS_NONE) {
+    change_message_status($msgid, $uid, _STATUS_ACCEPT));
+    $data['status'] = _STATUS_ACCEPT;
 }
 
 include XOOPS_ROOT_PATH."/header.php";

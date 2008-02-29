@@ -1,5 +1,5 @@
 <?php
-// $Id: comment_new.php,v 1.2 2007/09/26 07:08:58 nobu Exp $
+// $Id: comment_new.php,v 1.3 2008/02/29 06:22:10 nobu Exp $
 //  ------------------------------------------------------------------------ //
 //                XOOPS - PHP Content Management System                      //
 //                    Copyright (c) 2000 XOOPS.org                           //
@@ -29,7 +29,7 @@ include 'functions.php';
 
 $myts =& MyTextSanitizer::getInstance();
 $com_itemid = isset($_GET['com_itemid']) ? intval($_GET['com_itemid']) : 0;
-$res = $xoopsDB->query("SELECT m.*, title FROM ".CCMES." m,".FORMS." WHERE msgid=$com_itemid AND status<>'x' AND fidref=formid");
+$res = $xoopsDB->query("SELECT m.*, title FROM ".CCMES." m,".FORMS." WHERE msgid=$com_itemid AND status<>".$xoopsDB->quoteString(_STATUS_DEL)." AND fidref=formid");
 
 $data = $xoopsDB->fetchArray($res);
 

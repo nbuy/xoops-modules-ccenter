@@ -1,6 +1,6 @@
 <?php
 // ccenter common functions
-// $Id: functions.php,v 1.21 2008/01/31 09:02:25 nobu Exp $
+// $Id: functions.php,v 1.22 2008/02/29 06:22:10 nobu Exp $
 
 global $xoopsDB;		// for blocks scope
 // using tables
@@ -10,14 +10,19 @@ define('CCLOG', $xoopsDB->prefix('ccenter_log'));
 
 $myts =& MyTextSanitizer::getInstance();
 
+define('_STATUS_NONE',   '-');
+define('_STATUS_ACCEPT', 'a');
+define('_STATUS_REPLY',  'b');
+define('_STATUS_CLOSE',  'c');
+define('_STATUS_DEL',    'x');
 if (defined('_CC_STATUS_NONE')) {
     global $msg_status;
     $msg_status = array(
-	'-'=>_CC_STATUS_NONE,
-	'a'=>_CC_STATUS_ACCEPT,
-	'b'=>_CC_STATUS_REPLY,
-	'c'=>_CC_STATUS_CLOSE,
-	'x'=>_CC_STATUS_DEL);
+	_STATUS_NONE  =>_CC_STATUS_NONE,
+	_STATUS_ACCEPT=>_CC_STATUS_ACCEPT,
+	_STATUS_REPLY =>_CC_STATUS_REPLY,
+	_STATUS_CLOSE =>_CC_STATUS_CLOSE,
+	_STATUS_DEL   =>_CC_STATUS_DEL);
 
     $export_range = array(
 	'm0'=>_CC_EXPORT_THIS_MONTH,
@@ -38,7 +43,7 @@ define('LABEL_ETC', '*');	// radio, checkbox widget 'etc' text input.
 function get_form_attribute($defs) {
     $num = 0;
     $result = array();
-    $types = array('text', 'checkbox', 'radio', 'textarea', 'select', 'hidden','const', 'mail', 'file', 'multi');
+    $types = array('text', 'checkbox', 'radio', 'textarea', 'select', 'hidden','const', 'mail', 'file');
     $def = $GLOBALS['xoopsModuleConfig']['def_attrs'];
     $def_attrs = array();
     if (!empty($def)) {
@@ -219,9 +224,11 @@ function assign_form_widgets(&$items, $conf=false) {
 	    }
 	} else {
 	    $input = cc_make_widget($item);
-	    if ($mconf && isset($item['type']) && $item['type']=='mail' && $item['attr']['check']=='require') {
+	    if ($mconf && isset($item['type']) && $item['type']=='mail' &&
+		isset($item['attr']['check'])&& $item['attr']['check']=='require') {
 		$cfname = $fname.'_conf';
 		$citem = array(
+		    'name'=>sprintf(_MD_CONF_LABEL, $item['name']),
 		    'label'=>sprintf(_MD_CONF_LABEL, $item['label']),
 		    'field'=>$cfname, 'type'=>$item['type'],
 		    'comment'=>_MD_CONF_DESC, 'attr'=>$item['attr']);
@@ -530,7 +537,7 @@ function cc_message_entry($data, $link="message.php") {
 function is_cc_evaluate($id, $uid, $pass) {
     global $xoopsDB;
     $cond = $pass?'onepass='.$xoopsDB->quoteString($pass):"uid=$uid";
-    $res = $xoopsDB->query("SELECT count(uid) FROM ".CCMES." WHERE msgid=$id AND $cond AND status='b'");
+    $res = $xoopsDB->query("SELECT count(uid) FROM ".CCMES." WHERE msgid=$id AND $cond AND status=".$xoopsDB->quoteString(_STATUS_REPLY));
     list($ret) = $xoopsDB->fetchRow($res);
     return $ret;
 }
@@ -865,7 +872,7 @@ function xoopsFormValidate_ccenter() {
     $script .= "
     if (msg == \"\") return true;
     window.alert(msg);
-    if (obj.length==null) obj.focus();
+    if (typeof(obj.length)!=\"number\") obj.focus();
     return false;
 }
 function checkedEtcText(lab) {

@@ -1,5 +1,5 @@
 <?php
-// $Id: comment_functions.php,v 1.6 2007/10/27 07:27:08 nobu Exp $
+// $Id: comment_functions.php,v 1.7 2008/02/29 06:22:10 nobu Exp $
 //  ------------------------------------------------------------------------ //
 //                XOOPS - PHP Content Management System                      //
 //                    Copyright (c) 2000 XOOPS.org                           //
@@ -36,24 +36,32 @@ function ccenter_com_approve(&$comment){
     global $xoopsDB, $xoopsUser, $xoopsModule, $xoopsConfig;
 
     $msgid = $comment->getVar('com_itemid');
-    $res = $xoopsDB->query("SELECT uid, touid, email, onepass, fidref, title FROM ".CCMES.", ".FORMS." WHERE msgid=$msgid AND formid=fidref");
+    $res = $xoopsDB->query("SELECT uid, touid, email, onepass, fidref, title, status FROM ".CCMES.", ".FORMS." WHERE msgid=$msgid AND formid=fidref");
 
     $comid = $comment->getVar('com_id');
     if ($res && $xoopsDB->getRowsNum($res)) {
 	$data = $xoopsDB->fetchArray($res);
 	$email = $data['email'];
+	$s = $data['status'];
 
 	$uid = is_object($xoopsUser)?$xoopsUser->getVar('uid'):0;
 	$msg = _CC_LOG_COMMENT;
+	$status = ''; // new status
 	if ($uid && $uid == $data['touid']) { // comment by charge
 	    // status to replyed
-	    $xoopsDB->query("UPDATE ".CCMES." SET status='b' WHERE msgid=$msgid AND status='a'");
+	    if ($s==_STATUS_ACCEPT) $status = _STATUS_REPLY;
 	    $msg .= _CC_LOG_BYCHARGE;
 	} elseif ($uid==0 || $uid==$data['uid']) { // comment by order person
 	    // status back to contacting
-	    $xoopsDB->query("UPDATE ".CCMES." SET status='a' WHERE msgid=$msgid AND status IN ('b', 'c')");
+	    if ($s==_STATUS_REPLY || $s==_STATUS_CLOSE) $status = _STATUS_ACCEPT;
 	}
-	$xoopsDB->query("UPDATE ".CCMES." SET mtime=".time()." WHERE msgid=$msgid");
+	$values = array('mtime='.time());
+	if ($status && $status != $s) {
+	    global $msg_status;
+	    $msg .= "\n".sprintf(_CC_LOG_STATUS, $msg_status[$s], $msg_status[$status]);
+	    $values[] = 'status='.$xoopsDB->quoteString($status);
+	}
+	$xoopsDB->query("UPDATE ".CCMES." SET ".join(',', $values)." WHERE msgid=$msgid");
 	cc_log_message($data['fidref'], $msg." (comid=$comid)", $msgid);
 	// notification for guest contact
 	if (is_object($xoopsUser) && $data['uid']==0 && $email) {

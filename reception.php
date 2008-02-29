@@ -1,6 +1,6 @@
 <?php
 // contact to member
-// $Id: reception.php,v 1.7 2007/11/01 05:01:15 nobu Exp $
+// $Id: reception.php,v 1.8 2008/02/29 06:22:10 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -22,7 +22,7 @@ else {
 if ($id) $cond .= ' AND formid='.$id;
 
 $res = $xoopsDB->query("SELECT f.*,count(msgid) nmsg,max(m.mtime) ltime
- FROM ".FORMS." f LEFT JOIN ".CCMES." m ON fidref=formid AND status<>'x'
+ FROM ".FORMS." f LEFT JOIN ".CCMES." m ON fidref=formid AND status<>".$xoopsDB->quoteString(_STATUS_DEL)."
  WHERE $cond GROUP BY formid");
 
 if (!$res || $xoopsDB->getRowsNum($res)==0) {
@@ -103,7 +103,7 @@ foreach ($form['items'] as $item) {
 
 include_once XOOPS_ROOT_PATH.'/class/pagenav.php';
 
-$cond = "fidref=$id AND status<>'x'";
+$cond = "fidref=$id AND status<>".$xoopsDB->quoteString(_STATUS_DEL);
 $res = $xoopsDB->query('SELECT count(*) FROM '.CCMES." WHERE $cond");
 list($count) = $xoopsDB->fetchRow($res);
 $max = $xoopsModuleConfig['max_lists'];

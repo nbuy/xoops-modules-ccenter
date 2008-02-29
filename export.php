@@ -1,6 +1,6 @@
 <?php
 // Export data in CSV format
-// $Id: export.php,v 1.7 2007/11/01 14:01:34 nobu Exp $
+// $Id: export.php,v 1.8 2008/02/29 04:17:56 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -53,7 +53,7 @@ case 'y0':
     break;
 case 'y1':
     $ym = explode('-', formatTimestamp(time(), 'Y-m'));
-    $stime = userTimeToServerTime(mktime(0, 0, 0, 0, 1, $ym[0]));
+    $stime = userTimeToServerTime(mktime(0, 0, 0, 1, 1, $ym[0]-1));
     $ym = explode('-', formatTimestamp(time(), 'Y-m'));
     $ltime = userTimeToServerTime(mktime(0, 0, 0, 1, 1, $ym[0])-1);
     $cond .= " AND ctime BETWEEN $stime AND $ltime";

@@ -223,11 +223,31 @@ function build_form($formid=0) {
     $grpperm = new XoopsFormSelectGroup(_AM_FORM_ACCEPT_GROUPS, 'grpperm', true, $data['grpperm'], 4, true);
     $grpperm->setDescription(_AM_FORM_ACCEPT_GROUPS_DESC);
     $form->addElement($grpperm);
-    $defs = new XoopsFormTextArea(_AM_FORM_DEFS, 'defs', $data['defs']);
-    $defs->setDescription(_AM_FORM_DEFS_DESC);
-    $form->addElement($defs);
+    $defs_tray = new XoopsFormElementTray(_AM_FORM_DEFS);
+    $defs_tray->addElement(new XoopsFormTextArea('', 'defs', $data['defs']));
+    $defs_tray->addElement(new XoopsFormLabel('', 
+'<div id="itemhelper" style="display:none; white-space:nowrap;">
+  '._AM_FORM_LAB.' <input name="xelab" size="10">
+  <input type="checkbox" name="xereq" title="'._AM_FORM_REQ.'">
+  <select name="xetype">
+    <option value="text">text</option>
+    <option value="checkbox">checkbox</option>
+    <option value="radio">radio</option>
+    <option value="textarea">textarea</option>
+    <option value="select">select</option>
+    <option value="const">const</option>
+    <option value="hidden">hidden</option>
+    <option value="mail">mail</option>
+    <option value="file">file</option>
+  </select>
+  <input name="xeopt" size="30" />
+  <button onClick="return addFieldItem();">'._AM_FORM_ADD.'</button>
+</div>'));
+    $defs_tray->setDescription(_AM_FORM_DEFS_DESC);
+    $form->addElement($defs_tray);
 
     $member_handler =& xoops_gethandler('member');
+    $groups = $member_handler->getGroupList(new Criteria('groupid', XOOPS_GROUP_ANONYMOUS, '!='));
     $groups = $member_handler->getGroupList(new Criteria('groupid', XOOPS_GROUP_ANONYMOUS, '!='));
     $options = array();
     foreach ($groups as $k=>$v) {
@@ -267,7 +287,36 @@ function build_form($formid=0) {
     $form->display();
     echo '<script language="JavaScript">'.
 	$priuid->renderSupportJS(false).
-'function defsToString() {
+'
+// display only JavaScript enable
+xoopsGetElementById("itemhelper").style.display = "block";
+
+function addFieldItem() {
+    var myform = window.document.myform;
+    var item=myform.xelab.value;
+    if (item == "") {
+	alert("'._AM_FORM_LABREQ.'");
+	myform.xelab.focus();
+	return false;
+    }
+    if (myform.xereq.checked) item += "*";
+    var ty = myform.xetype.value;
+    var ov = myform.xeopt.value;
+    item += ","+ty;
+    if (ty != "text" && ty != "textarea" && ty != "file" && ty != "mail" && ov == "") {
+	alert(ty+": '._AM_FORM_OPTREQ.'");
+	myform.xeopt.focus();
+	return false;
+    }
+    if (ov != "") item += ","+ov;
+    opts = myform.defs;
+    if (opts.value!="" && !opts.value.match(/[\n\r]$/)) item = "\n"+item;
+    opts.value += item;
+    myform.xelab.value = ""; // clear old value
+    myform.xeopt.value = "";
+    return false; // always return false
+}
+function defsToString() {
     value = window.document.myform.defs.value;
     ret = "";
     lines = value.split("\\n");

@@ -1,5 +1,5 @@
 <?php
-// $Id: admin.php,v 1.1 2008/01/31 09:05:58 nobu Exp $
+// $Id: admin.php,v 1.2 2008/02/29 06:21:49 nobu Exp $
 
 define('_AM_FORM_EDIT', 'Edit contact form');
 define('_AM_FORM_NEW', 'Create new contact form');
@@ -10,7 +10,7 @@ define('_AM_INS_TEMPLATE', 'Adding template');
 define('_AM_FORM_ACCEPT_GROUPS', 'Accept Groups');
 define('_AM_FORM_ACCEPT_GROUPS_DESC', 'This contact form accept from this setting groups');
 define('_AM_FORM_DEFS', 'Form defunitions');
-define('_AM_FORM_DEFS_DESC', '<a href="help.php#form" target="_blank">Defunitions</a> <small>Types: text checkbox radio textarea select const hidden mail multi file</small>');
+define('_AM_FORM_DEFS_DESC', '<a href="help.php#form" target="_blank">Defunitions</a> <small>Types: text checkbox radio textarea select const hidden mail file</small>');
 define('_AM_FORM_PRIM_CONTACT', 'Contact person');
 define('_AM_FORM_PRIM_NONE', 'None');
 define('_AM_FORM_PRIM_DESC', 'Select Member of group, The contact person need select by uid argument from the group');
@@ -22,6 +22,11 @@ define('_AM_FORM_WEIGHT', 'Weight');
 define('_AM_FORM_REDIRECT', 'Display page after sending');
 define('_AM_FORM_ACTIVE', 'Form active');
 define('_AM_DELETE_FORM', 'Delete From');
+define('_AM_FORM_LAB', 'Item name');
+define('_AM_FORM_LABREQ', 'Please input item name');
+define('_AM_FORM_REQ','Required');
+define('_AM_FORM_ADD', 'Add');
+define('_AM_FORM_OPTREQ', 'Need option argument');
 define('_AM_CUSTOM_NONE', 'Normal[bb]');
 define('_AM_CUSTOM_TPL_BLOCK', 'Part template');
 define('_AM_CUSTOM_TPL_FULL', 'Overall template');

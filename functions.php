@@ -1,6 +1,6 @@
 <?php
 // ccenter common functions
-// $Id: functions.php,v 1.22 2008/02/29 06:22:10 nobu Exp $
+// $Id: functions.php,v 1.23 2008/03/20 02:48:17 nobu Exp $
 
 global $xoopsDB;		// for blocks scope
 // using tables
@@ -78,6 +78,7 @@ function get_form_attribute($defs) {
 	if (preg_match('/\*$/', $name)) { // syntax convention
 	    $attr['check'] = 'require';
 	    $name = preg_replace('/\s*\*$/', '', $name);
+	    $label = preg_replace('/\s*\*$/', _MD_REQUIRE_MARK, $label);
 	}
 	while (isset($opts[0]) && (preg_match('/^(size|rows|maxlength|cols|prop)=(\d+)$/', $opts[0], $d) || preg_match('/^(check)=(.+)$/', $opts[0], $d))) {
 	    array_shift($opts);

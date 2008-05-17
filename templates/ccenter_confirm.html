@@ -5,8 +5,21 @@
 <p clss="heading"><{$heading}></p>
 <table class="outer" align="center" cellspacing="1" border="0">
 <tr><th colspan="2"><{$form.title}></th></tr>
-<{foreach from=$form.items item=item}>
-<{if $item.label}><tr class="<{cycle values="even, odd"}>"><td class="head"><{$item.label}></td><td><{$item.input}></td></tr><{/if}>
+<{foreach from=$form.items item=fm name=item}>
+  <{if preg_match("/^-/", $form.items[$smarty.foreach.item.iteration].label)}>
+    <{if empty($form_continue)}>
+      <tr class="<{cycle values="even, odd"}>"><td class="head"><{$fm.label}></td><td>
+      <{assign var=form_continue value=1}>
+    <{/if}>
+    <{$fm.input}>
+  <{else}>
+    <{if !empty($form_continue)}>
+       <{$fm.input}></td></tr>
+      <{assign var=form_continue value=0}>
+    <{else}>
+      <{if $fm.label}><tr class="<{cycle values="even, odd"}>"><td class="head"><{$fm.label}></td><td><{$fm.input}></td></tr><{/if}>
+    <{/if}>
+  <{/if}>
 <{/foreach}>
 </table>
 <p style="text-align: center;"><input type="submit" value="<{$smarty.const._MD_SUBMIT_SEND}>" /> &nbsp; <input type="submit" name="edit" value="<{$smarty.const._MD_SUBMIT_EDIT}>" /></p>

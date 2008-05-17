@@ -1,5 +1,5 @@
 <?php
-// $Id: modinfo.php,v 1.1 2008/01/31 09:05:58 nobu Exp $
+// $Id: modinfo.php,v 1.2 2008/05/17 05:55:47 nobu Exp $
 // Module Info
 
 // The name of this module
@@ -52,6 +52,11 @@ define("_MI_CCENTER_NEWPOST_SUBJECT","Post contact message");
 define("_MI_CCENTER_STATUS_NOTIFY","Update status");
 define("_MI_CCENTER_STATUS_NOTIFY_CAP","Notify status changes");
 define("_MI_CCENTER_STATUS_SUBJECT","Status:[{X_MODULE}]{FORM_NAME}");
+
+define("_MI_SAMPLE_FORM","Create sample form");
+define("_MI_SAMPLE_TITLE","Contact us");
+define("_MI_SAMPLE_DESC","Please send following form when you want contact us.");
+define("_MI_SAMPLE_DEFS","Your name*,size=40\nEmail*,mail,size=60\nAbout*,radio,Site contents,Query about us,Others\nMessage,textarea,cols=50,rows=5");
 
 // for altsys 
 if (!defined('_MD_A_MYMENU_MYTPLSADMIN')) {

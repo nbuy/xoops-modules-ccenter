@@ -4,8 +4,6 @@ There is new contact message from {FROM_USER} to {TO_USER}.
 
 -------
 {VALUES}-------
-
-This message reference to following URL:
 {MSG_URL}
 
 -----------

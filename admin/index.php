@@ -103,7 +103,8 @@ function list_forms() {
 sum(if(status='-',1,0)) nwait,
 sum(if(status='a',1,0)) nwork,
 sum(if(status='b',1,0)) nreply,
-sum(if(status='c',1,0)) nclose
+sum(if(status='c',1,0)) nclose,
+store
 FROM ".FORMS." LEFT JOIN ".CCMES." ON fidref=formid AND status<>'x' GROUP BY formid");
     if (!$res || $xoopsDB->getRowsNum($res)==0) return false;
     echo "<style>td.num { text-align: right; }</style>";
@@ -112,6 +113,7 @@ FROM ".FORMS." LEFT JOIN ".CCMES." ON fidref=formid AND status<>'x' GROUP BY for
     $n = 0;
     $mbase = XOOPS_URL."/modules/$dirname";
     $ancfmt = "<td class='num'><a href='msgadm.php?stat=%s&formid=%d'>%d</a></td>\n";
+    $nodata = "<td class='num'>--</td>";
     $msgs = array('- a b c'=>'nmes', '-'=>'nwait', 'a'=>'nwork',
 		  'b'=>'nreply', 'c'=>'nclose');
     $member_handler =& xoops_gethandler('member');
@@ -142,7 +144,13 @@ FROM ".FORMS." LEFT JOIN ".CCMES." ON fidref=formid AND status<>'x' GROUP BY for
 <td><a href='$form' target='preview'>$title</a></td>
 <td>$contact</td>";
 	foreach ($msgs as $stat=>$name) {
-	    printf($ancfmt, urlencode($stat), $id, $data[$name]);
+	    $value=$data[$name];
+	    if ($data['store']==_DB_STORE_YES) {
+		$value = sprintf($ancfmt, urlencode($stat), $id, $value);
+	    } else {
+		$value = $value?sprintf($ancfmt, urlencode($stat), $id, $value):$nodata;
+	    }
+	    echo $value;
 	}
 	echo "<td>$ope</td></tr>\n";
     }
@@ -273,7 +281,10 @@ function build_form($formid=0) {
 
     $form->addElement($cgroup_tray) ;
 
-    $form->addElement(new XoopsFormRadioYN(_AM_FORM_STORE, 'store' , $data['store']));
+    
+    $store = new XoopsFormSelect(_AM_FORM_STORE, 'store', $data['store']);
+    $store->addOptionArray(unserialize_vars(_CC_STORE_MODE, 1));
+    $form->addElement($store);
     $form->addElement(new XoopsFormRadioYN(_AM_FORM_ACTIVE, 'active' , $data['active']));
 
     $form->addElement(new XoopsFormText(_AM_FORM_WEIGHT, 'weight', 2, 8, $data['weight']));

@@ -68,6 +68,12 @@ pre { color: #600000; }
       will be userinfo capitalized field name. (e.g. {X_UNAME}, {X_NAME}, {X_EMAIL}, {X_BIO})
       Guest user will be empty string.
     </li>
+    <li>
+      In 'Normal[bb]' type form, Form defunitions item name start "-", show that same line with previus item.
+
+      This is implement by smarty template (ccenter_form.html,
+      ccenter_confirm.html) for convenience.
+    </li>
   </ul>
 
   <h3>Examples:</h3>
@@ -184,11 +190,20 @@ Item-n: {Item-n}
 
   <a name="changes"></a><h2>Changes</h2>
   <dl>
+  <dt>2008-05-17 ccenter 0.86</dt>
+  <dd>
+    <ul>
+      <li>add "Never store" mode for "Store in Database"</li>
+      <li>Create sample form when new install</li>
+      <li>Add "Default Form attributes", notify_with_email=1 setting show email address in notify email</li>
+      <li>Form item name start "-", show that same line with previus item</li>
+    </ul>
+  </dd>
   <dt>2008-02-29 ccenter 0.85</dt>
   <dd>
     <ul>
       <li>Add form item input helper</li>
-      <li>Add comment notificaiton event when do evaluation</li>
+      <li>Add comment notification event when do evaluation</li>
       <li>Fix present status logging when evaluation</li>
       <li>Fix last year range mistake when CSV output</li>
     </ul>
@@ -273,6 +288,6 @@ Item-n: {Item-n}
 <hr/>
 <aliress>Nobuhiro YASUTOMI &lt;<a href="mailto:nobuhiro.yasutomi@nifty.ne.jp">nobuhiro.yasutomi@nifty.ne.jp</a>&gt;</aliress>
 MySite Users <a href="http://myht.org/">http://myht.org/</a><br/>
-$Id: help.html,v 1.3 2008/02/29 06:50:11 nobu Exp $
+$Id: help.html,v 1.4 2008/05/17 05:55:47 nobu Exp $
 </body>
 </html>

@@ -1,5 +1,5 @@
 <?php
-// $Id: xoops_version.php,v 1.14 2008/02/29 06:50:11 nobu Exp $
+// $Id: xoops_version.php,v 1.15 2008/05/17 05:55:47 nobu Exp $
 //  ------------------------------------------------------------------------ //
 //  This program is free software; you can redistribute it and/or modify     //
 //  it under the terms of the GNU General Public License as published by     //
@@ -22,7 +22,7 @@
 //  ------------------------------------------------------------------------ //
 
 $modversion = array('name' => _MI_CCENTER_NAME,
-		    'version' => "0.85",
+		    'version' => "0.86",
 		    'description' => _MI_CCENTER_DESC,
 		    'credits' => "Nobuhiro Yasutomi",
 		    'author' => "Nobuhiro Yasutomi",
@@ -44,6 +44,9 @@ $modversion['tables'][] = "ccenter_log";
 
 // OnUpdate - upgrade DATABASE 
 $modversion['onUpdate'] = "onupdate.php";
+
+// OnInstall - Insert Sample Form
+$modversion['onInstall'] = "oninstall.php";
 
 // Admin things
 $modversion['hasAdmin'] = 1;
@@ -131,9 +134,9 @@ $modversion['config'][]=
     array('name' => 'def_attrs',
 	  'title' => '_MI_CCENTER_DEF_ATTRS',
 	  'description' => '_MI_CCENTER_DEF_ATTRS_DESC',
-	  'formtype' => 'text',
+	  'formtype' => 'textarea',
 	  'valuetype' => 'string',
-			      'default' => 'size=60,rows=5,cols=50');
+	  'default' => "size=60\nrows=5\ncols=50\nnotify_with_email=0");
 $modversion['config'][]=
     array('name' => 'status_combo',
 	  'title' => '_MI_CCENTER_STATUS_COMBO',

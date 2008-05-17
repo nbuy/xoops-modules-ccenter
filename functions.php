@@ -1,6 +1,6 @@
 <?php
 // ccenter common functions
-// $Id: functions.php,v 1.23 2008/03/20 02:48:17 nobu Exp $
+// $Id: functions.php,v 1.24 2008/05/17 05:55:47 nobu Exp $
 
 global $xoopsDB;		// for blocks scope
 // using tables
@@ -15,8 +15,13 @@ define('_STATUS_ACCEPT', 'a');
 define('_STATUS_REPLY',  'b');
 define('_STATUS_CLOSE',  'c');
 define('_STATUS_DEL',    'x');
+
+define('_DB_STORE_LOG',  0);	// logging only in db
+define('_DB_STORE_YES',  1);	// store information in db
+define('_DB_STORE_NONE', 2);	// query not store in db
+
 if (defined('_CC_STATUS_NONE')) {
-    global $msg_status;
+    global $msg_status, $export_range;
     $msg_status = array(
 	_STATUS_NONE  =>_CC_STATUS_NONE,
 	_STATUS_ACCEPT=>_CC_STATUS_ACCEPT,
@@ -38,22 +43,45 @@ if (defined('_CC_STATUS_NONE')) {
 }
 
 define('LABEL_ETC', '*');	// radio, checkbox widget 'etc' text input.
+define('OPTION_ATTRS', 'size,rows,maxlength,cols,prop,notify_with_email');
 
 // attribute config option expanding
+function get_attr_value($pri, $name) {
+    static $defs;		// default option value
+
+    if (isset($pri) && isset($pri[$name])) return $pri[$name];
+    if (!isset($defs)) {
+	$defs = array();
+	foreach (explode(',', OPTION_ATTRS) as $key) {
+	    $defs[$key] = 0;
+	}
+	// override module config values
+	$mydirname = basename(dirname(__FILE__));
+	if (is_object($GLOBALS['xoopsModule']) &&
+	    $GLOBALS['xoopsModule']->getVar('dirname')==$mydirname) {
+	    $def_attr = $GLOBALS['xoopsModuleConfig']['def_attrs'];
+	} else {
+	    $module_handler =& xoops_gethandler('module');
+	    $module =& $module_handler->getByDirname($mydirname);
+	    $config_handler =& xoops_gethandler('config');
+	    $configs =& $config_handler->getConfigsByCat(0, $module->getVar('mid'));
+	    $def_attr = $configs['def_attrs'];
+	}
+	foreach (preg_split('/(,|\r?\n)/', $def_attr) as $ln) {
+	    if (preg_match('/^\s*([^=]+)\s*=\s*(.+)$/', $ln, $d)
+		&& isset($defs[$d[1]])) {
+		$defs[$d[1]] = intval($d[2]); // XXX: only numeric?
+	    }
+	}
+    }
+    if (isset($defs[$name])) return $defs[$name];
+    return null;
+}
+
 function get_form_attribute($defs) {
     $num = 0;
     $result = array();
     $types = array('text', 'checkbox', 'radio', 'textarea', 'select', 'hidden','const', 'mail', 'file');
-    $def = $GLOBALS['xoopsModuleConfig']['def_attrs'];
-    $def_attrs = array();
-    if (!empty($def)) {
-	foreach (explode(',', $def) as $ln) {
-	    if (preg_match('/^(size|rows|maxlength|cols|prop)=(\d+)$/', $ln, $d)
-		|| preg_match('/^(check)=(.+)$/', $ln, $d)) {
-		$def_attrs[$d[1]] = $d[2];
-	    }
-	}
-    }
     foreach (preg_split('/\r?\n/', $defs) as $ln) {
 	$ln = trim($ln);
 	if (empty($ln)) continue;
@@ -71,7 +99,7 @@ function get_form_attribute($defs) {
 	}
 	$type='text';
 	$comment='';
-	$attr = $def_attrs;
+	$attr = array();
 	if (count($opts) && in_array($opts[0], $types)) {
 	    $type = array_shift($opts);
 	}
@@ -309,7 +337,8 @@ function cc_make_widget($item) {
 	    $etcval = $myts->stripSlashesGPC($_POST[$etclab]);
 	}
 	$input = "";
-	$estr = isset($attr['size'])?' size="'.$attr['size'].'"':'';
+	$estr = get_attr_value($attr, 'size');
+	$estr = empty($estr)?'':' size="'.$estr.'"';
 	foreach ($options as $key=>$val) {
 	    $lab = preg_replace('/\+$/', '', $key);
 	    if (empty($def) && $lab != $key) {
@@ -340,7 +369,8 @@ function cc_make_widget($item) {
 	    }
 	}
 	$input = "";
-	$estr = isset($attr['size'])?' size="'.$attr['size'].'"':'';
+	$estr = get_attr_value($attr, 'size');
+	$estr = empty($estr)?'':' size="'.$estr.'"';
 	foreach ($options as $key=>$val) {
 	    $lab = preg_replace('/\+$/', '', $key);
 	    if ($def==null) {
@@ -373,16 +403,20 @@ function cc_make_widget($item) {
 	}
 	$val = htmlspecialchars(str_replace(array_keys($defuser), $defuser, $val), ENT_QUOTES);
 	if ($type == 'textarea') {
-	    if (isset($attr['rows'])) $astr .= ' rows="'.$attr['rows'].'"';
-	    if (isset($attr['cols'])) $astr .= ' cols="'.$attr['cols'].'"';
+	    $estr = get_attr_value($attr, 'rows');
+	    if (!empty($estr)) $astr .= ' rows="'.$estr.'"';
+	    $estr = get_attr_value($attr, 'cols');
+	    if (!empty($estr)) $astr .= ' cols="'.$estr.'"';
 	    $input = "<textarea $names $astr>$val</textarea>";
 	} else {
 	    $input = "";
 	    if ($type=='file') {
 		if ($val) $input .= "$val<input type='hidden' name='{$fname}_prev' value='$val' /><br />";
 	    } else $type = 'text';
-	    if (isset($attr['size'])) $astr .= ' size="'.$attr['size'].'"';
-	    if (isset($attr['maxlength'])) $astr .= ' maxlength="'.$attr['maxlength'].'"';
+	    $estr = get_attr_value($attr, 'size');
+	    if (!empty($estr)) $astr .= ' size="'.$estr.'"';
+	    $estr = get_attr_value($attr, 'maxlength');
+	    if (!empty($estr)) $astr .= ' maxlength="'.$estr.'"';
 	    $input .= "<input type='$type' $names value='$val'$astr />";
 	    if ($type=='file') {
 	    }
@@ -392,6 +426,22 @@ function cc_make_widget($item) {
     return $input;
 }
 
+if (!function_exists("unserialize_vars")) {
+    // expand: label=value[,\n](label=value...) 
+    function unserialize_vars($text,$rev=false) {
+	$array = array();
+	foreach (preg_split('/(,|\r?\n)/',$text) as $ln) {
+	    if (preg_match('/^\s*([^=]+)\s*=\s*(.+)$/', $ln, $d)) {
+		if ($rev) {
+		    $array[$d[2]] = $d[1];
+		} else {
+		    $array[$d[1]] = $d[2];
+		}
+	    }
+	}
+	return $array;
+    }
+}
 if (!function_exists("serialize_text")) {
     function serialize_text($array) {
 	$text = '';
@@ -543,13 +593,13 @@ function is_cc_evaluate($id, $uid, $pass) {
     return $ret;
 }
 
-function cc_notify_mail($tpl, $tags, $users) { // return: error count
+function cc_notify_mail($tpl, $tags, $users, $from="") { // return: error count
     global $xoopsConfig, $xoopsModuleConfig, $xoopsUser, $xoopsModule;
     $xoopsMailer =& getMailer();
     if (is_array($users)) {
 	$err = 0;
 	foreach ($users as $u) {
-	    $err += cc_notify_mail($tpl, $tags, $u);
+	    $err += cc_notify_mail($tpl, $tags, $u, $from);
 	}
 	return $err;
     }
@@ -575,7 +625,7 @@ function cc_notify_mail($tpl, $tags, $users) { // return: error count
 	$xoopsMailer->setToEmails($users);
     }
 
-    $xoopsMailer->setFromEmail($xoopsConfig['adminmail']);
+    $xoopsMailer->setFromEmail($from?$from:$xoopsConfig['adminmail']);
     $xoopsMailer->setFromName($xoopsModule->getVar('name'));
     $xoopsMailer->setSubject(_CC_NOTIFY_SUBJ);
     $xoopsMailer->assign($tags);
@@ -921,7 +971,7 @@ class XoopsBreadcrumbs {
 
     function set($name, $url) {
 	if (preg_match('/^\w+:\/\//', $url)) $url = $this->moddir.$url;
-	$this->pairs[] = array('name'=>htmlspecialchars($name, ENT_QUOTES), 'url'=>$url);
+	$this->pairs[] = array('name'=>htmlspecialchars(strip_tags($name), ENT_QUOTES), 'url'=>$url);
     }
 
     function get() {

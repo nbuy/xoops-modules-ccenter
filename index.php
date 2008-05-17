@@ -1,6 +1,6 @@
 <?php
 // contact to member
-// $Id: index.php,v 1.16 2008/01/27 09:49:34 nobu Exp $
+// $Id: index.php,v 1.17 2008/05/17 05:55:47 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -138,7 +138,13 @@ function store_message($items, $form) {
     global $xoopsUser, $xoopsDB, $xoopsModuleConfig;
 
     $uid = is_object($xoopsUser)?$xoopsUser->getVar('uid'):0;
-    $email = "";
+    $store = $form['store'];
+    if ($store==_DB_STORE_NONE) {
+	$showaddr = true;	// no store to need show address
+    } else {
+	$showaddr = get_attr_value(array(), 'notify_with_email');
+    }
+    $from = $email = "";
     $attach = array();
     $vals = array();
     foreach ($items as $item) {
@@ -149,7 +155,11 @@ function store_message($items, $form) {
 	case 'mail':
 	    if (empty($email)) { // save first email for contact
 		$email = $vals[$name];
-		unset($vals[$name]);
+		if (empty($showaddr)) {
+		    unset($vals[$name]);
+		} else {
+		    $from = $email;
+		}
 	    }
 	    break;
 	case 'file':
@@ -176,12 +186,18 @@ function store_message($items, $form) {
 	'email'=>$xoopsDB->quoteString($email),
 	'onepass'=>$xoopsDB->quoteString($onepass));
     $parg = $onepass?"&p=".urlencode($onepass):"";
-    if ($form['store']) $values['body']=$xoopsDB->quoteString($text);
+    if ($store==_DB_STORE_YES) {
+	$values['body']=$xoopsDB->quoteString($text);
+    }
 
-    $res = $xoopsDB->query("INSERT INTO ".CCMES. "(".join(',',array_keys($values)).") VALUES (".join(',', $values).")");
-    if ($res===false) return array("Error in DATABASE insert");
-    $id = $xoopsDB->getInsertID();
-    if (empty($id)) return array("Internal Error in Store Message");
+    if ($store!=_DB_STORE_NONE) {
+	$res = $xoopsDB->query("INSERT INTO ".CCMES. "(".join(',',array_keys($values)).") VALUES (".join(',', $values).")");
+	if ($res===false) return array("Error in DATABASE insert");
+	$id = $xoopsDB->getInsertID();
+	if (empty($id)) return array("Internal Error in Store Message");
+    } else {
+	$id = 0;
+    }
     $member_handler =& xoops_gethandler('member');
     if ($touid) {
 	$toUser = $member_handler->getUser($touid);
@@ -203,7 +219,6 @@ function store_message($items, $form) {
 	rmdir(XOOPS_UPLOAD_PATH.cc_attach_path(0, ''));
     }
     $dirname = basename(dirname(__FILE__));
-    $msgurl = XOOPS_URL."/modules/$dirname/message.php?id=$id";
     $uname = $xoopsUser?$xoopsUser->getVar('uname'):$GLOBALS['xoopsConfig']['anonymous'];
     $tags = array('SUBJECT'=>$form['title'],
 		  'TO_USER'=>$toUname,
@@ -212,24 +227,25 @@ function store_message($items, $form) {
 		  'REMOTE_ADDR'=>$_SERVER["REMOTE_ADDR"],
 		  'HTTP_USER_AGENT'=>$_SERVER["HTTP_USER_AGENT"]);
     $tpl = 'form_confirm.tpl';
-    if ($email) {
+    $msgurl = XOOPS_URL.($id?"/modules/$dirname/message.php?id=$id":'/');
+    if ($email) {		// reply automaticaly
 	$tags['VALUES'] = "$text$atext";
-	$tags['MSG_URL'] = "$msgurl$parg";
-	cc_notify_mail($tpl, $tags, $email);
+	$tags['MSG_URL'] = ($store==_DB_STORE_NONE)?'':"\n"._MD_NOTIFY_URL."\n$msgurl$parg";
+	cc_notify_mail($tpl, $tags, $email, $toUser?$toUser->getVar('email'):'');
     }
     $tags['VALUES'] = "$text$btext";
-    $tags['MSG_URL'] = $msgurl;
+    $tags['MSG_URL'] = ($store==_DB_STORE_NONE)?'':"\n"._MD_NOTIFY_URL."\n".$msgurl;
 
     $notification_handler =& xoops_gethandler('notification');
     $notification_handler->triggerEvent('global', $id, 'new', $tags);
     // force subscribe sender and recipient
-    $notification_handler->subscribe('message', $id, 'comment');
+    if ($id) $notification_handler->subscribe('message', $id, 'comment');
     if ($touid) {
-	$notification_handler->subscribe('message', $id, 'comment', null, null, $touid);
-	cc_notify_mail($tpl, $tags, $toUser);
+	if ($id) $notification_handler->subscribe('message', $id, 'comment', null, null, $touid);
+	cc_notify_mail($tpl, $tags, $toUser, $from);
     } elseif ($form['cgroup']) { // contact group notify
 	$users = $member_handler->getUsersByGroup($form['cgroup'], true);
-	cc_notify_mail($tpl, $tags, $users);
+	cc_notify_mail($tpl, $tags, $users, $from);
     }
 
     $msgurl .= $parg;

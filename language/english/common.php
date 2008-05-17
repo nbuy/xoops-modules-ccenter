@@ -1,5 +1,5 @@
 <?php
-// $Id: common.php,v 1.1 2008/01/31 09:05:58 nobu Exp $
+// $Id: common.php,v 1.2 2008/05/17 05:55:47 nobu Exp $
 // common user and admin
 
 // message status
@@ -26,4 +26,6 @@ define('_CC_EXPORT_LAST_MONTH','Last month');
 define('_CC_EXPORT_THIS_YEAR','This year');
 define('_CC_EXPORT_LAST_YEAR','Last year');
 define('_CC_EXPORT_ALL','All');
+
+define('_CC_STORE_MODE','Store information=1,Logging only=0,Never store=2');
 ?>

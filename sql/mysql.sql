@@ -1,5 +1,5 @@
 # Contact Center Module for XOOPS
-# $Id: mysql.sql,v 1.3 2007/08/02 16:27:37 nobu Exp $
+# $Id: mysql.sql,v 1.4 2008/05/17 05:55:47 nobu Exp $
 
 #
 # Table structure for table `ccenter_form`
@@ -15,7 +15,7 @@ CREATE TABLE ccenter_form (
   grpperm varchar(40)  NOT NULL default '', -- acceptting groups |ID|ID..|
   priuid  int(8)  NOT NULL default '0',	-- primary contact person
   cgroup  int(8)  NOT NULL default '0', -- contacting group id
-  store   int(1)  NOT NULL default '1', -- store in database
+  store   int(1)  NOT NULL default '1', -- store in database (0:no, 1:store, 2:never)
   custom  int(1)  NOT NULL default '0', -- use custom template (as description)
   active  int(1)  NOT NULL default '1',
   weight  int(8)  NOT NULL default '0',

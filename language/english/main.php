@@ -1,5 +1,5 @@
 <?php
-// $Id: main.php,v 1.1 2008/01/31 09:05:58 nobu Exp $
+// $Id: main.php,v 1.2 2008/05/17 05:55:47 nobu Exp $
 
 define('_MD_EVALS','Evaluate');
 define('_MD_COUNT','Count');
@@ -25,6 +25,7 @@ define('_MD_CCENTER_CHARGE','Contact for me');
 define('_MD_CCENTER_QUERY','My Messages');
 define('_MD_CCENTER_RECEPTION','Staff desk');
 define('_MD_NOTIFY_SUBJ','{X_SITENAME}:{SUBJECT}');
+define('_MD_NOTIFY_URL','This message reference to following URL:');
 define('_MD_CONTACT_DONE','Sending contact message');
 define('_MD_CONTACT_COMMENT','Comment to message');
 define('_MD_CONTACT_FORM','Form name');

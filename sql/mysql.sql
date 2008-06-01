@@ -1,5 +1,5 @@
 # Contact Center Module for XOOPS
-# $Id: mysql.sql,v 1.4 2008/05/17 05:55:47 nobu Exp $
+# $Id: mysql.sql,v 1.5 2008/06/01 13:54:23 nobu Exp $
 
 #
 # Table structure for table `ccenter_form`
@@ -30,18 +30,19 @@ CREATE TABLE ccenter_form (
 
 CREATE TABLE ccenter_message (
   msgid  int(8) unsigned NOT NULL auto_increment,
-  uid   int(5) NOT NULL default '0',
-  touid int(8) NOT NULL default '0',
-  ctime int(10) NOT NULL default '0',
+  uid   int(5) NOT NULL default '0',	-- contactee uid. guest is 0
+  touid int(8) NOT NULL default '0',	-- uid of charge
+  ctime int(10) NOT NULL default '0',	-- contact(create) time
   mtime int(10) NOT NULL default '0',
-  fidref int(8) NOT NULL default '0',
-  email varchar(60) NOT NULL default '',
-  body  text NOT NULL default '',
-  status char(1) NOT NULL default '-',
-  value int(4) NOT NULL default '0',
-  comment text NOT NULL default '',
-  comtime int(10) NOT NULL default '0',
-  onepass varchar(10) NOT NULL default '',
+  atime int(10) NOT NULL default '0',	-- last access time by contactee
+  fidref int(8) NOT NULL default '0',	-- formid external reference
+  email varchar(60) NOT NULL default '',-- guest access email address
+  body  text NOT NULL default '',	-- contact form siralized value
+  status char(1) NOT NULL default '-',	-- '-':not yet, a:accept, b:replyed, c:close, x:deleted
+  value int(4) NOT NULL default '0',	-- evaluate value for this contact
+  comment text NOT NULL default '',	-- comment for evaluate
+  comtime int(10) NOT NULL default '0',	-- time for evaluate
+  onepass varchar(10) NOT NULL default '', -- onetime password for guest
   PRIMARY KEY  (msgid)
 );
 

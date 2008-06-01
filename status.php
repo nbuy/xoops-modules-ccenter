@@ -1,6 +1,6 @@
 <?php
 // Changing message status
-// $Id: status.php,v 1.10 2008/02/29 06:40:11 nobu Exp $
+// $Id: status.php,v 1.11 2008/06/01 13:54:23 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -17,7 +17,11 @@ if (!empty($_POST['eval'])) {	// evaluate at last
     if (is_cc_evaluate($msgid, $uid, $pass)) {
 	$res = $xoopsDB->query("SELECT fidref,status FROM ".CCMES." WHERE msgid=$msgid");
 	list($formid, $s) = $xoopsDB->fetchRow($res);
-	$xoopsDB->query("UPDATE ".CCMES." SET comment=".$xoopsDB->quoteString($com).",value=$eval,comtime=$now,status=".$xoopsDB->quoteString(_STATUS_CLOSE)." WHERE msgid=$msgid");
+	$values = array("value=$eval",
+			"comment=".$xoopsDB->quoteString($com),
+			"comtime=$now", "atime=$now", "mtime=$now",
+			"status=".$xoopsDB->quoteString(_STATUS_CLOSE));
+	$xoopsDB->query("UPDATE ".CCMES." SET ".join(',',$values)." WHERE msgid=$msgid");
 	$log = _MD_EVALS." ($eval)";
 	$log .= "\n".sprintf(_CC_LOG_STATUS, $msg_status[$s], $msg_status[_STATUS_CLOSE]);
 	$evalmsg = _MD_EVALS." ($eval)\n$com";

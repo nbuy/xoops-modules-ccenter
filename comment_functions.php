@@ -1,5 +1,5 @@
 <?php
-// $Id: comment_functions.php,v 1.7 2008/02/29 06:22:10 nobu Exp $
+// $Id: comment_functions.php,v 1.8 2008/06/01 13:54:23 nobu Exp $
 //  ------------------------------------------------------------------------ //
 //                XOOPS - PHP Content Management System                      //
 //                    Copyright (c) 2000 XOOPS.org                           //
@@ -47,6 +47,8 @@ function ccenter_com_approve(&$comment){
 	$uid = is_object($xoopsUser)?$xoopsUser->getVar('uid'):0;
 	$msg = _CC_LOG_COMMENT;
 	$status = ''; // new status
+	$now = time();
+	$values = array('mtime='.$now);
 	if ($uid && $uid == $data['touid']) { // comment by charge
 	    // status to replyed
 	    if ($s==_STATUS_ACCEPT) $status = _STATUS_REPLY;
@@ -54,8 +56,8 @@ function ccenter_com_approve(&$comment){
 	} elseif ($uid==0 || $uid==$data['uid']) { // comment by order person
 	    // status back to contacting
 	    if ($s==_STATUS_REPLY || $s==_STATUS_CLOSE) $status = _STATUS_ACCEPT;
+	    $values[] = 'atime='.$now;
 	}
-	$values = array('mtime='.time());
 	if ($status && $status != $s) {
 	    global $msg_status;
 	    $msg .= "\n".sprintf(_CC_LOG_STATUS, $msg_status[$s], $msg_status[$status]);

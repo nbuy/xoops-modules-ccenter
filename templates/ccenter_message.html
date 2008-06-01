@@ -26,6 +26,11 @@
 <h3><{$subject}></h3>
 <div class="attr"><b class="label"><{$smarty.const._CC_STATUS}></b> 
 <{$status}>
+ <{if $is_mine || $xoops_isadmin}>
+  <{if $readit}>(<{$smarty.const._MD_MSG_READTHIS}> <{$mdate}>)
+  <{else}>(<{$smarty.const._MD_MSG_NOTREAD}>)
+  <{/if}>
+<{/if}>
 <{if $data.value}>
 (<b class="label"><{$smarty.const._MD_EVAL_VALUE}></b> <{$data.value}>)
 <p><{$data.comment}></p>
@@ -41,7 +46,7 @@
   </form>
 <{/if}>
 </div>
-<div class="attr"><b class="label"><{$smarty.const._MD_REGDATE}></b> <{$cdate}></div>
+<div class="attr"><b class="label"><{$smarty.const._MD_POSTDATE}></b> <{$cdate}></div>
 <div class="attr"><b class="label"><{$smarty.const._MD_MODDATE}></b> <{$mdate}></div>
 <div class="attr"><b class="label"><{$smarty.const._MD_CONTACT_FROM}></b> <{$sender}><{if $data.email}> &lt;<a href="mailto:<{$data.email|escape}>"><{$data.email|escape}></a>&gt;<{/if}></div>
 <div class="attr"><b class="label"><{$smarty.const._MD_CONTACT_TO}></b> <{$sendto}>

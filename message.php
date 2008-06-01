@@ -1,6 +1,6 @@
 <?php
 // show messages file
-// $Id: message.php,v 1.17 2008/02/29 06:50:11 nobu Exp $
+// $Id: message.php,v 1.18 2008/06/01 13:54:23 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -39,10 +39,17 @@ if (!cc_check_perm($data)) {
     redirect_header(XOOPS_URL.'/user.php', 3, _NOPERM);
     exit;
 }
-// referer
+
+// change to accept status when change user access
 if ($uid && $uid == $data['touid'] && $data['status']==_STATUS_NONE) {
     change_message_status($msgid, $uid, _STATUS_ACCEPT);
     $data['status'] = _STATUS_ACCEPT;
+}
+
+// recording contactee access time
+$now = time();
+if ($uid == $data['uid'] && $now>$data['atime']+600) { // relax 10min
+    $xoopsDB->queryF("UPDATE ".CCMES." SET atime=$now WHERE msgid=$msgid");
 }
 
 include XOOPS_ROOT_PATH."/header.php";
@@ -80,6 +87,8 @@ $xoopsTpl->assign(
 	  'sendto'=>$data['touid']?xoops_getLinkedUnameFromId($data['touid']):_MD_CONTACT_NOTYET,
 	  'cdate'=>formatTimestamp($data['ctime']),
 	  'mdate'=>myTimestamp($data['mtime'], 'l', _MD_TIME_UNIT),
+	  'adate'=>myTimestamp($data['atime'], 'l', _MD_TIME_UNIT),
+	  'readit'=>($data['atime']>=$data['mtime']),
 	  'data'=> $data,
 	  'items'=>$values,
 	  'status'=>$msg_status[$data['status']],

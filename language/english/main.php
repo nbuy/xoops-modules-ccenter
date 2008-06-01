@@ -1,5 +1,5 @@
 <?php
-// $Id: main.php,v 1.2 2008/05/17 05:55:47 nobu Exp $
+// $Id: main.php,v 1.3 2008/06/01 13:54:23 nobu Exp $
 
 define('_MD_EVALS','Evaluate');
 define('_MD_COUNT','Count');
@@ -40,10 +40,11 @@ define('_MD_MSG_ADMIN', 'Management');
 define('_MD_TIME_UNIT', '%dmin,%dhour,%ddays,past %s');
 
 define('_MD_USER_EVAL','Evaluate by client');
-define('_MD_REGDATE','Registered');
 define('_MD_POSTDATE','Posted');
 define('_MD_MODDATE','Updated');
 define('_MD_ATTACHMENT','Attachment');
+define('_MD_MSG_READTHIS','Readed');
+define('_MD_MSG_NOTREAD','No read');
 define('_MD_EVAL_THANKYOU','Thank you, Evaluating.');
 define('_MD_EVAL_VALUE','This contact response evaluation');
 define('_MD_EVAL_DESC','Contact us to be satisfied with the answers you? Your assessment, if you will respond to comments and please specify. If you have any further questions, the answers to comment "reply" to please.');

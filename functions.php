@@ -1,6 +1,6 @@
 <?php
 // ccenter common functions
-// $Id: functions.php,v 1.24 2008/05/17 05:55:47 nobu Exp $
+// $Id: functions.php,v 1.25 2008/06/01 13:54:23 nobu Exp $
 
 global $xoopsDB;		// for blocks scope
 // using tables
@@ -39,7 +39,8 @@ if (defined('_CC_STATUS_NONE')) {
     define('_CC_TPL_NONE',  0);
     define('_CC_TPL_BLOCK', 1);
     define('_CC_TPL_FULL',  2);
-    define('_CC_TPL_FRAME', 3);
+    define('_CC_TPL_FRAME', 3);	// obsolete
+    define('_CC_TPL_NONE_HTML', 4);
 }
 
 define('LABEL_ETC', '*');	// radio, checkbox widget 'etc' text input.
@@ -51,13 +52,13 @@ function get_attr_value($pri, $name) {
 
     if (isset($pri) && isset($pri[$name])) return $pri[$name];
     if (!isset($defs)) {
-	$defs = array();
+	$defs = array('numeric'=>'[-+]?[0-9]+', 'tel'=>'\+?[0-9][0-9-,]*[0-9]');
 	foreach (explode(',', OPTION_ATTRS) as $key) {
 	    $defs[$key] = 0;
 	}
 	// override module config values
 	$mydirname = basename(dirname(__FILE__));
-	if (is_object($GLOBALS['xoopsModule']) &&
+	if (!empty($GLOBALS['xoopsModule']) &&
 	    $GLOBALS['xoopsModule']->getVar('dirname')==$mydirname) {
 	    $def_attr = $GLOBALS['xoopsModuleConfig']['def_attrs'];
 	} else {
@@ -67,29 +68,40 @@ function get_attr_value($pri, $name) {
 	    $configs =& $config_handler->getConfigsByCat(0, $module->getVar('mid'));
 	    $def_attr = $configs['def_attrs'];
 	}
-	foreach (preg_split('/(,|\r?\n)/', $def_attr) as $ln) {
-	    if (preg_match('/^\s*([^=]+)\s*=\s*(.+)$/', $ln, $d)
-		&& isset($defs[$d[1]])) {
-		$defs[$d[1]] = intval($d[2]); // XXX: only numeric?
-	    }
+	foreach (unserialize_vars($def_attr) as $k => $v) {
+	    $defs[$k] = $v;
 	}
     }
     if (isset($defs[$name])) return $defs[$name];
     return null;
 }
 
+function cc_csv_parse($ln) {
+    $result = array();
+    $rec = array();
+    while ($ln && preg_match('/^("[^"]*(?:""[^"]*)*"|[^,\t\r\n]*)[,\t]?/', $ln, $d)) {
+	$rec[] = preg_replace('/""/', '"', preg_replace('/"([^"]*)"$/s', '$1', $d[1]));
+	$ln = substr($ln, strlen($d[0]));
+	if (preg_match("/^[\r\n]/", $ln)) {
+	    $result[] = $rec;
+	    $rec = array();
+	    $ln = preg_replace("/^[\r\n]\n?/", '', $ln);
+	}
+    }
+    if (count($rec)) $result[] = $rec;
+    return $result;
+}
+
 function get_form_attribute($defs) {
     $num = 0;
     $result = array();
     $types = array('text', 'checkbox', 'radio', 'textarea', 'select', 'hidden','const', 'mail', 'file');
-    foreach (preg_split('/\r?\n/', $defs) as $ln) {
-	$ln = trim($ln);
-	if (empty($ln)) continue;
-	if (preg_match('/^\s*#/', $ln)) {
-	    $result[] = array('comment'=>preg_replace('/^\s*#/','', $ln));
+    foreach (cc_csv_parse($defs) as $opts) {
+	if (empty($opts)) continue;
+	if (preg_match('/^#/', $opts[0])) {
+	    $result[] = array('comment'=>join(',', $opts));
 	    continue;
 	}
-	$opts = explode(",", $ln);
 	$name = array_shift($opts);
 	if (preg_match('/=(.*)$/', $name, $d)) { // use alternative label
 	    $label = $d[1];
@@ -164,14 +176,14 @@ function assign_post_values(&$items) {
 	case 'require':
 	    if ($val==='') $errors[] = $lab.": "._MD_REQUIRE_ERR;
 	    break;
-	case 'num':
-	case 'numeric':
-	    if (!preg_match('/^[-+]?\d+$/', $val)) $errors[] = $lab.": "._MD_NUMITEM_ERR;
-	    break;
 	case 'mail':
 	    if (!checkEmail($val)) $errors[] = $lab.": "._MD_ADDRESS_ERR;
 	    break;
+	case 'num':
+	    $check='numeric';
 	default:
+	    $v = get_attr_value(array(), $check);
+	    if (!empty($v)) $check = $v;
 	    if (!preg_match('/^'.$check.'$/', $val)) $errors[] = $lab.": "._MD_REGEXP_ERR;
 	    break;
 	}
@@ -249,7 +261,7 @@ function assign_form_widgets(&$items, $conf=false) {
 	    } else {
 		$v = htmlspecialchars($val, ENT_QUOTES);
 		if ($item['type']=='hidden') $input = $v;
-		else $input = "$v<input type='hidden' name='$fname' value='$v' />";
+		else $input = nl2br($v)."<input type='hidden' name='$fname' value='$v' />";
 	    }
 	} else {
 	    $input = cc_make_widget($item);
@@ -430,13 +442,21 @@ if (!function_exists("unserialize_vars")) {
     // expand: label=value[,\n](label=value...) 
     function unserialize_vars($text,$rev=false) {
 	$array = array();
-	foreach (preg_split('/(,|\r?\n)/',$text) as $ln) {
+	$text = ltrim($text);
+	$pat = array('/""/', '/^"(.*)"$/');
+	$rep = array('"', '$1');
+	while ($text && preg_match('/^("[^"]*"|[^"\t\r\n,]*)*[,\t\n\r]?/', $text, $d)) {
+	    $ln = preg_replace('/[,\t\n\r]$/', '', $d[0]);
+	    $text = ltrim(substr($text, strlen($d[0])));
 	    if (preg_match('/^\s*([^=]+)\s*=\s*(.+)$/', $ln, $d)) {
 		if ($rev) {
-		    $array[$d[2]] = $d[1];
+		    $k = $d[2];
+		    $v = $d[1];
 		} else {
-		    $array[$d[1]] = $d[2];
+		    $k = $d[1];
+		    $v = $d[2];
 		}
+		$array[$k] = preg_replace($pat, $rep, $v);
 	    }
 	}
 	return $array;
@@ -634,8 +654,15 @@ function cc_notify_mail($tpl, $tags, $users, $from="") { // return: error count
     return $xoopsMailer->send()?0:1;
 }
 
-function check_form_tags($defs, $desc) {
+function check_form_tags($cust,$defs, $desc) {
     global $xoopsConfig;
+
+    switch ($cust) {		// check only custom form
+    case _CC_TPL_NONE:
+    case _CC_TPL_NONE_HTML:
+	return '';
+    }
+
     $base = dirname(__FILE__).'/language/';
     $path = $base.$xoopsConfig['language'].'/main.php';
     if (file_exists($path)) include_once($path);
@@ -661,10 +688,13 @@ function custom_template($form, $items, $conf=false) {
     global $xoopsConfig;
     $str = $rep = array();
     $hasfile = "";
-    $id = $form['formid'];
     foreach ($items as $item) {
+	$value = empty($item['input'])?"":$item['input'];
+	if (!empty($item['comment'])) {
+	    $value .= "<span class='note'>".$item['comment']."</span>";
+	}
 	$str[] = '{'.$item['name'].'}';
-	$rep[] = empty($item['input'])?"":$item['input'];
+	$rep[] = $value;
 	$fname = $item['field'];
 	if ($item['type']=='file') {
 	    $hasfile = ' enctype="multipart/form-data"';
@@ -886,19 +916,20 @@ function change_message_status($msgid, $touid, $stat) {
     return true;
 }
 
-function checkScript($checks, $confirm) {
+function checkScript($checks, $confirm, $pattern) {
     $script = "<script type=\"text/javascript\">
 <!--//
-function checkItem(obj, lab) {
+function checkItem(obj, lab, pat) {
   msg = lab+\": "._MD_REQUIRE_ERR."\\n\";
   if (typeof(obj.selectedIndex)==\"number\" && obj.value != \"\") return \"\";
-  if (obj.value == \"\") return msg;
   if (typeof(obj.length)==\"number\") {
      for (i=0; i<obj.length; i++) {
         if (obj[i].checked) return \"\";
      }
      return msg;
   }
+  if (obj.value == \"\") return msg;
+  if (!obj.value.match(new RegExp('^'+pat+'\$'))) return lab+\": "._MD_REGEXP_ERR."\\n\";
   return \"\";
 }
 function xoopsFormValidate_ccenter() {
@@ -907,8 +938,12 @@ function xoopsFormValidate_ccenter() {
     obj = null;
 ";
     foreach ($checks as $name => $msg) {
+	$pat = $pattern[$name];
+	$v = get_attr_value(array(), $pat);
+	if (!empty($v)) $pat = $v;
+	$pat = htmlspecialchars($pat);
 	$script .= "
-    msg = msg+checkItem(myform['$name'], \"$msg\");
+    msg = msg+checkItem(myform['$name'], \"".htmlspecialchars($msg)."\", \"$pat\");
     if(msg && obj==null)obj=myform['$name'];\n";
     }
     if (count($confirm)) {
@@ -936,27 +971,63 @@ function checkedEtcText(lab) {
 
 function set_checkvalue(&$form) {
     $hasfile = false;
-    $require = array();
-    $confirm = array();
+    $require = $confirm = $pattern = array();
     foreach ($form['items'] as $item) {
 	if (empty($item['field'])) continue;
 	$fname = $item['field'];
 	$type = $item['type'];
-	$lab = $item['label'];
+	$lab = htmlspecialchars(strip_tags($item['label']));
 	$check = isset($item['attr']['check'])?$item['attr']['check']:'';
 	if ($type == 'file') {
 	    $hasfile=true;
 	} elseif (preg_match('/_conf$/', $fname)) {
 	    $confirm[preg_replace('/_conf$/', '', $fname)] = $lab;
-	} elseif ($check=='require') {
+	} elseif (!empty($check)) {
 	    if ($type == 'checkbox') $fname .= '[]';
-	    $require[$fname] = htmlspecialchars(strip_tags($lab));
+	    $require[$fname] = $lab;
+	    $pattern[$fname] = ($check=='require')?'.+':$check;
 	}
     }
 
-    $form['check_script'] = checkScript($require, $confirm);
+    $form['check_script'] = checkScript($require, $confirm, $pattern);
     $form['confirm'] = $confirm;
     $form['hasfile'] = $hasfile;
+}
+
+function render_form(&$form, $op) {
+    global $xoopsTpl;
+    set_checkvalue($form);
+    $myts =& MyTextSanitizer::getInstance();
+    $html = 0;
+    $br = 1;
+    switch ($form['custom']) {
+    case _CC_TPL_FRAME:
+	$xoopsTpl->assign(array('xoops_showcblock'=>0,'xoops_showlblock'=>0,'xoops_showrblock'=>0));
+    case _CC_TPL_BLOCK:
+    case _CC_TPL_FULL:
+	$out = custom_template($form, $form['items'], $op == 'confirm');
+	break;
+    case _CC_TPL_NONE_HTML:
+	$html = 1;
+	$br = 0;
+    case _CC_TPL_NONE:
+	$str = $rep = array();
+	if (!empty($form['priuser'])) {
+	    $priuser =& $form['priuser'];
+	    $str[] = "{TO_UNAME}";
+	    $rep[] = $priuser['uname'];
+	    $str[] = "{TO_NAME}";
+	    $rep[] = $priuser['name'];
+	}
+	$str[] = "{XOOPS_URL}";
+	$rep[] = XOOPS_URL;
+	$form['desc'] = $myts->displayTarea(str_replace($str, $rep, $form['description']), $html, 1, 1, 1, $br);
+
+	$xoopsTpl->assign('form', $form);
+	$xoopsTpl->assign('op', 'confirm');
+	$out = $xoopsTpl->fetch('db:'.($op=='confirm'?"ccenter_confirm.html":"ccenter_form.html"));
+    }
+    return $out;
 }
 
 class XoopsBreadcrumbs {

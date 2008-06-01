@@ -1,5 +1,5 @@
 <?php
-// $Id: modinfo.php,v 1.2 2008/05/17 05:55:47 nobu Exp $
+// $Id: modinfo.php,v 1.3 2008/06/01 13:54:23 nobu Exp $
 // Module Info
 
 // The name of this module
@@ -34,8 +34,8 @@ define("_MI_CCENTER_BLOCK_FORM","Contact form");
 // Configs
 define("_MI_CCENTER_LISTS","Number of list items");
 define("_MI_CCENTER_LISTS_DESC","Set number of list show a display");
-define("_MI_CCENTER_DEF_ATTRS","Default Form attributes");
-define("_MI_CCENTER_DEF_ATTRS_DESC","Setting form definition attribute default value. Example: <tt>size=60,rows=5,cols=50</tt>");
+define("_MI_CCENTER_DEF_ATTRS","Default attributes");
+define("_MI_CCENTER_DEF_ATTRS_DESC","Setting form definition and other attribute default value. Example: <tt>size=60,rows=5,cols=50</tt>");
 define("_MI_CCENTER_STATUS_COMBO", "Status selections");
 define("_MI_CCENTER_STATUS_COMBO_DESC","the Format as: <tt>Display-label: [status1[,status2...]]</tt>, include multipule lines. the status is a character from (-,a,b,c). Example: <tt>Open: - a</tt>");
 define("_MI_CCENTER_STATUS_COMBO_DEF","All: - a b c\nOpen: - a\nClosed: b c\n--------:\nWaiting: -\nWorking: a\nReplyed: b\nDone: c\n");

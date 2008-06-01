@@ -1,5 +1,5 @@
 <?php
-// $Id: xoops_version.php,v 1.15 2008/05/17 05:55:47 nobu Exp $
+// $Id: xoops_version.php,v 1.16 2008/06/01 13:54:23 nobu Exp $
 //  ------------------------------------------------------------------------ //
 //  This program is free software; you can redistribute it and/or modify     //
 //  it under the terms of the GNU General Public License as published by     //
@@ -22,7 +22,7 @@
 //  ------------------------------------------------------------------------ //
 
 $modversion = array('name' => _MI_CCENTER_NAME,
-		    'version' => "0.86",
+		    'version' => "0.87",
 		    'description' => _MI_CCENTER_DESC,
 		    'credits' => "Nobuhiro Yasutomi",
 		    'author' => "Nobuhiro Yasutomi",

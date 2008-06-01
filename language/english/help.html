@@ -18,6 +18,7 @@ pre { color: #600000; }
   <li><a href="#intro">Abstruct</a></li>
   <li><a href="#form">Form defunitions</a></li>
   <li><a href="#custom">Custom Form</a></li>
+  <li><a href="#config">Preferences</a></li>
   <li><a href="#tips">Tips for using</a></li>
   <li><a href="#changes">Changes</a></li>
   </ul>
@@ -95,8 +96,9 @@ pre { color: #600000; }
 	  <input type="checkbox" name="samp5_3" /> Item3</td>
 	<td>Selection value default checked adding "+".</td></tr>
       <tr class="even"><td>Selection,select,Item1,Item2,Item3</td><td>Selection <select name="samp6"><option>Item1</option><option>Item2</option><option>Item3</option></select></td><td></td></tr>
-      <tr class="odd"><td>Label,hidden,value</td><td><em>(Not display in form)</em></td><td>This is handle input value.</td></tr>
-      <tr class="even"><td>#Comment</td><td>Comment</td><td></td></tr>
+      <tr class="odd"><td>Label,const,value</td><td><em>Label value</em></td><td>Show the value as is and that input value.</td></tr>
+      <tr class="even"><td>Label,hidden,value</td><td><em>(Not display in form)</em></td><td>This is handle input value.</td></tr>
+      <tr class="odd"><td>#Comment</td><td>Comment</td><td></td></tr>
     </table>
   </form>
   </blockquote>
@@ -136,6 +138,46 @@ Item-n: {Item-n}
   <li>"Wide template" settings makes setting smarty variables <tt>$xoops_show{c,l,r}block</tt> to 0. This function to be work need to depend themes.</li>
   </ul>
   </blockquote>
+
+  <a name="config"></a><h2>Preferences</h2>
+
+  <p>Module preferences has following items.</p>
+
+  <blockquote>
+    <table border="0" cellspacing="1" cellpadding="4" class="outer">
+      <tr class="head"><th>Item Name</th><th>Setting/Default</th><th>Description</th></tr>
+      <tr class="even"><td class="head">Number of list items</td><td><u>25</u></td><td>Set number of list show a display</td></tr>
++      <tr class="odd"><td class="head">Default Attributes</td><td>size=60, rows=5, cols=50, notify_with_email=0</td><td>Setting form definition and other attribute default value.</td></tr>
++      <tr class="even"><td class="head">Status selections</td><td><pre>All: - a b c
+Open: - a
+Closed: b c
+--------:
+Waiting: -
+Working: a
+Replyed: b
+Done: c</pre></td><td>the Format as: Display-label: [status1[,status2...]], include multipule lines. the status is a character from (-,a,b,c). 
+	  <p>
+	    Each character mean as -:waiting, a:working,
+	    b:reply and c:close.
+	  </p>
+      </td></tr>
+    </table>
+
+    <h3>Attributes</h3>
+
+    <table border="0" cellspacing="1" cellpadding="4" class="outer">
+      <tr class="head"><th>Attribute Name</th><th>Setting/Default</th><th>Description</th></tr>
+      <tr class="even"><td class="head">size</td><td><u>0</u></td><td>size of text input</td></tr>
+      <tr class="odd"><td class="head">maxlength</td><td><u>0</u></td><td>maxlength of text input</td></tr>
+      <tr class="even"><td class="head">rows</td><td><u>0</u></td><td>rows number of textarea</td></tr>
+      <tr class="odd"><td class="head">cols</td><td><u>0</u></td><td>columns number of textarea</td></tr>
+      <tr class="even"><td class="head">notify_with_email</td><td><u>0</u></td><td>When setting 1 email address include in notification</td></tr>
+      <tr class="odd"><td class="head">other names</td><td>RegExp</td><td>Input format checking regular expressions
+	  <p>Example: Numeric check <tt>numeric=[-+]?[0-9]+</tt>, Phone Number <tt>tel="\+?[0-9][0-9-,]*[0-9]"</tt><br />Using in Contact form's "Form defunisions" attribute like <tt>check=tel</tt>.</p>
+	  <p>Regular expressions using JavaScript acceptable range. (Server side use perl regexp, but client side use JavaScript)</p>
+      </td></tr>
+    </table>
+  <blockquote>
 
   <a name="tips"></a><h2>Tips for using</h2>
 
@@ -190,6 +232,18 @@ Item-n: {Item-n}
 
   <a name="changes"></a><h2>Changes</h2>
   <dl>
+  <dt>2008-06-01 ccenter 0.87</dt>
+  <dd>
+    <ul>
+      <li>Template mode show with comment</li>
+      <li>Attribute name using checking regular expressions</li>
+      <li>Form defunitions accept CSV quotation</li>
+      <li>Blocks form using select button</li>
+      <li>Admin preview reviced</li>
+      <li>Fix when no saveing redirection page</li>
+      <li>Add contactee access time in database (Following read contactee)</li>
+    </ul>
+  </dd>
   <dt>2008-05-17 ccenter 0.86</dt>
   <dd>
     <ul>
@@ -288,6 +342,6 @@ Item-n: {Item-n}
 <hr/>
 <aliress>Nobuhiro YASUTOMI &lt;<a href="mailto:nobuhiro.yasutomi@nifty.ne.jp">nobuhiro.yasutomi@nifty.ne.jp</a>&gt;</aliress>
 MySite Users <a href="http://myht.org/">http://myht.org/</a><br/>
-$Id: help.html,v 1.4 2008/05/17 05:55:47 nobu Exp $
+$Id: help.html,v 1.5 2008/06/01 13:54:23 nobu Exp $
 </body>
 </html>

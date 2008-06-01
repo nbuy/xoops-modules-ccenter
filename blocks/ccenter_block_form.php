@@ -1,6 +1,6 @@
 <?php
 // Display contact form in block
-// $Id: ccenter_block_form.php,v 1.1 2008/01/02 10:00:37 nobu Exp $
+// $Id: ccenter_block_form.php,v 1.2 2008/06/01 13:54:23 nobu Exp $
 
 global $xoopsConfig;
 
@@ -33,24 +33,20 @@ function b_ccenter_form_show($options) {
     $form['items'] =& $items;
     $form['action'] = XOOPS_URL.'/modules/'.basename(dirname(dirname(__FILE__))).'/index.php?form='.$form['formid'];
 
-    set_checkvalue($form);
-
-    if ($form['custom']) {
-	$out = custom_template($form, $items, false);
-    } else {
-	$form['description'] = $myts->displayTarea($form['description']);
-	$tpl = new XoopsTpl();
-	$tpl->assign('form', $form);
-	$tpl->assign('op', 'confirm');
-	$out = $tpl->fetch('db:ccenter_form.html');
-    }
-    return array('content'=>$out);
+    return array('content'=>render_form($form, 'form'));
 }
 
 function b_ccenter_form_edit($options) {
-    global $xoopsConfig, $msg_status;
+    global $xoopsConfig, $msg_status, $xoopsDB;
     $id = intval($options[0]);
-    $ln = "<div><b>"._BL_CCENTER_FORMS_ID."</b> <input name='options[0]' value='$id' size='4'/></div>\n";
+    $ln = "<div><b>"._BL_CCENTER_FORMS_ID."</b> ".
+	"<select name='options[0]'>\n<option value='0'>".
+	_BL_CCENTER_FORMS_FIRST."</option>\n";
+    $res = $xoopsDB->query("SELECT formid,title FROM ".FORMS." WHERE active ORDER BY weight,formid");
+    while (list($id, $title)=$xoopsDB->fetchRow($res)) {
+	$ln .= "<option value='$id'>".htmlspecialchars($title)."</option>";
+    }
+    $ln .= "</select>\n";
     return $ln;
 }
 ?>

@@ -48,9 +48,11 @@ if ($op == 'delform') {
 	$res = $xoopsDB->query("INSERT INTO ".FORMS."(".join(',', array_keys($vals)).") VALUES(".join(',', $vals).")");
 	$formid = $xoopsDB->getInsertID();
     }
-    if ($data['custom']&&check_form_tags($data['defs'],$data['description'])) {
+    if (check_form_tags($data['custom'], $data['defs'],$data['description'])) {
 	$redirect = "index.php?formid=".$formid;
-    } else $redirect = "index.php";
+    } else {
+	$redirect = "index.php";
+    }
     if ($res) {
 	redirect_header($redirect, 1, _AM_FORM_UPDATED);
     } else {
@@ -159,8 +161,9 @@ FROM ".FORMS." LEFT JOIN ".CCMES." ON fidref=formid AND status<>'x' GROUP BY for
 }
 
 function build_form($formid=0) {
-    global $xoopsDB, $xoopsUser, $myts, $fields, $xoopsConfig;
+    global $xoopsDB, $xoopsUser, $myts, $fields, $xoopsConfig, $xoopsModuleConfig;
     include_once dirname(dirname(__FILE__))."/language/".$xoopsConfig['language'].'/main.php';
+
     if (isset($_POST['formid'])) {
 	$data = array();
 	$fields[] = 'priuid';
@@ -176,24 +179,11 @@ function build_form($formid=0) {
 	if ($_POST['preview']) {
 	    echo "<h2>"._PREVIEW." : ".htmlspecialchars($data['title'])."</h2>\n";
 	    echo "<div class='preview'>\n";
-	    if ($data['custom']) {
-		$data['check_script'] = "";
-		$data['formid'] = $formid;
-		echo custom_template($data, $items);
-	    } else {
-		echo $myts->displayTarea($data['description']);
-		echo "<form><table class='outer' cellspacing='1' border='0'>\n";
-		foreach ($items as $n=>$item) {
-		    $bg = $n%2?'even':'odd';
-		    if (empty($item['label'])) {
-			echo "<tr class='$bg'><td colspan='2'>".$item['comment']."</td></tr>\n";
-		    } else {
-			echo "<tr class='$bg'><td class='head'>".$item['label']."</td><td>".$item['input'].$item['comment']."</td></tr>\n";
-		    }
-		}
-		echo '</table><p style="text-align: center;"><input type="submit" value="'._SUBMIT.'" disabled="disabled"/></p>';
-		echo "\n</form>";
-	    }
+	    $data['action'] = '';
+	    $data['check_script'] = "";
+	    $data['items'] =& $items;
+	    $out = render_form($data, 'form');
+	    echo preg_replace('/type=["\']submit["\']/', 'type="submit" disabled="disabled"', $out);
 	    echo "</div>\n<hr size='5'/>\n";
 	}
     } elseif ($formid) {
@@ -218,15 +208,12 @@ function build_form($formid=0) {
     $button = new XoopsFormButton('', 'ins_tpl', _AM_INS_TEMPLATE);
     $button->setExtra("onClick=\"myform.description.value += defsToString();\"");
     $desc->addElement($button);
-    if ($data['custom']) {
-	$error = check_form_tags($data['defs'], $description);
-	if ($error) $desc->addElement(new XoopsFormLabel('', "<div style='color:red;'>$error</div>"));
-    }
+    $error = check_form_tags($data['custom'], $data['defs'], $description);
+    if ($error) $desc->addElement(new XoopsFormLabel('', "<div style='color:red;'>$error</div>"));
     $form->addElement($desc);
     $custom = new XoopsFormSelect(_AM_FORM_CUSTOM, 'custom' , $data['custom']);
-    $custom->setExtra(' onChange="myform.ins_tpl.disabled = (this.value==0);"');
-    $custom->addOptionArray(array(_AM_CUSTOM_NONE, _AM_CUSTOM_TPL_BLOCK,
-				  _AM_CUSTOM_TPL_FULL, _AM_CUSTOM_TPL_FRAME));
+    $custom->setExtra(' onChange="myform.ins_tpl.disabled = (this.value==0||this.value==4);"');
+    $custom->addOptionArray(unserialize_vars(_AM_CUSTOM_DESCRIPTION));
     $form->addElement($custom);
     $grpperm = new XoopsFormSelectGroup(_AM_FORM_ACCEPT_GROUPS, 'grpperm', true, $data['grpperm'], 4, true);
     $grpperm->setDescription(_AM_FORM_ACCEPT_GROUPS_DESC);
@@ -348,7 +335,9 @@ function defsToString() {
       "<p>{SUBMIT} {BACK}</p>\n</form>\n{CHECK_SCRIPT}";
 }
 
-document.myform.ins_tpl.disabled = (document.myform.custom.value==0);
+fvalue = document.myform.custom.value;
+document.myform.ins_tpl.disabled = (fvalue==0 || fvalue==4);
+//fckeditor_exec();
 </script>
 ';
 }

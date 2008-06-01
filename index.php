@@ -1,6 +1,6 @@
 <?php
 // contact to member
-// $Id: index.php,v 1.17 2008/05/17 05:55:47 nobu Exp $
+// $Id: index.php,v 1.18 2008/06/01 13:54:23 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -87,52 +87,16 @@ $action = XOOPS_URL."/modules/$dirname/index.php?form=".$form['formid'];
 if (!empty($form['priuser'])) $action .= '&amp;uid='.$form['priuser']['uid'];
 $form['action'] = $action;
 
-set_checkvalue($form);
-
 $title = htmlspecialchars($form['title']);
 $breadcrumbs->set($title, "index.php?form=$id");
 
-if ($cust) {
-    $out = custom_template($form, $items, $op == 'confirm');
-    switch ($cust) {
-    case _CC_TPL_FRAME:
-    case _CC_TPL_BLOCK:
-	include XOOPS_ROOT_PATH."/header.php";
-	if ($cust == _CC_TPL_FRAME) {
-	    $xoopsTpl->assign(array('xoops_showcblock'=>0,'xoops_showlblock'=>0,'xoops_showrblock'=>0));
-	}
-	$breadcrumbs->assign();
-	$xoopsTpl->assign('xoops_pagetitle', $title);
-	if ($errors) xoops_error($errors);
-	echo $out;
-	include XOOPS_ROOT_PATH."/footer.php";
-	break;
-	
-    default:
-	echo $out;
-	break;
-    }
-} else {
-    $str = $rep = array();
-    if (!empty($form['priuser'])) {
-	$priuser =& $form['priuser'];
-	$str[] = "{TO_UNAME}";
-	$rep[] = $priuser['uname'];
-	$str[] = "{TO_NAME}";
-	$rep[] = $priuser['name'];
-    }
-    $form['description'] = $myts->displayTarea(str_replace($str, $rep, $form['description']));
-    include XOOPS_ROOT_PATH."/header.php";
-    $breadcrumbs->assign();
-    $xoopsTpl->assign('xoops_pagetitle', $title);
-    $xoopsOption['template_main'] = ($op=='confirm')?"ccenter_confirm.html":"ccenter_form.html";
 
-    $xoopsTpl->assign('errors', $errors);
-    $xoopsTpl->assign('form', $form);
-    $xoopsTpl->assign('op', 'confirm');
-
-    include XOOPS_ROOT_PATH."/footer.php";
-}
+include XOOPS_ROOT_PATH."/header.php";
+$xoopsTpl->assign('errors', $errors);
+$xoopsTpl->assign('xoops_pagetitle', $title);
+$breadcrumbs->assign();
+echo render_form($form, $op);
+if ($cust!=_CC_TPL_FULL) include XOOPS_ROOT_PATH."/footer.php";
 
 function store_message($items, $form) {
     global $xoopsUser, $xoopsDB, $xoopsModuleConfig;
@@ -181,7 +145,7 @@ function store_message($items, $form) {
     $now = time();
     $values = array(
 	'uid'=>$uid, 'touid'=>$touid,
-	'ctime'=>$now, 'mtime'=>$now,
+	'ctime'=>$now, 'mtime'=>$now, 'atime'=>$now,
 	'fidref'=>$form['formid'],
 	'email'=>$xoopsDB->quoteString($email),
 	'onepass'=>$xoopsDB->quoteString($onepass));
@@ -248,7 +212,7 @@ function store_message($items, $form) {
 	cc_notify_mail($tpl, $tags, $users, $from);
     }
 
-    $msgurl .= $parg;
+    if ($id) $msgurl .= $parg;
     if (!empty($form['redirect'])) $msgurl = $form['redirect'];
     redirect_header($msgurl, 3, _MD_CONTACT_DONE);
     exit;

@@ -1,6 +1,6 @@
 <?php
 # ccenter module onUpdate proceeding.
-# $Id: onupdate.php,v 1.2 2007/08/06 13:54:27 nobu Exp $
+# $Id: onupdate.php,v 1.3 2008/06/01 13:54:23 nobu Exp $
 
 global $xoopsDB;
 
@@ -26,13 +26,13 @@ if ($xoopsDB->errno()) { // check exists
 }
 
 // add create time fields (after ccenter-0.80)
-if (add_field(MSG, "ctime", "INT DEFAULT 0 NOT NULL", "touid")) {
-    $msgs[] = "&nbsp;&nbsp; Add new field: <b>ctime</b> in ccenter_message";
-    // copy mtime to new ctime at first
-    $xoopsDB->query("UPDATE ".MSG." SET ctime=mtime");
+add_field(MSG, "ctime", "INT DEFAULT 0 NOT NULL", "touid");
+// add access time fields (after ccenter-0.87)
+if (add_field(MSG, "atime", "INT DEFAULT 0 NOT NULL", "mtime")) {
+    // last access initially same as ctime
+    $xoopsDB->query("UPDATE ".MSG." SET atime=ctime");
 }
 
-// not use now.
 function add_field($table, $field, $type, $after) {
     global $xoopsDB;
     $res = $xoopsDB->query("SELECT $field FROM $table", 1);
@@ -40,9 +40,20 @@ function add_field($table, $field, $type, $after) {
 	if ($after) $after = "AFTER $after";
 	$res = $xoopsDB->query("ALTER TABLE $table ADD $field $type $after");
     } else return false;
+    report_message(" Add new field: <b>$table.$field</b>");
     if (!$res) {
 	echo "<div class='errorMsg'>".$xoopsDB->errno()."</div>\n";
     }
     return $res;
+}
+
+function report_message($msg) {
+    global $msgs;		// module manager's variable
+    static $first = true;
+    if ($first) {
+	$msgs[] = "Update Database...";
+	$first = false;
+    }
+    $msgs[] = "&nbsp;&nbsp; $msg";
 }
 ?>

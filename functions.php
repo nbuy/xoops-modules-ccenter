@@ -1,6 +1,6 @@
 <?php
 // ccenter common functions
-// $Id: functions.php,v 1.25 2008/06/01 13:54:23 nobu Exp $
+// $Id: functions.php,v 1.26 2008/06/03 13:55:04 nobu Exp $
 
 global $xoopsDB;		// for blocks scope
 // using tables
@@ -929,7 +929,7 @@ function checkItem(obj, lab, pat) {
      return msg;
   }
   if (obj.value == \"\") return msg;
-  if (!obj.value.match(new RegExp('^'+pat+'\$'))) return lab+\": "._MD_REGEXP_ERR."\\n\";
+  if (!obj.value.match(new RegExp('^'+pat+'\$', 'm'))) return lab+\": "._MD_REGEXP_ERR."\\n\";
   return \"\";
 }
 function xoopsFormValidate_ccenter() {

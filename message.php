@@ -1,6 +1,6 @@
 <?php
 // show messages file
-// $Id: message.php,v 1.18 2008/06/01 13:54:23 nobu Exp $
+// $Id: message.php,v 1.19 2008/06/15 13:57:15 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -48,7 +48,7 @@ if ($uid && $uid == $data['touid'] && $data['status']==_STATUS_NONE) {
 
 // recording contactee access time
 $now = time();
-if ($uid == $data['uid'] && $now>$data['atime']+600) { // relax 10min
+if ($uid == $data['uid'] && $now>$data['atime']) {
     $xoopsDB->queryF("UPDATE ".CCMES." SET atime=$now WHERE msgid=$msgid");
 }
 

@@ -1,6 +1,6 @@
 <?php
 // ccenter common functions
-// $Id: functions.php,v 1.26 2008/06/03 13:55:04 nobu Exp $
+// $Id: functions.php,v 1.27 2008/06/15 13:57:15 nobu Exp $
 
 global $xoopsDB;		// for blocks scope
 // using tables
@@ -941,7 +941,7 @@ function xoopsFormValidate_ccenter() {
 	$pat = $pattern[$name];
 	$v = get_attr_value(array(), $pat);
 	if (!empty($v)) $pat = $v;
-	$pat = htmlspecialchars($pat);
+	$pat = htmlspecialchars(preg_replace('/([\\\\\"])/', '\\\\$1', $pat));
 	$script .= "
     msg = msg+checkItem(myform['$name'], \"".htmlspecialchars($msg)."\", \"$pat\");
     if(msg && obj==null)obj=myform['$name'];\n";
@@ -996,6 +996,7 @@ function set_checkvalue(&$form) {
 
 function render_form(&$form, $op) {
     global $xoopsTpl;
+
     set_checkvalue($form);
     $myts =& MyTextSanitizer::getInstance();
     $html = 0;
@@ -1005,7 +1006,8 @@ function render_form(&$form, $op) {
 	$xoopsTpl->assign(array('xoops_showcblock'=>0,'xoops_showlblock'=>0,'xoops_showrblock'=>0));
     case _CC_TPL_BLOCK:
     case _CC_TPL_FULL:
-	$out = custom_template($form, $form['items'], $op == 'confirm');
+	$xoopsTpl->assign('content', custom_template($form, $form['items'], $op == 'confirm'));
+	$template = "ccenter_custom.html";
 	break;
     case _CC_TPL_NONE_HTML:
 	$html = 1;
@@ -1023,11 +1025,13 @@ function render_form(&$form, $op) {
 	$rep[] = XOOPS_URL;
 	$form['desc'] = $myts->displayTarea(str_replace($str, $rep, $form['description']), $html, 1, 1, 1, $br);
 
-	$xoopsTpl->assign('form', $form);
 	$xoopsTpl->assign('op', 'confirm');
-	$out = $xoopsTpl->fetch('db:'.($op=='confirm'?"ccenter_confirm.html":"ccenter_form.html"));
+	$template = ($op=='confirm'?"ccenter_confirm.html":"ccenter_form.html");
     }
-    return $out;
+    $dirname = basename(dirname(__FILE__));
+    $form['cc_url'] = XOOPS_URL."/modules/$dirname";
+    $xoopsTpl->assign('form', $form);
+    return $template;
 }
 
 class XoopsBreadcrumbs {

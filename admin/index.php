@@ -161,7 +161,7 @@ FROM ".FORMS." LEFT JOIN ".CCMES." ON fidref=formid AND status<>'x' GROUP BY for
 }
 
 function build_form($formid=0) {
-    global $xoopsDB, $xoopsUser, $myts, $fields, $xoopsConfig, $xoopsModuleConfig;
+    global $xoopsDB, $xoopsUser, $myts, $fields, $xoopsConfig, $xoopsModuleConfig, $xoopsTpl;
     include_once dirname(dirname(__FILE__))."/language/".$xoopsConfig['language'].'/main.php';
 
     if (isset($_POST['formid'])) {
@@ -182,7 +182,7 @@ function build_form($formid=0) {
 	    $data['action'] = '';
 	    $data['check_script'] = "";
 	    $data['items'] =& $items;
-	    $out = render_form($data, 'form');
+	    $out = $xoopsTpl->fetch('db:'.render_form($data, 'form'));
 	    echo preg_replace('/type=["\']submit["\']/', 'type="submit" disabled="disabled"', $out);
 	    echo "</div>\n<hr size='5'/>\n";
 	}

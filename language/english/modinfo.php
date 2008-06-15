@@ -1,5 +1,5 @@
 <?php
-// $Id: modinfo.php,v 1.3 2008/06/01 13:54:23 nobu Exp $
+// $Id: modinfo.php,v 1.4 2008/06/15 13:57:15 nobu Exp $
 // Module Info
 
 // The name of this module
@@ -21,6 +21,7 @@ define("_MI_CCENTER_HELP", "Help");
 // A brief template of this module
 define("_MI_CCENTER_INDEX_TPL", "List of forms");
 define("_MI_CCENTER_FORM_TPL", "Contact form");
+define("_MI_CCENTER_CUST_TPL", "Contact form (custom)");
 define("_MI_CCENTER_CONF_TPL", "Confirm form inputs");
 define("_MI_CCENTER_LIST_TPL", "List of my queries");
 define("_MI_CCENTER_CHARGE_TPL", "List of contact for me");

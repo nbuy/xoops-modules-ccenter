@@ -9,7 +9,7 @@
 <h2><{$form.title}></h2>
 <p><{$form.desc}></p>
 <a name="form"></a>
-<form action="<{$form.action}>" name="ccenter" method="post"<{if $form.check_script}> onsubmit="return xoopsFormValidate_ccenter();"<{/if}><{if $form.hasfile}> enctype="multipart/form-data"<{/if}>>
+<form action="<{$form.cc_url}>/<{$form.action}>" name="ccenter" method="post"<{if $form.check_script}> onsubmit="return xoopsFormValidate_ccenter();"<{/if}><{if $form.hasfile}> enctype="multipart/form-data"<{/if}>>
 <input type="hidden" name="op" value="<{$op}>" />
 
 <table class="outer" align="center" cellspacing="1" border="0">
@@ -44,8 +44,8 @@
 </div>
 <{if $xoops_isadmin}>
   <div class="ccadmin" style="text-align: right">[
-    <a href="admin/index.php?formid=<{$form.formid}>"><{$smarty.const._EDIT}></a>
-    | <a href="admin/msgadm.php?msgid=<{$data.msgid}>"><{$smarty.const._MD_MSG_ADMIN}></a>
+    <a href="<{$form.cc_url}>/reception.php?formid=<{$form.formid}>"><{$smarty.const._MD_CCENTER_RECEPTION}></a>
+    | <a href="<{$form.cc_url}>/admin/index.php?formid=<{$form.formid}>"><{$smarty.const._EDIT}></a>
     ]
   </div>
 <{/if}>

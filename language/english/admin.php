@@ -1,5 +1,5 @@
 <?php
-// $Id: admin.php,v 1.2 2008/02/29 06:21:49 nobu Exp $
+// $Id: admin.php,v 1.3 2008/06/15 13:57:15 nobu Exp $
 
 define('_AM_FORM_EDIT', 'Edit contact form');
 define('_AM_FORM_NEW', 'Create new contact form');
@@ -27,10 +27,7 @@ define('_AM_FORM_LABREQ', 'Please input item name');
 define('_AM_FORM_REQ','Required');
 define('_AM_FORM_ADD', 'Add');
 define('_AM_FORM_OPTREQ', 'Need option argument');
-define('_AM_CUSTOM_NONE', 'Normal[bb]');
-define('_AM_CUSTOM_TPL_BLOCK', 'Part template');
-define('_AM_CUSTOM_TPL_FULL', 'Overall template');
-define('_AM_CUSTOM_TPL_FRAME', 'Wide template');
+define('_AM_CUSTOM_DESCRIPTION', '0=Normal[bb],4=HTML description[bb],1=Part template,2=Overall template');
 define('_AM_CHECK_NOEXIST', 'Variables not exist');
 define('_AM_CHECK_DUPLICATE', 'Variable duplicates');
 define('_AM_DETAIL', 'Detail');

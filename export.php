@@ -1,6 +1,6 @@
 <?php
 // Export data in CSV format
-// $Id: export.php,v 1.9 2008/02/29 06:22:10 nobu Exp $
+// $Id: export.php,v 1.10 2008/06/15 13:57:15 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -75,7 +75,7 @@ foreach ($items as $item) {
     $labels[] = $item['label'];
 }
 
-$contents = csv_str($labels)."\n";
+$contents = strip_tags(csv_str($labels))."\n";
 while ($data = $xoopsDB->fetchArray($res)) {
     $values = unserialize_text($data['body']);
     if ($mpos>=0) {
@@ -88,17 +88,22 @@ while ($data = $xoopsDB->fetchArray($res)) {
     $contents .= csv_str($fixval).",".csv_str($values)."\n";
 }
 
+if (function_exists("mb_convert_encoding")) {
+    $charset = get_attr_value(array(), 'export_charset');
+    if (!$charset) $charset = _MD_EXPORT_CHARSET;
+    $contents = mb_convert_encoding($contents, $charset, _CHARSET);
+} else {
+    $charset = _CHARSET;
+}
+
 $tm=formatTimestamp(time(), 'Ymd');
 $file = "ccenter_form$id-$range-$tm.csv";
-header("Content-type: text/csv; charset="._MD_EXPORT_CHARSET);
+
 header('Content-Disposition:attachment;filename="'.$file.'"');
+header("Content-type: text/csv; charset=$charset");
 header("Cache-Control: public");
 header("Pragma: public");
-if (function_exists("mb_convert_encoding")) {
-    echo mb_convert_encoding($contents, _MD_EXPORT_CHARSET, _CHARSET);
-} else {
-    echo $contents;
-}
+echo $contents;
 
 exit;
 

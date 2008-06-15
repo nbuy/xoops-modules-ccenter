@@ -136,7 +136,8 @@ LEFT JOIN $users u ON touid=u.uid LEFT JOIN $users f ON m.uid=f.uid";
 	    $from = empty($data['uid'])?$data['email']:htmlspecialchars($data['cfrom']);
 	    $box = "<input type='checkbox' name='ids[]' value='$id'/>";
 	    $ope = " <a href='$msg'>"._AM_DETAIL."</a>";
-	    echo "<tr class='$bg stat$stat'><td align='center'>$box</td><td>$date</td><td>".$msg_status[$stat]."</td><td><a href='?msgid=$id'>$title</a></td><td>$from</td><td>$priuname</td><td class='num'>".$data['comms']."</td><td>$ope</td></tr>\n";
+	    $readit = $data['mtime']<$data['atime']?_CC_MARK_READIT:'';
+	    echo "<tr class='$bg stat$stat'><td align='center'>$box</td><td>$date</td><td>".$msg_status[$stat].$readit."</td><td><a href='?msgid=$id'>$title</a></td><td>$from</td><td>$priuname</td><td class='num'>".$data['comms']."</td><td>$ope</td></tr>\n";
 	}
 	echo "</table>\n";
 	echo "<div>"._AM_MSG_CHANGESTATUS." <select name='op'><option></option>\n";

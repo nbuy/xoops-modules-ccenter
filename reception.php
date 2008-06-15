@@ -1,6 +1,6 @@
 <?php
 // contact to member
-// $Id: reception.php,v 1.8 2008/02/29 06:22:10 nobu Exp $
+// $Id: reception.php,v 1.9 2008/06/15 13:57:15 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -82,6 +82,7 @@ $start = isset($_GET['start'])?intval($_GET['start']):0;
 if ($form['custom']) {
     $reg = array('/\\[desc\\](.*)\\[\/desc\\]/sU', '/<form[^>]*>(.*)<\\/form[^>]*>/sU', '/{CHECK_SCRIPT}/');
     $rep = array('\\1', '', '');
+    $form['action'] = '';
     $form['description'] = preg_replace($reg, $rep, custom_template($form, $items));
 } else {
     $form['description'] = $myts->displayTarea($form['description']);

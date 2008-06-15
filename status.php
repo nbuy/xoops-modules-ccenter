@@ -1,6 +1,6 @@
 <?php
 // Changing message status
-// $Id: status.php,v 1.11 2008/06/01 13:54:23 nobu Exp $
+// $Id: status.php,v 1.12 2008/06/15 13:57:15 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -34,7 +34,11 @@ if (!empty($_POST['eval'])) {	// evaluate at last
 	redirect_header($redirect, 3, _NOPERM);
     }
 } elseif (!empty($_POST['status'])) {
-    if (change_message_status($msgid, $uid, $myts->stripSlashesGPC($_POST['status']))) {
+    $stat = $myts->stripSlashesGPC($_POST['status']);
+    $res = $xoopsDB->query("SELECT fidref FROM ".CCMES." WHERE msgid=$msgid");
+    list($fid) = $xoopsDB->fetchRow($res);
+    if (change_message_status($msgid, $uid, $stat)) {
+	if ($stat=='x') $redirect = "reception.php?form=$fid"; // delete the message
 	redirect_header($redirect, 1, _MD_UPDATE_STATUS);
 	exit;
     }

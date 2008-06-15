@@ -1,6 +1,6 @@
 <?php
 // contact to member
-// $Id: index.php,v 1.18 2008/06/01 13:54:23 nobu Exp $
+// $Id: index.php,v 1.19 2008/06/15 13:57:15 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -82,8 +82,7 @@ if ($op!="form") {
 
 $cust = $form['custom'];
 $form['items'] =& $items;
-$dirname = basename(dirname(__FILE__));
-$action = XOOPS_URL."/modules/$dirname/index.php?form=".$form['formid'];
+$action = "index.php?form=".$form['formid'];
 if (!empty($form['priuser'])) $action .= '&amp;uid='.$form['priuser']['uid'];
 $form['action'] = $action;
 
@@ -95,7 +94,7 @@ include XOOPS_ROOT_PATH."/header.php";
 $xoopsTpl->assign('errors', $errors);
 $xoopsTpl->assign('xoops_pagetitle', $title);
 $breadcrumbs->assign();
-echo render_form($form, $op);
+$xoopsOption['template_main'] = render_form($form, $op);
 if ($cust!=_CC_TPL_FULL) include XOOPS_ROOT_PATH."/footer.php";
 
 function store_message($items, $form) {
@@ -119,11 +118,8 @@ function store_message($items, $form) {
 	case 'mail':
 	    if (empty($email)) { // save first email for contact
 		$email = $vals[$name];
-		if (empty($showaddr)) {
-		    unset($vals[$name]);
-		} else {
-		    $from = $email;
-		}
+		if ($showaddr) $from = $email;
+		$mail_name = $name;
 	    }
 	    break;
 	case 'file':
@@ -135,7 +131,10 @@ function store_message($items, $form) {
 	    break;
 	}
     }
-    $text = serialize_text($vals);
+    if ($showaddr) $rtext = serialize_text($vals);  // reply value with addr
+    if (isset($mail_name)) unset($vals[$mail_name]);
+    if (!$showaddr) $rtext = serialize_text($vals); // reply value without addr
+    $text = serialize_text($vals);		    // store value
     $onepass = ($uid==0)?cc_onetime_ticket($email):"";
     if ($form['priuid'] < 0) {
 	$touid = empty($form['priuser'])?0:$form['priuser']['uid'];
@@ -193,11 +192,11 @@ function store_message($items, $form) {
     $tpl = 'form_confirm.tpl';
     $msgurl = XOOPS_URL.($id?"/modules/$dirname/message.php?id=$id":'/');
     if ($email) {		// reply automaticaly
-	$tags['VALUES'] = "$text$atext";
+	$tags['VALUES'] = "$rtext$atext";
 	$tags['MSG_URL'] = ($store==_DB_STORE_NONE)?'':"\n"._MD_NOTIFY_URL."\n$msgurl$parg";
 	cc_notify_mail($tpl, $tags, $email, $toUser?$toUser->getVar('email'):'');
     }
-    $tags['VALUES'] = "$text$btext";
+    $tags['VALUES'] = "$rtext$btext";
     $tags['MSG_URL'] = ($store==_DB_STORE_NONE)?'':"\n"._MD_NOTIFY_URL."\n".$msgurl;
 
     $notification_handler =& xoops_gethandler('notification');

@@ -13,6 +13,7 @@
     <p><{$data.comment}></p>
 </div>
 <{elseif $is_mine && isset($own_status[$data.status])}>
+<div class="attr">
   <form action="status.php" method="post">
   <input type="hidden" name="id" value="<{$data.msgid}>" />
   <select name="status">
@@ -22,8 +23,8 @@
   </select>
   <input type="submit" value="<{$smarty.const._MD_SUBMIT}>" />
   </form>
-<{/if}>
 </div>
+<{/if}>
 <div class="attr"><b class="label"><{$smarty.const._MD_POSTDATE}></b> <{$cdate}></div>
 <div class="attr"><b class="label"><{$smarty.const._MD_MODDATE}></b> <{$mdate}></div>
 <div class="attr"><b class="label"><{$smarty.const._MD_CONTACT_FROM}></b> <{$sender}><{if $data.email}> &lt;<a href="mailto:<{$data.email|escape}>"><{$data.email|escape}></a>&gt;<{/if}></div>

@@ -1,6 +1,6 @@
 <?php
 // ccenter common functions
-// $Id: functions.php,v 1.27 2008/06/15 13:57:15 nobu Exp $
+// $Id: functions.php,v 1.28 2008/10/18 17:09:33 nobu Exp $
 
 global $xoopsDB;		// for blocks scope
 // using tables
@@ -202,7 +202,7 @@ function assign_post_values(&$items) {
 	    break;
 	case 'hidden':
 	case 'const':
-	    $val = join(',', $item['options']);
+	    $val = eval_user_value(join(',', $item['options']));
 	    break;
 	case 'file':
 	    $val = '';		// filename
@@ -287,9 +287,10 @@ function assign_form_widgets(&$items, $conf=false) {
     return $updates;
 }
 
-function cc_make_widget($item) {
-    global $myts, $xoopsUser, $defuser;
+function eval_user_value($str) {
+    static $defuser;
     if (empty($defuser)) {
+	global $xoopsUser;
 	$defuser = array();
 	$user = is_object($xoopsUser)?$xoopsUser:new XoopsUser;
 	$keys = array_keys($user->getVars());
@@ -303,6 +304,11 @@ function cc_make_widget($item) {
 	    }
 	}
     }
+    return str_replace(array_keys($defuser), $defuser, $str);
+}
+
+function cc_make_widget($item) {
+    global $myts;
     $input = '';
     $fname = $item['field'];
     $names = "name='$fname' id='$fname'";
@@ -316,7 +322,7 @@ function cc_make_widget($item) {
     switch($type) {
     case 'hidden':
     case 'const':
-	$input=htmlspecialchars(join(',', $options), ENT_QUOTES);
+	$input=htmlspecialchars(eval_user_value(join(',', $options)), ENT_QUOTES);
 	break;
     case 'select':
 	$def = '';
@@ -413,7 +419,7 @@ function cc_make_widget($item) {
 		}
 	    }
 	}
-	$val = htmlspecialchars(str_replace(array_keys($defuser), $defuser, $val), ENT_QUOTES);
+	$val = htmlspecialchars(eval_user_value($val), ENT_QUOTES);
 	if ($type == 'textarea') {
 	    $estr = get_attr_value($attr, 'rows');
 	    if (!empty($estr)) $astr .= ' rows="'.$estr.'"';

@@ -8,8 +8,6 @@ Please wait reply again form us.
 Sender
 IP address: {REMOTE_ADDR}
 Browser: {HTTP_USER_AGENT}
-
-This message reference to following URL:
 {MSG_URL}
 
 -----------

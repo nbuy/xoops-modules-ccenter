@@ -1,6 +1,6 @@
 <?php
 // contact to member
-// $Id: index.php,v 1.19 2008/06/15 13:57:15 nobu Exp $
+// $Id: index.php,v 1.20 2009/03/11 15:01:56 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -200,7 +200,8 @@ function store_message($items, $form) {
     $tags['MSG_URL'] = ($store==_DB_STORE_NONE)?'':"\n"._MD_NOTIFY_URL."\n".$msgurl;
 
     $notification_handler =& xoops_gethandler('notification');
-    $notification_handler->triggerEvent('global', $id, 'new', $tags);
+    $notification_handler->triggerEvent('global', 0, 'new', $tags);
+    $notification_handler->triggerEvent('form', $form['formid'], 'new', $tags);
     // force subscribe sender and recipient
     if ($id) $notification_handler->subscribe('message', $id, 'comment');
     if ($touid) {

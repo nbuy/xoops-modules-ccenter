@@ -1,6 +1,6 @@
 <?php
 // ccenter common functions
-// $Id: functions.php,v 1.28 2008/10/18 17:09:33 nobu Exp $
+// $Id: functions.php,v 1.29 2009/03/15 10:03:43 nobu Exp $
 
 global $xoopsDB;		// for blocks scope
 // using tables
@@ -184,7 +184,7 @@ function assign_post_values(&$items) {
 	default:
 	    $v = get_attr_value(array(), $check);
 	    if (!empty($v)) $check = $v;
-	    if (!preg_match('/^'.$check.'$/', $val)) $errors[] = $lab.": "._MD_REGEXP_ERR;
+	    if (!preg_match('/^'.$check.'$/', $val)) $errors[] = $lab.": ".($val?_MD_REGEXP_ERR:_MD_REQUIRE_ERR);
 	    break;
 	}
 	switch ($type) {
@@ -451,8 +451,9 @@ if (!function_exists("unserialize_vars")) {
 	$text = ltrim($text);
 	$pat = array('/""/', '/^"(.*)"$/');
 	$rep = array('"', '$1');
-	while ($text && preg_match('/^("[^"]*"|[^"\t\r\n,]*)*[,\t\n\r]?/', $text, $d)) {
-	    $ln = preg_replace('/[,\t\n\r]$/', '', $d[0]);
+	$delm = preg_match('/[\n\r]/', $text)?'\n\r':',\n\r'; // allow comma format
+	while ($text && preg_match("/^(\"[^\"]*\"|[^\"$delm]*)*[$delm]?/", $text, $d)) {
+	    $ln = preg_replace("/[\\s$delm]\$/", '', $d[0]);
 	    $text = ltrim(substr($text, strlen($d[0])));
 	    if (preg_match('/^\s*([^=]+)\s*=\s*(.+)$/', $ln, $d)) {
 		if ($rev) {
@@ -934,9 +935,9 @@ function checkItem(obj, lab, pat) {
      }
      return msg;
   }
+  if (obj.value.match(new RegExp('^'+pat+'\$', 'm'))) return \"\";
   if (obj.value == \"\") return msg;
-  if (!obj.value.match(new RegExp('^'+pat+'\$', 'm'))) return lab+\": "._MD_REGEXP_ERR."\\n\";
-  return \"\";
+  return lab+\": "._MD_REGEXP_ERR."\\n\";
 }
 function xoopsFormValidate_ccenter() {
     myform = window.document.ccenter;

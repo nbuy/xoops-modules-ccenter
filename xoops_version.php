@@ -1,5 +1,5 @@
 <?php
-// $Id: xoops_version.php,v 1.18 2009/03/15 10:21:18 nobu Exp $
+// $Id: xoops_version.php,v 1.19 2009/03/15 10:35:57 nobu Exp $
 //  ------------------------------------------------------------------------ //
 //  This program is free software; you can redistribute it and/or modify     //
 //  it under the terms of the GNU General Public License as published by     //
@@ -50,7 +50,7 @@ $modversion['onInstall'] = "oninstall.php";
 
 // Admin things
 $modversion['hasAdmin'] = 1;
-$modversion['adminindex'] = "admin/index.php";
+$modversion['adminindex'] = "admin/help.php";
 $modversion['adminmenu'] = "admin/menu.php";
 
 // Menu

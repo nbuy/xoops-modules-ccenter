@@ -1,5 +1,5 @@
 <?php
-// $Id: modinfo.php,v 1.4 2008/06/15 13:57:15 nobu Exp $
+// $Id: modinfo.php,v 1.5 2009/03/15 10:35:57 nobu Exp $
 // Module Info
 
 // The name of this module
@@ -16,7 +16,7 @@ define("_MI_CCENTER_STAFFDESK", "Staff Desk");
 // Admin Menu
 define("_MI_CCENTER_FORMADMIN", "Forms");
 define("_MI_CCENTER_MSGADMIN", "Messages");
-define("_MI_CCENTER_HELP", "Help");
+define("_MI_CCENTER_HELP", "About ccenter");
 
 // A brief template of this module
 define("_MI_CCENTER_INDEX_TPL", "List of forms");

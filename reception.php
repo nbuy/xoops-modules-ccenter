@@ -1,6 +1,6 @@
 <?php
 // contact to member
-// $Id: reception.php,v 1.9 2008/06/15 13:57:15 nobu Exp $
+// $Id: reception.php,v 1.10 2009/06/02 07:19:42 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -98,6 +98,7 @@ foreach ($form['items'] as $item) {
     $n++;
     if ($item['type'] == 'mail') {
 	$mpos = $n;
+	$mlab = $item['name'];
 	break;
     }
 }
@@ -125,7 +126,7 @@ $xoopsTpl->assign('export_range', $export_range);
 $mlist = array();
 while ($data = $xoopsDB->fetchArray($res)) {
     $values = unserialize_text($data['body']);
-    if ($mpos>=0) {
+    if ($mpos>=0 && !isset($values[$mlab])) {
 	array_splice($values, $mpos, 0, array($data['email']));
     }
     $data['values'] = array_slice($values, 0, $max_cols);

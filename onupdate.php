@@ -1,12 +1,13 @@
 <?php
 # ccenter module onUpdate proceeding.
-# $Id: onupdate.php,v 1.3 2008/06/01 13:54:23 nobu Exp $
+# $Id: onupdate.php,v 1.4 2009/06/05 09:20:08 nobu Exp $
 
 global $xoopsDB;
 
 // ccenter_log table add in 0.72 later
 define('LOG', $xoopsDB->prefix('ccenter_log'));
 define('MSG', $xoopsDB->prefix('ccenter_message'));
+define('FORM', $xoopsDB->prefix('ccenter_form'));
 
 // add logging (after ccenter-0.80)
 $xoopsDB->query('SELECT * FROM '.LOG, 1);
@@ -31,6 +32,11 @@ add_field(MSG, "ctime", "INT DEFAULT 0 NOT NULL", "touid");
 if (add_field(MSG, "atime", "INT DEFAULT 0 NOT NULL", "mtime")) {
     // last access initially same as ctime
     $xoopsDB->query("UPDATE ".MSG." SET atime=ctime");
+}
+// change redirect to optvars field (after ccenter-0.90)
+if ($xoopsDB->query("ALTER TABLE ".FORM." CHANGE redirect optvars TEXT")) {
+    $xoopsDB->query("UPDATE ".FORM." set optvars=concat('redirect=', optvars)");
+    report_message(" Change '<b>redirect</b>' field to '<b>optvars</b>' in ccneter_form table");
 }
 
 function add_field($table, $field, $type, $after) {

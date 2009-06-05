@@ -1,6 +1,6 @@
 <?php
 // contact to member
-// $Id: reception.php,v 1.10 2009/06/02 07:19:42 nobu Exp $
+// $Id: reception.php,v 1.11 2009/06/05 09:20:08 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -88,6 +88,7 @@ if ($form['custom']) {
     $form['description'] = $myts->displayTarea($form['description']);
 }
 $form['mdate'] = formatTimestamp($form['mtime']);
+$form['cdate'] = formatTimestamp($form['ctime']);
 foreach ($items as $k=>$item) {
     if (empty($item['label'])) unset($items[$k]);
 }
@@ -132,6 +133,7 @@ while ($data = $xoopsDB->fetchArray($res)) {
     $data['values'] = array_slice($values, 0, $max_cols);
     $data['uname'] = $xoopsUser->getUnameFromId($data['uid']);
     $data['mdate'] = formatTimestamp($data['mtime']);
+    $data['cdate'] = formatTimestamp($data['ctime']);
     $data['stat'] = $msg_status[$data['status']];
     $mlist[] = $data;
 }

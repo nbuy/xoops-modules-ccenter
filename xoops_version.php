@@ -1,5 +1,5 @@
 <?php
-// $Id: xoops_version.php,v 1.19 2009/03/15 10:35:57 nobu Exp $
+// $Id: xoops_version.php,v 1.20 2009/06/05 09:20:08 nobu Exp $
 //  ------------------------------------------------------------------------ //
 //  This program is free software; you can redistribute it and/or modify     //
 //  it under the terms of the GNU General Public License as published by     //
@@ -22,7 +22,7 @@
 //  ------------------------------------------------------------------------ //
 
 $modversion = array('name' => _MI_CCENTER_NAME,
-		    'version' => "0.89",
+		    'version' => "0.90",
 		    'description' => _MI_CCENTER_DESC,
 		    'credits' => "Nobuhiro Yasutomi",
 		    'author' => "Nobuhiro Yasutomi",
@@ -90,6 +90,9 @@ $modversion['templates'][] =
 $modversion['templates'][] =
     array('file' => 'ccenter_reception.html',
 	  'description' => _MI_CCENTER_RECEPT_TPL);
+$modversion['templates'][] =
+    array('file' => 'ccenter_form_widgets.html',
+	  'description' => _MI_CCENTER_WIDGET_TPL);
 
 // Blocks
 $modversion['blocks'][1]=

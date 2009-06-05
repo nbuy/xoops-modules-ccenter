@@ -1,5 +1,5 @@
 # Contact Center Module for XOOPS
-# $Id: mysql.sql,v 1.6 2008/10/08 13:41:59 nobu Exp $
+# $Id: mysql.sql,v 1.7 2009/06/05 09:20:08 nobu Exp $
 
 #
 # Table structure for table `ccenter_form`
@@ -19,7 +19,7 @@ CREATE TABLE ccenter_form (
   custom  int(1)  NOT NULL default '0', -- use custom template (as description)
   active  int(1)  NOT NULL default '1',
   weight  int(8)  NOT NULL default '0',
-  redirect varchar(128) NOT NULL default '',
+  optvars text,				-- override option variables
   PRIMARY KEY  (formid)
 );
 

@@ -1,6 +1,6 @@
 <?php
 // ccenter common functions
-// $Id: functions.php,v 1.29 2009/03/15 10:03:43 nobu Exp $
+// $Id: functions.php,v 1.30 2009/06/05 09:20:08 nobu Exp $
 
 global $xoopsDB;		// for blocks scope
 // using tables
@@ -9,6 +9,7 @@ define('CCMES', $xoopsDB->prefix('ccenter_message'));
 define('CCLOG', $xoopsDB->prefix('ccenter_log'));
 
 $myts =& MyTextSanitizer::getInstance();
+include_once XOOPS_ROOT_PATH."/class/template.php";
 
 define('_STATUS_NONE',   '-');
 define('_STATUS_ACCEPT', 'a');
@@ -19,6 +20,8 @@ define('_STATUS_DEL',    'x');
 define('_DB_STORE_LOG',  0);	// logging only in db
 define('_DB_STORE_YES',  1);	// store information in db
 define('_DB_STORE_NONE', 2);	// query not store in db
+
+define('_CC_WIDGET_TPL', basename(dirname(__FILE__))."_form_widgets.html");
 
 if (defined('_CC_STATUS_NONE')) {
     global $msg_status, $export_range;
@@ -125,14 +128,21 @@ function get_form_attribute($defs) {
 	    $attr[$d[1]] = $d[2];
 	}
 	$options = array();
+	$defs = array();
 	if (count($opts)) {
 	    while(count($opts) && !preg_match('/^\s*#/', $opts[0])) {
 		$v = array_shift($opts);
 		$sv = preg_split('/=/', $v, 2);
 		if (count($sv)>1) {
-		    $options[$sv[0]] = $sv[1];
+		    $k = strip_tags($sv[0]);
+		    $sk = preg_replace('/\+$/', '', $k);  // real value
+		    if ($k != $sk) $defs[] = $sk;	  // defaults
+		    $options[$sk] = $sv[1];
 		} else {
-		    $options[strip_tags($v)] = preg_replace('/\+$/', '', $v);
+		    $k = strip_tags($v);
+		    $sk = preg_replace('/\+$/', '', $k);  // real value
+		    if ($k != $sk) $defs[] = $sk;	  // defaults
+		    $options[$sk] = preg_replace('/\+$/', '', $v);
 		}
 	    }
 	    if (count($opts)) {
@@ -140,11 +150,16 @@ function get_form_attribute($defs) {
 		$comment = join(',',$opts);
 	    }
 	}
+	if ($type == 'radio') {
+	    $defs = $defs?$defs[0]:'';
+	} elseif ($type != 'checkbox') {
+	    $defs = eval_user_value(join(',', $options));
+	}
 	$fname = "cc".++$num;
 	$result[$name] = array(
 	    'name'=>$name, 'label'=>$label, 'field'=>$fname,
 	    'options'=>$options, 'type'=>$type, 'comment'=>$comment,
-	    'attr'=>$attr);
+	    'attr'=>$attr, 'default'=>$defs);
     }
     return $result;
 }
@@ -309,139 +324,42 @@ function eval_user_value($str) {
 
 function cc_make_widget($item) {
     global $myts;
-    $input = '';
-    $fname = $item['field'];
-    $names = "name='$fname' id='$fname'";
-    $options =& $item['options'];
-    $type =& $item['type'];
-    $attr =& $item['attr'];
-    $astr = '';
-    if (isset($attr['prop'])) $astr .= ' '.$attr['prop'];
-    $etcreg = empty($item['options'][LABEL_ETC])?'':'/^'.preg_quote(strip_tags($item['options'][LABEL_ETC]), '/').'\s+/';
-    $etcval = '';
-    switch($type) {
-    case 'hidden':
-    case 'const':
-	$input=htmlspecialchars(eval_user_value(join(',', $options)), ENT_QUOTES);
-	break;
-    case 'select':
-	$def = '';
-	if (isset($_POST[$fname])) { // ovarride post value
-	    $def = $myts->stripSlashesGPC($_POST[$fname]);
-	}
-	$input = "<select name='".htmlspecialchars($fname, ENT_QUOTES)."'$astr>\n";
-	foreach ($options as $key=>$val) {
-	    $lab = preg_replace('/\+$/', '', $key);
-	    if (empty($def) && $lab != $key) {
-		$def = $lab;
-	    }
-	    $ck = ($def == $lab)?" selected='selected'":"";
-	    $lab = htmlspecialchars($lab, ENT_QUOTES);
-	    $input .= "<option value='$lab'$ck />$val</option>\n";
-	}
-	$input .= "</select>\n";
-	break;
-    case 'radio':
-	$def = '';
-	$etclab = "{$fname}_etc";
-	if (isset($_POST[$fname])) { // ovarride post value
-	    $def = $myts->stripSlashesGPC($_POST[$fname]);
-	    if ($etcreg && preg_match($etcreg, $def)) {
-		$etcval = preg_replace($etcreg, '', $def);
-		$def = LABEL_ETC;
-	    }
-	}
-	if (isset($_POST[$etclab])) {
-	    $etcval = $myts->stripSlashesGPC($_POST[$etclab]);
-	}
-	$input = "";
-	$estr = get_attr_value($attr, 'size');
-	$estr = empty($estr)?'':' size="'.$estr.'"';
-	foreach ($options as $key=>$val) {
-	    $lab = preg_replace('/\+$/', '', $key);
-	    if (empty($def) && $lab != $key) {
-		$def = $lab;
-	    }
-	    $ck = ($def === $lab)?" checked='checked'":"";
-	    if ($lab == LABEL_ETC && $lab!=strip_tags($val)) {
-		$val .= " <input name='$etclab' value='$etcval' onChange='checkedEtcText(\"$fname\")'$estr />";
-		$ck .= " id='{$fname}_eck'";
-	    }
-	    $input .= "<span class='ccradio'><input type='radio' name='$fname' value='$lab'$ck /> $val</span> ";
-	}
-	break;
-    case 'checkbox':
-	$etclab = "{$fname}_etc";
-	$def = ($_SERVER['REQUEST_METHOD']=='POST')?array():null;
-	if (isset($_POST[$etclab])) {
-	    $etcval = $myts->stripSlashesGPC($_POST[$etclab]);
-	}
-	if (isset($_POST[$fname])) { // ovarride post value
-	    foreach ($_POST[$fname] as $v) {
-		$v = $myts->stripSlashesGPC($v);
-		if ($etcreg && preg_match($etcreg, $v)) {
-		    $etcval = preg_replace($etcreg, '', $v);
-		    $v = LABEL_ETC;
-		}
-		$def[] = $v;
-	    }
-	}
-	$input = "";
-	$estr = get_attr_value($attr, 'size');
-	$estr = empty($estr)?'':' size="'.$estr.'"';
-	foreach ($options as $key=>$val) {
-	    $lab = preg_replace('/\+$/', '', $key);
-	    if ($def==null) {
-		$ck = ($key!=$lab)?" checked='checked'":"";
-	    } else {
-		$ck = in_array($lab, $def)?" checked='checked'":"";
-	    }
-	    if ($lab == LABEL_ETC && $lab!=strip_tags($val)) {
-		$val .= " <input name='$etclab' value='$etcval' onChange='checkedEtcText(\"$fname\")'$estr />";
-		$ck .= " id='{$fname}_eck'";
-	    }
-	    $input .= "<span class='cccheckbox'><input type='checkbox' name='".$fname."[]' value='$lab'$ck$astr /> $val</span> ";
-	}
-	break;
-    case 'textarea':
-    default:
-	$val = is_array($options)?join(',', $options):$options;
-	if (isset($_POST[$fname])) { // ovarride post value
-	    $val = $myts->stripSlashesGPC($_POST[$fname]);
-	} else {
-	    global $xoopsUser;
-	    if ($type=='mail' && empty($val)) {
-		$orig = preg_replace('/_conf$/', '', $fname);
-		if (isset($_POST[$orig])) {
-		    $val = $myts->stripSlashesGPC($_POST[$orig]);
-		} elseif ($type=='mail') {
-		    $val = "{X_EMAIL}";
-		}
-	    }
-	}
-	$val = htmlspecialchars(eval_user_value($val), ENT_QUOTES);
-	if ($type == 'textarea') {
-	    $estr = get_attr_value($attr, 'rows');
-	    if (!empty($estr)) $astr .= ' rows="'.$estr.'"';
-	    $estr = get_attr_value($attr, 'cols');
-	    if (!empty($estr)) $astr .= ' cols="'.$estr.'"';
-	    $input = "<textarea $names $astr>$val</textarea>";
-	} else {
-	    $input = "";
-	    if ($type=='file') {
-		if ($val) $input .= "$val<input type='hidden' name='{$fname}_prev' value='$val' /><br />";
-	    } else $type = 'text';
-	    $estr = get_attr_value($attr, 'size');
-	    if (!empty($estr)) $astr .= ' size="'.$estr.'"';
-	    $estr = get_attr_value($attr, 'maxlength');
-	    if (!empty($estr)) $astr .= ' maxlength="'.$estr.'"';
-	    $input .= "<input type='$type' $names value='$val'$astr />";
-	    if ($type=='file') {
-	    }
-	}
-	break;
+    $fname = preg_replace('/_conf$/', '', $item['field']);
+    $value = null;
+    $type = $item['type'];
+    $options = &$item['options'];
+    if (isset($_POST[$fname])) {
+	$value = &$_POST[$fname];
+	if (!is_array($value)) $value = $myts->stripSlashesGPC($value);
+    } else {
+	if (isset($item['default'])) $value = $item['default'];
     }
-    return $input;
+    if (isset($options)) {
+	if (isset($options[LABEL_ETC])) {
+	    $ereg = '/^'.preg_quote(strip_tags($options[LABEL_ETC]), '/').'\s+/';
+	    if ($type == 'checkbox') {
+		if (is_array($value)) {
+		    foreach ($value as $key => $val) {
+			if (preg_match($ereg, $val)) {
+			    $item['etc_value'] = preg_replace($ereg, '', $val);
+			    $value[$key] = LABEL_ETC;
+			}
+		    }
+		}
+	    } else {
+		if (preg_match($ereg, $value)) {
+		    $item['etc_value'] = preg_replace($ereg, '', $value);
+		    $esize = get_attr_value($item['attr'], 'size');
+		    if (!empty($esize)) $item['attr']['size'] = $esize;
+		    $value = LABEL_ETC;
+		}
+	    }
+	}
+    }
+    $item['value'] = $value;
+    $tpl=new XoopsTpl;
+    $tpl->assign('item', $item);
+    return $tpl->fetch('db:'._CC_WIDGET_TPL);
 }
 
 if (!function_exists("unserialize_vars")) {
@@ -585,7 +503,7 @@ function cc_check_perm($data) {
 }
 
 function cc_onetime_ticket($genseed="mypasswdbasestring") {
-    return substr(base64_encode(pack("H*",md5($genseed.time()))), 0, 8);
+    return substr(preg_replace('/[^a-zA-Z0-9]/', '', base64_encode(pack("H*",md5($genseed.time())))), 0, 8);
 }
 
 function cc_delete_message($msgid) {
@@ -924,56 +842,18 @@ function change_message_status($msgid, $touid, $stat) {
 }
 
 function checkScript($checks, $confirm, $pattern) {
-    $script = "<script type=\"text/javascript\">
-<!--//
-function checkItem(obj, lab, pat) {
-  msg = lab+\": "._MD_REQUIRE_ERR."\\n\";
-  if (typeof(obj.selectedIndex)==\"number\" && obj.value != \"\") return \"\";
-  if (typeof(obj.length)==\"number\") {
-     for (i=0; i<obj.length; i++) {
-        if (obj[i].checked) return \"\";
-     }
-     return msg;
-  }
-  if (obj.value.match(new RegExp('^'+pat+'\$', 'm'))) return \"\";
-  if (obj.value == \"\") return msg;
-  return lab+\": "._MD_REGEXP_ERR."\\n\";
-}
-function xoopsFormValidate_ccenter() {
-    myform = window.document.ccenter;
-    msg = \"\";
-    obj = null;
-";
+    global $xoopsTpl;
+    $chks = array();
     foreach ($checks as $name => $msg) {
 	$pat = $pattern[$name];
 	$v = get_attr_value(array(), $pat);
 	if (!empty($v)) $pat = $v;
 	$pat = htmlspecialchars(preg_replace('/([\\\\\"])/', '\\\\$1', $pat));
-	$script .= "
-    msg = msg+checkItem(myform['$name'], \"".htmlspecialchars($msg)."\", \"$pat\");
-    if(msg && obj==null)obj=myform['$name'];\n";
+	$chks[$name] = array('message'=>$msg, 'pattern'=>$pat);
     }
-    if (count($confirm)) {
-	foreach ($confirm as $name => $msg) {
-	    $script .= "
-    if ( myform.$name.value != myform.{$name}_conf.value ) {
-        msg = msg+\"$msg: "._MD_CONFIRM_ERR."\\n\";
-        if(obj==null)obj=myform.{$name}_conf;
-}\n";
-	}
-    }
-    $script .= "
-    if (msg == \"\") return true;
-    window.alert(msg);
-    if (typeof(obj.length)!=\"number\") obj.focus();
-    return false;
-}
-function checkedEtcText(lab) {
-   obj = xoopsGetElementById(lab+\"_eck\");
-   if (obj) obj.checked=true;
-}
-//--></script>";
-    return $script;
+    $tpl=new XoopsTpl;
+    $tpl->assign('item', array("type"=>"javascript", "confirm"=>$confirm, 'checks'=>$chks));
+    return $tpl->fetch('db:'._CC_WIDGET_TPL);
 }
 
 function set_checkvalue(&$form) {

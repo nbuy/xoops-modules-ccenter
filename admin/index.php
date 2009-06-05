@@ -11,7 +11,8 @@ if (isset($_POST['op'])) $op = $_POST['op'];
 $formid = isset($_REQUEST['formid'])?intval($_REQUEST['formid']):0;
 
 $fields = array('title', 'description', 'defs', 'priuid', 'cgroup',
-		'store', 'custom', 'weight', 'active', 'redirect');
+		'store', 'custom', 'weight', 'active');
+$optfields = array('redirect');
 if ($op == 'delform') {
     $formid = intval($_POST['formid']);
     $xoopsDB->query("DELETE FROM ".FORMS." WHERE formid=".$formid);
@@ -32,6 +33,20 @@ if ($op == 'delform') {
 	} else {
 	    $vals[$fname] = $v;
 	}
+    }
+    $opts = "";
+    foreach ($optfields as $fname) {
+	if (!empty($_POST[$fname])) {
+	    $opts .= $fname."=".preg_replace("/\\n.*$/", '', $myts->stripSlashesGPC($_POST[$fname]))."\n";
+	}
+    }
+    $fname = 'optvars';
+    $data[$fname] = $v = $opts;
+    $v = $xoopsDB->quoteString($v);
+    if ($formid) {
+	$vals[] = $fname."=".$v;
+    } else {
+	$vals[$fname] = $v;
     }
     $v = '|';
     foreach ($_POST['grpperm'] as $gid) {
@@ -182,6 +197,7 @@ function build_form($formid=0) {
 	    $data['action'] = '';
 	    $data['check_script'] = "";
 	    $data['items'] =& $items;
+	    if (empty($xoopsTpl)) $xoopsTpl = new XoopsTpl();
 	    $out = $xoopsTpl->fetch('db:'.render_form($data, 'form'));
 	    echo preg_replace('/type=["\']submit["\']/', 'type="submit" disabled="disabled"', $out);
 	    echo "</div>\n<hr size='5'/>\n";
@@ -195,7 +211,7 @@ function build_form($formid=0) {
 		      'store'=>1, 'custom'=>0, 'weight'=>0, 'active'=>1,
 		      'priuid'=>$xoopsUser->getVar('uid'),
 		      'cgroup'=>XOOPS_GROUP_ADMIN,
-		      'redirect'=>'',
+		      'optvars'=>'',
 		      'grpperm'=>array(XOOPS_GROUP_USERS));
     }
     $form = new XoopsThemeForm($formid?_AM_FORM_EDIT:_AM_FORM_NEW, 'myform', 'index.php');
@@ -275,7 +291,8 @@ function build_form($formid=0) {
     $form->addElement(new XoopsFormRadioYN(_AM_FORM_ACTIVE, 'active' , $data['active']));
 
     $form->addElement(new XoopsFormText(_AM_FORM_WEIGHT, 'weight', 2, 8, $data['weight']));
-    $form->addElement(new XoopsFormText(_AM_FORM_REDIRECT, 'redirect', 50, 128, $data['redirect']));
+    $optvars = unserialize_vars($data['optvars']);
+    $form->addElement(new XoopsFormText(_AM_FORM_REDIRECT, 'redirect', 50, 128, @$optvars['redirect']));
     $submit = new XoopsFormElementTray('');
     $submit->addElement(new XoopsFormButton('' , 'formdefs', _SUBMIT, 'submit'));
     $submit->addElement(new XoopsFormButton('' , 'preview', _PREVIEW, 'submit'));

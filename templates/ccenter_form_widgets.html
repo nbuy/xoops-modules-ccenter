@@ -1,0 +1,103 @@
+<{if $item.type == "hidden"}>
+
+  <{* No Value *}>
+
+<{elseif $item.type == "const"}>
+
+  <{$item.value|escape}>
+
+<{elseif $item.type == "select"}>
+  <select name="<{$item.field}>" id="<{$item.field}>">
+    <{foreach key=key item=val from=$item.options}>
+      <option value="<{$key}>"<{if $key==$item.value}> selected="selected"<{/if}>><{$val}></option>
+    <{/foreach}>
+  </select>
+
+<{elseif $item.type == "radio"}>
+
+  <{foreach key=lab item=val from=$item.options}>
+    <span class="ccradio">
+      <{if $lab==$smarty.const.LABEL_ETC}>
+        <input name="<{$item.field}>" type="radio" value="<{$lab}>" id="<{$item.field}>_eck"<{if $item.value==$lab}> checked="checked"<{/if}> /> <{$val}>
+        <input name="<{$item.field}>_etc" value="<{$item.etc_value}>" onChange="checkedEtcText('<{$item.field}>')"<{if $item.attr.size}> size="<{$item.attr.size}>"<{/if}> />
+      <{else}>
+        <input name="<{$item.field}>" type="radio" value="<{$lab}>"<{if $item.value==$lab}> checked="checked"<{/if}> /> <{$val}>
+      <{/if}>
+    </span>
+  <{/foreach}>
+
+<{elseif $item.type == "checkbox"}>
+
+  <{foreach key=lab item=val from=$item.options}>
+    <span class="cccheck">
+      <{if $lab==$smarty.const.LABEL_ETC}>
+        <input name="<{$item.field}>[]" type="checkbox" value="<{$lab}>" id="<{$item.field}>_eck"<{if in_array($lab, $item.value)}> checked="checked"<{/if}> /> <{$val}>
+        <input name="<{$item.field}>_etc" value="<{$item.etc_value}>" onChange="checkedEtcText('<{$item.field}>')"<{if $item.attr.size}> size="<{$item.attr.size}>"<{/if}> />
+      <{else}>
+        <input name="<{$item.field}>[]" type="checkbox" value="<{$lab}>"<{if in_array($lab, $item.value)}> checked="checked"<{/if}> /> <{$val}>
+      <{/if}>
+    </span>
+  <{/foreach}>
+
+<{elseif $item.type == "textarea"}>
+
+  <textarea name="<{$item.field}>" id="<{$item.field}>"
+<{if $item.attr.cols}> cols="<{$item.attr.cols}>"<{/if}>
+<{if $item.attr.rows}> rows="<{$item.attr.rows}>"<{/if}>
+><{$item.value|escape}></textarea>
+
+<{elseif $item.type == "file"}>
+
+  <input name="<{$item.field}>" id="<{$item.field}>" type="file" value="<{$item.value|escape}>"<{if $item.attr.size}> size="<{$item.attr.size}>"<{/if}> />
+
+<{elseif $item.type != "javascript"}><{* as text *}>
+
+  <input name="<{$item.field}>" id="<{$item.field}>" type="text" value="<{$item.value|escape}>"<{if $item.attr.size}> size="<{$item.attr.size}>"<{/if}> />
+
+<{else}>
+
+<script type="text/javascript">
+<!--//
+function checkItem(obj, lab, pat) {
+  msg = lab+": <{$smarty.const._MD_REQUIRE_ERR}>\n";
+  if (typeof(obj.selectedIndex)=="number" && obj.value != "") return "";
+  if (typeof(obj.length)=="number") {
+     for (i=0; i<obj.length; i++) {
+        if (obj[i].checked) return "";
+     }
+     return msg;
+  }
+  if (obj.value.match(new RegExp('^'+pat+'\$', 'm'))) return "";
+  if (obj.value == "") return msg;
+  return lab+": <{$smarty.const._MD_REGEXP_ERR}>\n";
+}
+function xoopsFormValidate_ccenter() {
+    myform = window.document.ccenter;
+    msg = "";
+    obj = null;
+
+<{foreach key=name item=val from=$item.checks}>
+    msg = msg+checkItem(myform["<{$name}>"], "<{$val.message|escape}>", "<{$val.pattern}>");
+    if(msg && obj==null)obj=myform['<{$name}>'];
+<{/foreach}>
+
+<{foreach key=name item=label from=$item.confirm}>
+    if ( myform.<{$name}>.value != myform.<{$name}>_conf.value ) {
+        msg = msg+"<{$label}>: <{$smarty.const._MD_CONFIRM_ERR}>\n";
+        if(obj==null)obj=myform.<{$name}>_conf;
+    }
+<{/foreach}>
+
+    if (msg == "") return true;
+    window.alert(msg);
+    if (typeof(obj.length)!="number") obj.focus();
+    return false;
+}
+function checkedEtcText(lab) {
+   obj = xoopsGetElementById(lab+"_eck");
+   if (obj) obj.checked=true;
+}
+//-->
+</script>
+
+<{/if}>

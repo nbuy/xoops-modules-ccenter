@@ -1,6 +1,6 @@
 <?php
 // contact to member
-// $Id: index.php,v 1.20 2009/03/11 15:01:56 nobu Exp $
+// $Id: index.php,v 1.21 2009/06/05 09:20:08 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -105,21 +105,28 @@ function store_message($items, $form) {
     if ($store==_DB_STORE_NONE) {
 	$showaddr = true;	// no store to need show address
     } else {
-	$showaddr = get_attr_value(array(), 'notify_with_email');
+	$optvars = unserialize_vars($form['optvars']);
+	$showaddr = get_attr_value($optvars, 'notify_with_email');
     }
     $from = $email = "";
     $attach = array();
     $vals = array();
+    $rtext = '';
     foreach ($items as $item) {
 	if (empty($item['name'])) continue;
 	$name = $item['name'];
-	$vals[$name] = $item['value'];
+	$val = $item['value'];
+	$vals[$name] = $val;
 	switch ($item['type']) {
 	case 'mail':
 	    if (empty($email)) { // save first email for contact
 		$email = $vals[$name];
-		if ($showaddr) $from = $email;
 		$mail_name = $name;
+		if ($showaddr) {
+		    $from = $email;
+		    break;
+		}
+		continue 2;		/* PHP switch catch continue! */
 	    }
 	    break;
 	case 'file':
@@ -129,11 +136,15 @@ function store_message($items, $form) {
 		$attach[] = $val;
 	    }
 	    break;
+	case 'checkbox':
+	    $val = join(', ', $val);
+	    break;
 	}
+	if (!empty($val) && preg_match('/\n/', $val)) $val = "\n\t".preg_replace('/\n/', "\n\t", $val);
+	$rtext .= strip_tags($item['label']).": $val\n";
     }
-    if ($showaddr) $rtext = serialize_text($vals);  // reply value with addr
-    if (isset($mail_name)) unset($vals[$mail_name]);
-    if (!$showaddr) $rtext = serialize_text($vals); // reply value without addr
+    // remove if not show/store email address in database
+    if (!$showaddr && isset($mail_name)) unset($vals[$mail_name]);
     $text = serialize_text($vals);		    // store value
     $onepass = ($uid==0)?cc_onetime_ticket($email):"";
     if ($form['priuid'] < 0) {
@@ -213,7 +224,10 @@ function store_message($items, $form) {
     }
 
     if ($id) $msgurl .= $parg;
-    if (!empty($form['redirect'])) $msgurl = $form['redirect'];
+    $redirect = get_attr_value(unserialize_vars($form['optvars']), 'redirect');
+    if (!empty($redirect)) {
+	$msgurl = preg_match('/^\\//', $redirect)?XOOPS_URL.$redirect:$redirect;
+    }
     redirect_header($msgurl, 3, _MD_CONTACT_DONE);
     exit;
 }

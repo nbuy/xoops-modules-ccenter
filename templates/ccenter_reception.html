@@ -65,7 +65,7 @@
     <{foreach from=$mlist item=msg}>
     <tr class="<{cycle values="even, odd"}>">
       <td><a href="message.php?id=<{$msg.msgid}>"><{$smarty.const._MD_DETAIL}></a></td>
-      <td><{$msg.mdate}></td>
+      <td><{$msg.cdate}></td>
       <td><{$msg.stat}><{if $msg.mtime<$msg.atime}><{$smarty.const._CC_MARK_READIT}><{/if}></td>
       <td><{$msg.uname}></td>
     <{foreach from=$msg.values item=val name=vals}>

@@ -1,6 +1,6 @@
 <?php
 // Display contact form in block
-// $Id: ccenter_block_form.php,v 1.3 2008/06/15 13:57:15 nobu Exp $
+// $Id: ccenter_block_form.php,v 1.4 2009/06/05 07:12:35 nobu Exp $
 
 global $xoopsConfig;
 
@@ -31,7 +31,7 @@ function b_ccenter_form_show($options) {
     $items = get_form_attribute($form['defs']);
     assign_form_widgets($items);
     $form['items'] =& $items;
-    $form['action'] = XOOPS_URL.'/modules/'.basename(dirname(dirname(__FILE__))).'/index.php?form='.$form['formid'];
+    $form['action'] = 'index.php?form='.$form['formid'];
     $template = render_form($form, 'form');
     return array('content'=>$xoopsTpl->fetch('db:'.$template));
 }

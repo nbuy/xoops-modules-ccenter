@@ -1,6 +1,6 @@
 <?php
 // ccenter common functions
-// $Id: functions.php,v 1.30 2009/06/05 09:20:08 nobu Exp $
+// $Id: functions.php,v 1.31 2009/06/06 03:28:04 nobu Exp $
 
 global $xoopsDB;		// for blocks scope
 // using tables
@@ -50,10 +50,10 @@ define('LABEL_ETC', '*');	// radio, checkbox widget 'etc' text input.
 define('OPTION_ATTRS', 'size,rows,maxlength,cols,prop,notify_with_email');
 
 // attribute config option expanding
-function get_attr_value($pri, $name) {
+function get_attr_value($pri, $name=null) {
     static $defs;		// default option value
 
-    if (isset($pri) && isset($pri[$name])) return $pri[$name];
+    if ($name && is_array($pri) && isset($pri[$name])) return $pri[$name];
     if (!isset($defs)) {
 	$defs = array('numeric'=>'[-+]?[0-9]+', 'tel'=>'\+?[0-9][0-9-,]*[0-9]');
 	foreach (explode(',', OPTION_ATTRS) as $key) {
@@ -72,6 +72,13 @@ function get_attr_value($pri, $name) {
 	    $def_attr = $configs['def_attrs'];
 	}
 	foreach (unserialize_vars($def_attr) as $k => $v) {
+	    $defs[$k] = $v;
+	}
+    }
+    if ($name == null && !is_null($pri)) {
+	// override values
+	if (!is_array($pri)) $pri = unserialize_vars($pri);
+	foreach ($pri as $k => $v) {
 	    $defs[$k] = $v;
 	}
     }
@@ -155,6 +162,13 @@ function get_form_attribute($defs) {
 	} elseif ($type != 'checkbox') {
 	    $defs = eval_user_value(join(',', $options));
 	}
+	if ($type=='textarea') {
+	    $attr['rows'] = get_attr_value($attr, 'rows');
+	    $attr['cols'] = get_attr_value($attr, 'cols');
+	} else {
+	    $attr['size'] = get_attr_value($attr, 'size');
+	}
+
 	$fname = "cc".++$num;
 	$result[$name] = array(
 	    'name'=>$name, 'label'=>$label, 'field'=>$fname,
@@ -197,7 +211,7 @@ function assign_post_values(&$items) {
 	case 'num':
 	    $check='numeric';
 	default:
-	    $v = get_attr_value(array(), $check);
+	    $v = get_attr_value(null, $check);
 	    if (!empty($v)) $check = $v;
 	    if (!preg_match('/^'.$check.'$/', $val)) $errors[] = $lab.": ".($val?_MD_REGEXP_ERR:_MD_REQUIRE_ERR);
 	    break;
@@ -349,8 +363,6 @@ function cc_make_widget($item) {
 	    } else {
 		if (preg_match($ereg, $value)) {
 		    $item['etc_value'] = preg_replace($ereg, '', $value);
-		    $esize = get_attr_value($item['attr'], 'size');
-		    if (!empty($esize)) $item['attr']['size'] = $esize;
 		    $value = LABEL_ETC;
 		}
 	    }
@@ -374,6 +386,7 @@ if (!function_exists("unserialize_vars")) {
 	    $ln = preg_replace("/[\\s$delm]\$/", '', $d[0]);
 	    $text = ltrim(substr($text, strlen($d[0])));
 	    if (preg_match('/^\s*([^=]+)\s*=\s*(.+)$/', $ln, $d)) {
+		if (preg_match('/^#/', $d[1])) continue;
 		if ($rev) {
 		    $k = $d[2];
 		    $v = $d[1];
@@ -846,7 +859,7 @@ function checkScript($checks, $confirm, $pattern) {
     $chks = array();
     foreach ($checks as $name => $msg) {
 	$pat = $pattern[$name];
-	$v = get_attr_value(array(), $pat);
+	$v = get_attr_value(null, $pat);
 	if (!empty($v)) $pat = $v;
 	$pat = htmlspecialchars(preg_replace('/([\\\\\"])/', '\\\\$1', $pat));
 	$chks[$name] = array('message'=>$msg, 'pattern'=>$pat);

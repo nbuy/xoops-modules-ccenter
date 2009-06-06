@@ -1,5 +1,5 @@
 <?php
-// $Id: admin.php,v 1.3 2008/06/15 13:57:15 nobu Exp $
+// $Id: admin.php,v 1.4 2009/06/06 03:28:04 nobu Exp $
 
 define('_AM_FORM_EDIT', 'Edit contact form');
 define('_AM_FORM_NEW', 'Create new contact form');
@@ -20,6 +20,8 @@ define('_AM_FORM_STORE', 'Store in Database');
 define('_AM_FORM_CUSTOM', 'Description type');
 define('_AM_FORM_WEIGHT', 'Weight');
 define('_AM_FORM_REDIRECT', 'Display page after sending');
+define('_AM_FORM_OPTIONS', 'Option variables');
+define("_MI_FORM_OPTIONS_DESC","Setting form definition and other attribute <a href='help.php#attr'>default options</a>. Example: <tt>size=60,rows=5,cols=50</tt>");
 define('_AM_FORM_ACTIVE', 'Form active');
 define('_AM_DELETE_FORM', 'Delete From');
 define('_AM_FORM_LAB', 'Item name');

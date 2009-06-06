@@ -1,5 +1,5 @@
 <?php
-// $Id: admin.php,v 1.1 2009/06/05 07:10:26 nobu Exp $
+// $Id: admin.php,v 1.2 2009/06/06 03:28:04 nobu Exp $
 // Traduzido para o Portugues do Brasil por: Miraldo Antoninho Ohse (m_ohse@hotmail.com).
 
 
@@ -23,6 +23,8 @@ define('_AM_FORM_STORE', 'Armazenar no banco de dados');
 define('_AM_FORM_CUSTOM', 'Digite a descrição');
 define('_AM_FORM_WEIGHT', 'Peso');
 define('_AM_FORM_REDIRECT', 'Página que será mostrada após o envio');
+define('_AM_FORM_OPTIONS', 'Opção variáveis');
+define("_MI_FORM_OPTIONS_DESC","Configuração das definições do formulário e o valor de outros <a href='help.php#attr'>opção padrão valores</a>. Exemplo: <tt>size=60,rows=5,cols=50</tt>");
 define('_AM_FORM_ACTIVE', 'Formuário ativo');
 define('_AM_DELETE_FORM', 'Deletar formulário');
 define('_AM_FORM_LAB', 'Nome do item');

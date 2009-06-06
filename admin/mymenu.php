@@ -13,12 +13,9 @@ $mydirname = basename($mydirpath);
 if( file_exists( "$mydirpath/language/$language/modinfo.php" ) ) {
 	// user customized language file
 	include_once "$mydirpath/language/$language/modinfo.php" ;
-} else if( file_exists( "$mytrustdirpath/language/$language/modinfo.php" ) ) {
-	// default language file
-	include_once "$mytrustdirpath/language/$language/modinfo.php" ;
 } else {
 	// fallback english
-	include_once "$mytrustdirpath/language/english/modinfo.php" ;
+	include_once "$mydirpath/language/english/modinfo.php" ;
 }
 
 include dirname(__FILE__).'/menu.php' ;
@@ -88,26 +85,20 @@ foreach( array_keys( $adminmenu ) as $i ) {
 }
 
 if ( $use_altsys ) {
-    // display
-    require_once XOOPS_TRUST_PATH.'/libs/altsys/class/D3Tpl.class.php' ;
-    $tpl =& new D3Tpl() ;
-    $tpl->assign( array(
-			'adminmenu' => $adminmenu ,
-			) ) ;
-    $tpl->display( 'db:altsys_inc_mymenu.html' ) ;
-
-    // submenu
-    $page = preg_replace( '/[^0-9a-zA-Z_-]/' , '' , @$_GET['page'] ) ;
-    if( file_exists( dirname(__FILE__).'/mymenusub/'.$page.'.php' ) ) {
-	include dirname(__FILE__).'/mymenusub/'.$page.'.php' ;
-    }
-} else {
+	// display
+	require_once XOOPS_ROOT_PATH.'/class/template.php' ;
+	$tpl =& new XoopsTpl() ;
+	$tpl->assign( array(
+						'adminmenu' => $adminmenu ,
+						) ) ;
+	$tpl->display( 'db:altsys_inc_mymenu.html' ) ;
+ } else {
 	// display (you can customize htmls)
 	echo "<div style='text-align:left;width:98%;'>" ;
 	foreach( $adminmenu as $menuitem ) {
 		echo "<div style='float:left;height:1.5em;'><nobr><a href='".htmlspecialchars($menuitem['link'],ENT_QUOTES)."' style='background-color:".($menuitem['selected']?"#FFCCCC":"#DDDDDD").";font:normal normal bold 9pt/12pt;'>".htmlspecialchars($menuitem['title'],ENT_QUOTES)."</a> | </nobr></div>\n" ;
 	}
 	echo "</div>\n<hr style='clear:left;display:block;' />\n" ;
-}
+ }
 
 ?>

@@ -11,8 +11,8 @@ if (isset($_POST['op'])) $op = $_POST['op'];
 $formid = isset($_REQUEST['formid'])?intval($_REQUEST['formid']):0;
 
 $fields = array('title', 'description', 'defs', 'priuid', 'cgroup',
-		'store', 'custom', 'weight', 'active');
-$optfields = array('redirect');
+		'store', 'custom', 'weight', 'active', 'optvars');
+$optfields = array();
 if ($op == 'delform') {
     $formid = intval($_POST['formid']);
     $xoopsDB->query("DELETE FROM ".FORMS." WHERE formid=".$formid);
@@ -33,20 +33,6 @@ if ($op == 'delform') {
 	} else {
 	    $vals[$fname] = $v;
 	}
-    }
-    $opts = "";
-    foreach ($optfields as $fname) {
-	if (!empty($_POST[$fname])) {
-	    $opts .= $fname."=".preg_replace("/\\n.*$/", '', $myts->stripSlashesGPC($_POST[$fname]))."\n";
-	}
-    }
-    $fname = 'optvars';
-    $data[$fname] = $v = $opts;
-    $v = $xoopsDB->quoteString($v);
-    if ($formid) {
-	$vals[] = $fname."=".$v;
-    } else {
-	$vals[$fname] = $v;
     }
     $v = '|';
     foreach ($_POST['grpperm'] as $gid) {
@@ -189,6 +175,7 @@ function build_form($formid=0) {
 	$data['grpperm'] = $_POST['grpperm'];
 	$formid = intval($_POST['formid']);
 	// form preview
+	get_attr_value($data['optvars']); // set default values
 	$items = get_form_attribute($data['defs']);
 	assign_form_widgets($items);
 	if ($_POST['preview']) {
@@ -291,8 +278,9 @@ function build_form($formid=0) {
     $form->addElement(new XoopsFormRadioYN(_AM_FORM_ACTIVE, 'active' , $data['active']));
 
     $form->addElement(new XoopsFormText(_AM_FORM_WEIGHT, 'weight', 2, 8, $data['weight']));
-    $optvars = unserialize_vars($data['optvars']);
-    $form->addElement(new XoopsFormText(_AM_FORM_REDIRECT, 'redirect', 50, 128, @$optvars['redirect']));
+    $optvars = new XoopsFormTextarea(_AM_FORM_OPTIONS, 'optvars', $data['optvars']);
+    $optvars->setDescription(_AM_FORM_OPTIONS_DESC);
+    $form->addElement($optvars);
     $submit = new XoopsFormElementTray('');
     $submit->addElement(new XoopsFormButton('' , 'formdefs', _SUBMIT, 'submit'));
     $submit->addElement(new XoopsFormButton('' , 'preview', _PREVIEW, 'submit'));

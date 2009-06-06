@@ -8,29 +8,30 @@ td,th { padding: 4px; background: #e8e8e8;}
 .head th  { padding: 4px; background: #d0d0d0; }
 .bnf { color: #008000; }
 .note { font-size: 80%; color: #800000; padding: 0.5em;}
-h1, h2, h3, h4 { color: #000040; }
+h1, h2, h3, h4, h5, h6 { color: #000040; }
 pre { color: #600000; }
 </style>
 </head>
 <body>
-  <h1>Contact Center module</h1>
+  <h4>Contact Center module</h4>
   <ul>
   <li><a href="#intro">Abstruct</a></li>
   <li><a href="#form">Form defunitions</a></li>
   <li><a href="#custom">Custom Form</a></li>
   <li><a href="#config">Preferences</a></li>
+  <li><a href="#attr">Default option variables</a></li>
   <li><a href="#tips">Tips for using</a></li>
   <li><a href="#changes">Changes</a></li>
   </ul>
 
   <hr>
 
-  <a name="intro"></a><h2>Abstruct of Contact Center module</h2>
+  <a name="intro"></a><h5>Abstruct of Contact Center module</h5>
 
   <p>"Contact Center" is a module for web forms like "Contact us".
     This module has features following:</p>
   <ul>
-    <li>Handling highly custamizable contact forms</li>
+    <li>Handling highly customizable contact forms</li>
     <li>Store contact message in Database</li>
     <li>Response management</li>
     <li>Evaluate contact work</li>
@@ -40,7 +41,7 @@ pre { color: #600000; }
     This module store in database and support and following contact messages.
   </p>
 
-  <a name="form"></a><h2>Form defunitions</h2>
+  <a name="form"></a><h5>Form defunitions</h5>
 
   Form define in admin menu at "Forms". The "Form defunitions" following syntax.
   <blockquote class="bnf">
@@ -77,7 +78,7 @@ pre { color: #600000; }
     </li>
   </ul>
 
-  <h3>Examples:</h3>
+  <h6>Examples:</h6>
 
   <blockquote>
   <form>
@@ -103,7 +104,7 @@ pre { color: #600000; }
   </form>
   </blockquote>
 
-  <a name="custom"></a><h2>Custom Form</h2>
+  <a name="custom"></a><h5>Custom Form</h5>
 
   <p>"Description" use template in "Description type" settings
     not "Normal[bb]". In "template" types insert form element
@@ -139,7 +140,7 @@ Item-n: {Item-n}
   </ul>
   </blockquote>
 
-  <a name="config"></a><h2>Preferences</h2>
+  <a name="config"></a><h5>Preferences</h5>
 
   <p>Module preferences has following items.</p>
 
@@ -163,7 +164,7 @@ Done: c</pre></td><td>the Format as: Display-label: [status1[,status2...]], incl
       </td></tr>
     </table>
 
-    <h3>Attributes</h3>
+    <a name="attr"></a><h5>Option variables</h5>
 
     <table border="0" cellspacing="1" cellpadding="4" class="outer">
       <tr class="head"><th>Attribute Name</th><th>Setting/Default</th><th>Description</th></tr>
@@ -173,16 +174,17 @@ Done: c</pre></td><td>the Format as: Display-label: [status1[,status2...]], incl
       <tr class="odd"><td class="head">cols</td><td><u>0</u></td><td>columns number of textarea</td></tr>
       <tr class="even"><td class="head">notify_with_email</td><td><u>0</u></td><td>When setting 1 email address include in notification</td></tr>
       <tr class="odd"><td class="head">export_charset</td><td><u>UTF-8</u></td><td>force setting encoding for CSV format file output.</td></tr>
-      <tr class="even"><td class="head">other names</td><td>RegExp</td><td>Input format checking regular expressions
+      <tr class="even"><td class="head">redirect</td><td>URI</td><td>Move to page URI when after sending form.</td></tr>
+      <tr class="odd"><td class="head">other names</td><td>RegExp</td><td>Input format checking regular expressions
 	  <p>Example: Numeric check <tt>numeric=[-+]?[0-9]+</tt>, Phone Number <tt>tel="\+?[0-9][0-9-,]*[0-9]"</tt><br />Using in Contact form's "Form defunisions" attribute like <tt>check=tel</tt>.</p>
 	  <p>Regular expressions using JavaScript acceptable range. (Server side use perl regexp, but client side use JavaScript)</p>
       </td></tr>
     </table>
   <blockquote>
 
-  <a name="tips"></a><h2>Tips for using</h2>
+  <a name="tips"></a><h5>Tips for using</h5>
 
-  <h3>Notification</h3>
+  <h6>Notification</h6>
   <p>
     Notification using XOOPS notification system.
     Except for contact person/group setting.
@@ -196,7 +198,7 @@ Done: c</pre></td><td>the Format as: Display-label: [status1[,status2...]], incl
     <li>Administrator can setting notification for all message.</li>
   </ul>
 
-  <h3>Note for Security</h3>
+  <h6>Note for Security</h6>
   <p>In this module using XOOPS comment system.
     When you use Comment custamization (modules/blocks/plugins/hacks...)
     to display, need to carefully. Comments in this module, include private
@@ -212,7 +214,7 @@ Done: c</pre></td><td>the Format as: Display-label: [status1[,status2...]], incl
     Otherwise, Like "Whatsnew" module using, comment body display.
   </p>
 
-  <h3>"Contact person" setting member of group</h3>
+  <h6>"Contact person" setting member of group</h6>
   <p>
     "Contact person" setting "Member[group]" mean choose a person
     when form sending, using HTTP argument "uid=YY" (YY is userid that
@@ -231,8 +233,20 @@ Done: c</pre></td><td>the Format as: Display-label: [status1[,status2...]], incl
     Modify template other module, for adding the link to form.
   </p>
 
-  <a name="changes"></a><h2>Changes</h2>
+  <a name="changes"></a><h5>Changes</h5>
   <dl>
+  <dt>2009-06-06 ccenter 0.90</dt>
+  <dd>
+    <ul>
+      <li>Fix XOOPS 2.3 compatibility</li>
+      <li>Add option variables on each forms</li>
+      <li>Fix mail address store in body</li>
+      <li>Make form widgets use template</li>
+      <li>Fix onetime password mistake authentication (thx zorro87)</li>
+      <li>Fix form block submit url (thx uhouho)</li>
+      <li>Add language resources "portuguese" (thx leco1)</li>
+    </ul>
+  </dd>
   <dt>2009-03-15 ccenter 0.89</dt>
   <dd>
     <ul>
@@ -367,6 +381,6 @@ Done: c</pre></td><td>the Format as: Display-label: [status1[,status2...]], incl
 <hr/>
 <aliress>Nobuhiro YASUTOMI &lt;<a href="mailto:nobuhiro.yasutomi@nifty.ne.jp">nobuhiro.yasutomi@nifty.ne.jp</a>&gt;</aliress>
 MySite Users <a href="http://myht.org/">http://myht.org/</a><br/>
-$Id: help.html,v 1.8 2009/03/15 10:21:18 nobu Exp $
+$Id: help.html,v 1.9 2009/06/06 03:28:04 nobu Exp $
 </body>
 </html>

@@ -1,6 +1,6 @@
 <?php
 // Export data in CSV format
-// $Id: export.php,v 1.10 2008/06/15 13:57:15 nobu Exp $
+// $Id: export.php,v 1.11 2009/06/06 03:28:04 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -89,7 +89,7 @@ while ($data = $xoopsDB->fetchArray($res)) {
 }
 
 if (function_exists("mb_convert_encoding")) {
-    $charset = get_attr_value(array(), 'export_charset');
+    $charset = get_attr_value(null, 'export_charset');
     if (!$charset) $charset = _MD_EXPORT_CHARSET;
     $contents = mb_convert_encoding($contents, $charset, _CHARSET);
 } else {

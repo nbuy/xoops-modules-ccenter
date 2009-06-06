@@ -1,6 +1,6 @@
 <?php
 # ccenter module onUpdate proceeding.
-# $Id: onupdate.php,v 1.4 2009/06/05 09:20:08 nobu Exp $
+# $Id: onupdate.php,v 1.5 2009/06/06 03:28:04 nobu Exp $
 
 global $xoopsDB;
 
@@ -35,7 +35,7 @@ if (add_field(MSG, "atime", "INT DEFAULT 0 NOT NULL", "mtime")) {
 }
 // change redirect to optvars field (after ccenter-0.90)
 if ($xoopsDB->query("ALTER TABLE ".FORM." CHANGE redirect optvars TEXT")) {
-    $xoopsDB->query("UPDATE ".FORM." set optvars=concat('redirect=', optvars)");
+    $xoopsDB->query("UPDATE ".FORM." set optvars=concat('redirect=', optvars) WHERE redirect<>''");
     report_message(" Change '<b>redirect</b>' field to '<b>optvars</b>' in ccneter_form table");
 }
 

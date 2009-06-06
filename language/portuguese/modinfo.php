@@ -1,5 +1,5 @@
 <?php
-// $Id: modinfo.php,v 1.1 2009/06/05 07:10:26 nobu Exp $
+// $Id: modinfo.php,v 1.2 2009/06/06 03:28:04 nobu Exp $
 // Module Info
 // Traduzido para o Portugues do Brasil por: Miraldo Antoninho Ohse (m_ohse@hotmail.com).
 
@@ -28,6 +28,7 @@ define("_MI_CCENTER_LIST_TPL", "Listar minhas consultas");
 define("_MI_CCENTER_CHARGE_TPL", "Lista de contatos para mim");
 define("_MI_CCENTER_MSGS_TPL", "Mostrar mensagem de contato");
 define("_MI_CCENTER_RECEPT_TPL", "Mostrar administração");
+define("_MI_CCENTER_WIDGET_TPL", "Forma widgets");
 
 // A brief blocks of this module
 define("_MI_CCENTER_BLOCK_RECEIPT","Contato para mim");
@@ -37,7 +38,7 @@ define("_MI_CCENTER_BLOCK_FORM","Formulário de contato");
 define("_MI_CCENTER_LISTS","Número de ítens listados");
 define("_MI_CCENTER_LISTS_DESC","Configurar o número de lista que serão mostradas");
 define("_MI_CCENTER_DEF_ATTRS","Atributos padrão");
-define("_MI_CCENTER_DEF_ATTRS_DESC","Configuração das definições do formulário e o valor de outros atributos padrão. Exemplo: <tt>tamanho=60,linhas=5,colunas=50</tt>");
+define("_MI_CCENTER_DEF_ATTRS_DESC","Configuração das definições do formulário e o valor de outros <a href='help.php#attr'>opção padrão valores</a>. Exemplo: <tt>size=60,rows=5,cols=50</tt>");
 define("_MI_CCENTER_STATUS_COMBO", "Seleções dos status");
 define("_MI_CCENTER_STATUS_COMBO_DESC","o formato como: <tt>Mostrar-etiqueta: [status1[,status2...]]</tt>, incluir múltiplas linhas. o status é um caracter do (-,a,b,c). Exemplo: <tt>Abrir: - a</tt>");
 define("_MI_CCENTER_STATUS_COMBO_DEF","Todas: - a b c\nAberta: - a\nFechada: b c\n--------:\nPendente: -\nTrabalhando: a\nRespondidas: b\nFeitas: c\n");

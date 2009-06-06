@@ -1,6 +1,6 @@
 <?php
 // show message list
-// $Id: charge.php,v 1.2 2007/09/26 07:08:58 nobu Exp $
+// $Id: charge.php,v 1.3 2009/06/06 03:28:04 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -22,7 +22,7 @@ if ($xoopsUser->isAdmin($xoopsModule->getVar('mid'))) {
     if (isset($_GET['touid'])) $uid = intval($_GET['touid']);
 }
 
-$labels=array('mtime'=>_MD_POSTDATE, 'formid'=>_MD_CONTACT_FORM,
+$labels=array('mtime'=>_MD_MODDATE, 'formid'=>_MD_CONTACT_FORM,
 	      'uid'=>_MD_CONTACT_FROM, 'status'=>_CC_STATUS);
 $orders=array('mtime'=>'ASC', 'formid'=>'ASC', 'uid'=>'ASC', 'status'=>'ASC',
 	      'stat'=>'- a', 'orders'=>array('status','mtime'));

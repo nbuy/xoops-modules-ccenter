@@ -1,6 +1,6 @@
 <?php
 // contact to member
-// $Id: index.php,v 1.21 2009/06/05 09:20:08 nobu Exp $
+// $Id: index.php,v 1.22 2009/06/06 03:28:04 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -46,6 +46,7 @@ if ($xoopsDB->getRowsNum($res)!=1) {
 
 if (isset($_POST['op']) && !isset($_POST['edit'])) $op = $_POST['op'];
 $form = $xoopsDB->fetchArray($res);
+get_attr_value($form['optvars']); // set default values
 $items = get_form_attribute($form['defs']);
 if ($form['priuid']< 0) {	// assign group member
     $priuid = isset($_GET['uid'])?intval($_GET['uid']):0;
@@ -105,7 +106,6 @@ function store_message($items, $form) {
     if ($store==_DB_STORE_NONE) {
 	$showaddr = true;	// no store to need show address
     } else {
-	$optvars = unserialize_vars($form['optvars']);
 	$showaddr = get_attr_value($optvars, 'notify_with_email');
     }
     $from = $email = "";
@@ -224,7 +224,7 @@ function store_message($items, $form) {
     }
 
     if ($id) $msgurl .= $parg;
-    $redirect = get_attr_value(unserialize_vars($form['optvars']), 'redirect');
+    $redirect = get_attr_value(null, 'redirect');
     if (!empty($redirect)) {
 	$msgurl = preg_match('/^\\//', $redirect)?XOOPS_URL.$redirect:$redirect;
     }

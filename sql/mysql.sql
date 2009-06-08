@@ -1,5 +1,5 @@
 # Contact Center Module for XOOPS
-# $Id: mysql.sql,v 1.7 2009/06/05 09:20:08 nobu Exp $
+# $Id: mysql.sql,v 1.8 2009/06/08 02:03:29 nobu Exp $
 
 #
 # Table structure for table `ccenter_form`
@@ -36,7 +36,7 @@ CREATE TABLE ccenter_message (
   mtime int(10) NOT NULL default '0',
   atime int(10) NOT NULL default '0',	-- last access time by contactee
   fidref int(8) NOT NULL default '0',	-- formid external reference
-  email varchar(60) NOT NULL default '',-- guest access email address
+  email varchar(256) NOT NULL default '',-- guest access email address
   body  text,	-- contact form siralized value
   status char(1) NOT NULL default '-',	-- '-':not yet, a:accept, b:replyed, c:close, x:deleted
   value int(4) NOT NULL default '0',	-- evaluate value for this contact

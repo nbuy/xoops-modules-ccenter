@@ -1,6 +1,6 @@
 <?php
 # ccenter module onUpdate proceeding.
-# $Id: onupdate.php,v 1.5 2009/06/06 03:28:04 nobu Exp $
+# $Id: onupdate.php,v 1.6 2009/06/08 02:03:29 nobu Exp $
 
 global $xoopsDB;
 
@@ -37,6 +37,15 @@ if (add_field(MSG, "atime", "INT DEFAULT 0 NOT NULL", "mtime")) {
 if ($xoopsDB->query("ALTER TABLE ".FORM." CHANGE redirect optvars TEXT")) {
     $xoopsDB->query("UPDATE ".FORM." set optvars=concat('redirect=', optvars) WHERE redirect<>''");
     report_message(" Change '<b>redirect</b>' field to '<b>optvars</b>' in ccneter_form table");
+}
+$res = $xoopsDB->query("SHOW COLUMNS FROM ".MSG." LIKE 'email'");
+$data = $xoopsDB->fetchArray($res);
+if ($res && preg_replace('/^varchar\((\d+)\)$/', '\1', $data['Type'])<256) {
+    if ($xoopsDB->query("ALTER TABLE ".MSG." CHANGE email email VARCHAR(256)")) {
+	report_message(" Fix '<b>email</b>' field length to <b>256</b>");
+    } else {
+	report_message(" Fail to change '<b>email</b>' field length");
+    }
 }
 
 function add_field($table, $field, $type, $after) {

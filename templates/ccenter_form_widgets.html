@@ -48,7 +48,8 @@
 
 <{elseif $item.type == "file"}>
 
-  <input name="<{$item.field}>" id="<{$item.field}>" type="file" value="<{$item.value|escape}>"<{if $item.attr.size}> size="<{$item.attr.size}>"<{/if}> />
+  <input name="<{$item.field}>" id="<{$item.field}>" type="file" <{if $item.attr.size}> size="<{$item.attr.size}>"<{/if}> />
+  <{$item.value|escape}><input name="<{$item.field}>_prev" type="hidden" value="<{$item.value|escape}>"<{if $item.attr.size}> size="<{$item.attr.size}>"<{/if}> />
 
 <{elseif $item.type != "javascript"}><{* as text *}>
 

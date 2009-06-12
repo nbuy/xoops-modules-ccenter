@@ -1,6 +1,6 @@
 <?php
 // contact to member
-// $Id: index.php,v 1.22 2009/06/06 03:28:04 nobu Exp $
+// $Id: index.php,v 1.23 2009/06/12 05:11:27 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -97,6 +97,7 @@ $xoopsTpl->assign('xoops_pagetitle', $title);
 $breadcrumbs->assign();
 $xoopsOption['template_main'] = render_form($form, $op);
 if ($cust!=_CC_TPL_FULL) include XOOPS_ROOT_PATH."/footer.php";
+else echo $xoopsTpl->fetch('db:'.$xoopsOption['template_main']);
 
 function store_message($items, $form) {
     global $xoopsUser, $xoopsDB, $xoopsModuleConfig;
@@ -106,7 +107,7 @@ function store_message($items, $form) {
     if ($store==_DB_STORE_NONE) {
 	$showaddr = true;	// no store to need show address
     } else {
-	$showaddr = get_attr_value($optvars, 'notify_with_email');
+	$showaddr = get_attr_value(null, 'notify_with_email');
     }
     $from = $email = "";
     $attach = array();
@@ -117,6 +118,7 @@ function store_message($items, $form) {
 	$name = $item['name'];
 	$val = $item['value'];
 	$vals[$name] = $val;
+	$opts = &$item['options'];
 	switch ($item['type']) {
 	case 'mail':
 	    if (empty($email)) { // save first email for contact
@@ -136,7 +138,14 @@ function store_message($items, $form) {
 		$attach[] = $val;
 	    }
 	    break;
+	case 'radio':
+	case 'select':
+	    if (isset($opts[$val])) $val = strip_tags($opts[$val]);
+	    break;
 	case 'checkbox':
+	    foreach ($val as $k=>$v) {
+		$val[$k] = isset($opts[$v])?strip_tags($opts[$v]):$v;
+	    }
 	    $val = join(', ', $val);
 	    break;
 	}

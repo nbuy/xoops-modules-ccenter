@@ -1,6 +1,6 @@
 <?php
 // ccenter common functions
-// $Id: functions.php,v 1.31 2009/06/06 03:28:04 nobu Exp $
+// $Id: functions.php,v 1.32 2009/06/12 05:11:27 nobu Exp $
 
 global $xoopsDB;		// for blocks scope
 // using tables
@@ -84,6 +84,46 @@ function get_attr_value($pri, $name=null) {
     }
     if (isset($defs[$name])) return $defs[$name];
     return null;
+}
+
+function cc_display_values($vals, $items, $msgid=0, $add="") {
+    $myts =& MyTextSanitizer::getInstance();
+    $values=array();
+    foreach ($vals as $key=>$val) {
+	if (isset($items[$key])) {
+	    $item = &$items[$key];
+	    $key = $item['label'];	// replace display value
+	} else {
+	    $item = null;
+	}
+	if (preg_match('/^file=(.+)$/', $val, $d)) {
+	    $val = cc_attach_image($msgid, $d[1], false, $add);
+	} else {
+	    if ($item) {
+		$opts = &$item['options'];
+		switch ($item['type']) {
+		case 'radio':
+		case 'select':
+		    if (isset($opts[$val])) $val = strip_tags($opts[$val]);
+		    break;
+		case 'checkbox':
+		    $cvals = array();
+		    foreach (preg_split('/,\s?/', $val) as $v) {
+			if (!empty($v)) $cvals[] = isset($opts[$v])?strip_tags($opts[$v]):$v;
+		    }
+		    $val = join(', ', $cvals);
+		    break;
+		default:
+		    $val = $myts->displayTarea($val);
+		    break;
+		}
+	    } else {
+		$val = $myts->displayTarea($val);
+	    }
+	}
+	$values[$key] = $val;
+    }
+    return $values;
 }
 
 function cc_csv_parse($ln) {
@@ -279,18 +319,36 @@ function assign_form_widgets(&$items, $conf=false) {
 	if ($item['type']=='hidden' && !$conf) continue;
 	$val =& $item['value'];
 	$fname =& $item['field'];
+	$opts = $item['options'];
 	if ($conf) {
 	    if (is_array($val)) {
-		$input = htmlspecialchars(join(', ', $val), ENT_QUOTES);
 		$fmt = "<input type='hidden' name='{$fname}[]' value='%s' />";
-		foreach ($val as $v) {
+		$input = "";
+		foreach ($val as $k=>$v) {
+		    $val[$k] = $v = isset($opts[$v])?strip_tags($opts[$v]):$v;
 		    $v = htmlspecialchars($v, ENT_QUOTES);
 		    $input .= sprintf($fmt, $v);
 		}
+		$input .= htmlspecialchars(join(', ', $val), ENT_QUOTES);
 	    } else {
 		$v = htmlspecialchars($val, ENT_QUOTES);
-		if ($item['type']=='hidden') $input = $v;
-		else $input = nl2br($v)."<input type='hidden' name='$fname' value='$v' />";
+		switch ($item['type']) {
+		case 'hidden':
+		    $input = $v;
+		    break;
+		case 'radio':
+		case 'select':
+		    $input = (isset($opts[$val])?strip_tags($opts[$val]):$v).
+			"<input type='hidden' name='$fname' value='$v' />";
+		    break;
+		case 'file':
+		    $input = cc_attach_image(0, $val, false).
+			"<input type='hidden' name='$fname' value='$v' />";
+		    break;
+		default:
+		    $input = nl2br($v)."<input type='hidden' name='$fname' value='$v' />";
+		    break;
+		}
 	    }
 	} else {
 	    $input = cc_make_widget($item);

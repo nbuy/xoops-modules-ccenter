@@ -1,6 +1,6 @@
 <?php
 // show messages file
-// $Id: message.php,v 1.19 2008/06/15 13:57:15 nobu Exp $
+// $Id: message.php,v 1.20 2009/06/12 05:11:27 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -56,20 +56,10 @@ include XOOPS_ROOT_PATH."/header.php";
 
 $breadcrumbs = new XoopsBreadcrumbs(_MD_CCENTER_RECEPTION, 'reception.php');
 
-$vals = unserialize_text($data['body']);
 $add = $pass?"p=".urlencode($pass):"";
 $to_uname = XoopsUser::getUnameFromId($data['touid']);
 $items = get_form_attribute($data['defs']);
-$values=array();
-foreach ($vals as $key=>$val) {
-    if (isset($items[$key])) $key = $items[$key]['label'];
-    if (preg_match('/^file=(.+)$/', $val, $d)) {
-	$val = cc_attach_image($data['msgid'], $d[1], false, $add);
-    } else {
-	$val = $myts->displayTarea($val);
-    }
-    $values[$key] = $val;
-}
+$values = cc_display_values(unserialize_text($data['body']), $items, $data['msgid'], $add);
 $data['comment'] = $myts->displayTarea($data['comment']);
 $isadmin = $uid && $xoopsUser->isAdmin($xoopsModule->getVar('mid'));
 $title = $data['title'];

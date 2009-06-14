@@ -34,7 +34,7 @@
 <input type="hidden" name="id" value="<{$data.msgid}>" />
 <input type="hidden" name="op" value="myself" />
 <input type="submit" value="<{$smarty.const._MD_CONTACT_MYSELF}>">
-</from>
+</form>
 <{/if}>
 </div>
 
@@ -100,7 +100,7 @@ table.evaluate td { width: 20%; text-align: center; }
 <input type="hidden" name="pass" value="<{$data.onepass|escape}>" />
 <input type="submit" value="<{$smarty.const._MD_EVAL_SUBMIT}>" />
 </p>
-</from>
+</form>
 </div>
 <{/if}>
 <{include file="db:system_notification_select.html"}>

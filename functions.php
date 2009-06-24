@@ -1,6 +1,6 @@
 <?php
 // ccenter common functions
-// $Id: functions.php,v 1.32 2009/06/12 05:11:27 nobu Exp $
+// $Id: functions.php,v 1.33 2009/06/24 14:50:48 nobu Exp $
 
 global $xoopsDB;		// for blocks scope
 // using tables
@@ -149,7 +149,7 @@ function get_form_attribute($defs) {
     foreach (cc_csv_parse($defs) as $opts) {
 	if (empty($opts)) continue;
 	if (preg_match('/^#/', $opts[0])) {
-	    $result[] = array('comment'=>join(',', $opts));
+	    $result[] = array('comment'=>substr(join(',', $opts), 1));
 	    continue;
 	}
 	$name = array_shift($opts);

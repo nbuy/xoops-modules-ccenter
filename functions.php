@@ -1,6 +1,6 @@
 <?php
 // ccenter common functions
-// $Id: functions.php,v 1.33 2009/06/24 14:50:48 nobu Exp $
+// $Id: functions.php,v 1.34 2009/06/26 02:05:55 nobu Exp $
 
 global $xoopsDB;		// for blocks scope
 // using tables
@@ -1008,7 +1008,10 @@ class XoopsBreadcrumbs {
     }
 
     function get() {
-	return $this->pairs;
+	$ret = $this->pairs;
+	$keys = array_keys($ret);
+	$ret[array_pop($keys)]['url'] = '';
+	return $ret;
     }
 
     function assign() {

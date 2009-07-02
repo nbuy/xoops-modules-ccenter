@@ -1,0 +1,397 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html languagee="ja">
+<head>
+<title>Contact Center module</title>
+<style>
+.outer { background-color: #808080; }
+td,th { padding: 4px; background: #e8e8e8;}
+.head th  { padding: 4px; background: #d0d0d0; }
+.bnf { color: #008000; }
+.note { font-size: 80%; color: #800000; padding: 0.5em;}
+h1, h2, h3, h4, h5, h6 { color: #000040; }
+pre { color: #600000; }
+</style>
+</head>
+<body>
+  <h4>Contact Center module</h4>
+  <ul>
+  <li><a href="#intro">Abstruct</a></li>
+  <li><a href="#form">Formular Definitionen</a></li>
+  <li><a href="#custom">Custom Form</a></li>
+  <li><a href="#config">Einstellungen</a></li>
+  <li><a href="#attr">Default option variables</a></li>
+  <li><a href="#tips">Tips zur Benutzung</a></li>
+  <li><a href="#changes">Änderungen</a></li>
+  </ul>
+
+  <hr>
+
+  <a name="intro"></a><h5>Abstruct of Contact Center module</h5>
+
+  <p>"Contact Center" ist ein Formular-Modul wie z.B. für ein Kontaktformular.
+    Dieses Modul hat folgende Funktionalitäten:</p>
+  <ul>
+    <li>Erstellung anpassbarer / flexibler Formulare</li>
+    <li>Kontaktnachrichten in der Datenbank speichern</li>
+    <li>Verwaltung der gesendeter Daten</li>
+    <li>Auswertung der übermittelten Daten</li>
+  </ul>
+
+  <p>Der grösste Unterschied zu einem gewöhnlichen Formular-Modul:
+  	Dieses Modul speichert die abgesendeten Daten in der Datenbank und unterstützt das Auswerten der Daten.
+  </p>
+
+  <a name="form"></a><h5>Formular Definitionen</h5>
+
+  Ein neues Formular erstellt/ändert man in der Administration über das obere Menü "Forms".
+  Die Formumar Definitionen befolgen folgende Syntax:
+  <blockquote class="bnf">
+      <b>line ::= label["*"][,type][,attribute...][,argument...]</b><p />
+      type ::= {text|checkbox|radio|textarea|select|const|hidden|mail|multi|file}<br />
+      argument ::= [value ["+"] "="] display-value<br />
+      attribute ::= aname "=" value<br />
+      aname ::= {size|rows|maxlength|cols|prop|check}
+  </blockquote>
+  <ul>
+    <li>"*" bedeutet "erforderlich"</li>
+    <li>"#" bedeutet das Hinzufügen einer Beschreibung in das Formular</li>
+    <li>"," ist ein seperator</li>
+    <li>argument abbreviation value, that is equivalent display-value</li>
+    <li>"+" In auswahl Typen (checkbox, radio, select) per default ausgewählte Wert</li>
+    <li>The other arguments are makes default value in text types(text, textarea)</li>
+    <li>Gültige Attribute hängen von den Typen ab (z.B. text: "size=n", textarea: "cols=n" "rows=n")</li>
+    <li>Mit dem "check" Attribut überprüft man die Eingabe eines Feldes wie zB. (*: erforderlich,  nach dem Namen des Feldes; "num": nur Ziffern zulassen, "mail": Email Format)</li>
+    <li>type of "checkbox" or "radio" argument value makes "*"
+      that is mean 'etc' field. And it takes a text input field.</li>
+    <li>Typ "mail" ist ein spezielles Eingabefeld. Es überprüft automatisch die Gütigkeit des Feldes.</li>
+    <li>Typ "file" bedeutet das hochladen einer Datei (Anhang) über das Formular</li>
+    <li>
+      Default value string can include variables expand user information.
+      The variables like <tt>{X_<em>LABEL</em>}</tt> style, <em>LABEL</em>
+      will be userinfo capitalized field name. (e.g. {X_UNAME}, {X_NAME}, {X_EMAIL}, {X_BIO})
+      Gäste erhalten einen leeren string.
+    </li>
+    <li>
+      In 'Normal[bb]' type form, Form defunitions item name start "-", show that same line with previus item.
+
+      This is implement by smarty template (ccenter_form.html,
+      ccenter_confirm.html) for convenience.
+    </li>
+  </ul>
+
+  <h6>Beispiele:</h6>
+
+  <blockquote>
+  <form>
+    <table border="0" cellspacing="1" cellpadding="4" class="outer">
+      <tr class="head"><th>Definiton</th><th>Repräsentiert</th><th>Beschreibung</th></tr>
+      <tr class="even"><td>Name*</td><td>Name* <input name="samp1" /></td><td> Das "*" macht die Eingabe dieses Feldes erfordelich. Typ wird autmatisch auf "text" gesetzt.</td></tr>
+      <tr class="odd"><td>Name*,size=5</td><td>Name* <input name="samp2" size="5" /></td><td>Hier wird das Attribut verwenden um die Länge zu bestimmen</td></tr>
+      <tr class="even"><td>Name*,size=10,Default,#Beschreibung</td><td>Name* <input name="samp3" size="10" value="Default" /> Beschreibung</td><td>Das Argument "#" als Prefix bedeutet dass "Beschreibung" als Text angezeigt wird.</td></tr>
+      <tr class="odd"><td>Name,size=10,check=reqire,{X_NAME},#Comment</td><td>Name <input name="samp3" size="10" value="expand your name"/> Comment</td><td>checking requirement like this. Default value  <tt>{X_NAME}</tt> are expand user information.</td></tr>
+      <tr class="even"><td>Selection,radio,Item1+,Item2&lt;br/&gt;,*=others</td><td>Selection <input type="radio" name="samp4" value="Item1" checked /> Item1
+	  &nbsp; <input type="radio" name="samp4" value="Item2" /> Item2<br/>
+	  <input type="radio" name="samp4" value="*" /> others <input name="etc4" size="8"/> </td><td>Include HTML tags in label, but ignore in
+	  value. The value use "*", that use text input.</td></tr>
+      <tr class="odd"><td>Selection,checkbox,Item1+,Item2,Item3</td><td>Selection <input type="checkbox" name="samp5_1" checked /> Item1 &nbsp;
+	  <input type="checkbox" name="samp5_2" /> Item2 &nbsp;
+	  <input type="checkbox" name="samp5_3" /> Item3</td>
+	<td>"+" bedeutet dass das Item1 per default als ausgewählt angezeigt wird.</td></tr>
+      <tr class="even"><td>Selection,select,Item1,Item2,Item3</td><td>Selection <select name="samp6"><option>Item1</option><option>Item2</option><option>Item3</option></select></td><td></td></tr>
+      <tr class="odd"><td>Label,const,value</td><td><em>Label value</em></td><td>Show the value as is and that input value.</td></tr>
+      <tr class="even"><td>Label,hidden,value</td><td><em>(Im Formular nicht angezeigt)</em></td><td>This is handle input value.</td></tr>
+      <tr class="odd"><td>#Kommentar/Beschreibung</td><td>Kommentar/Beschreibung</td><td></td></tr>
+    </table>
+  </form>
+  </blockquote>
+
+  <a name="custom"></a><h5>Custom Form</h5>
+
+  <p>"Beschreibung" use template in "Beschreibungstype" settings
+    not "Normal[bb]". In "template" types insert form element
+    make variables like <tt>{Name}</tt> style.</p>
+
+  <blockquote>
+    <table border="0" cellspacing="1" cellpadding="4" class="outer">
+      <tr class="head"><th>variables</th><th>Description</th></tr>
+      <tr class="even"><td>{FORM_ATTR}</td><td>form attributes</td></tr>
+      <tr class="odd"><td>{SUBMIT}</td><td>Absenden Schaltfl&auml;che</td></tr>
+      <tr class="even"><td>{BACK}</td><td>Re-Edit button</td></tr>
+      <tr class="odd"><td>{CHECK_SCRIPT}</td><td>Checking JavaScript</td></tr>
+      <tr class="even"><td>{Name}</td><td>Input field element of Name</td></tr>
+      <tr class="odd"><td>{TO_UNAME} {TO_NAME}</td><td>Member of group settings, uid setting user's uname and name</td></tr>
+    </table>
+  <ul>
+  <li>Need every variable represent once.</li>
+  <li>Edit contact form page's "Adding template" button makes set of variables adding in description.</li>
+  <li>Basicaly custom template form following variable sets (The element will be arrangement in a form tag)</li>
+    <pre>&lt;form {FORM_ATTR}&gt;
+Item1: {Item1}
+Item2*: {Item2}
+  :
+Item-n: {Item-n}
+{SUBMIT} {BACK}
+&lt;/form&gt;
+{CHECK_SCRIPT}</pre>
+  <li><tt>[desc]Description[/desc]</tt> bedeutet dass die "Description" auf der Eingabeseite angezeigt wird und nicht auf der Bestätigungsseite.</li>
+  <li>{TO_UNAME}, {TO_NAME} can use in normal description.</li>
+  <li>"Overall template" bedeutet dass man nicht die Impresscms Templtes nutzen will. Es wird direkt als HTML Seite angezeigt.</li>
+  <li>"Wide template" Ob diese Einstllung funktioniert hängt von dem Theme ab. Es seetzt die smarty Variablen <tt>$xoops_show{c,l,r}block</tt> auf 0.</li>
+  </ul>
+  </blockquote>
+
+  <a name="config"></a><h5>Preferences</h5>
+
+  <p>Module preferences has following items.</p>
+
+  <blockquote>
+    <table border="0" cellspacing="1" cellpadding="4" class="outer">
+      <tr class="head"><th>Item Name</th><th>Setting/Default</th><th>Description</th></tr>
+      <tr class="even"><td class="head">Number of list items</td><td><u>25</u></td><td>Set number of list show a display</td></tr>
+      <tr class="odd"><td class="head">Default Attributes</td><td>size=60, rows=5, cols=50, notify_with_email=0</td><td>Setting form definition and other attribute default value.</td></tr>
+      <tr class="even"><td class="head">Status selections</td><td><pre>All: - a b c
+Open: - a
+Closed: b c
+--------:
+Waiting: -
+Working: a
+Replyed: b
+Done: c</pre></td><td>the Format as: Display-label: [status1[,status2...]], include multipule lines. the status is a character from (-,a,b,c). 
+	  <p>
+	    Each character mean as -:waiting, a:working,
+	    b:reply and c:close.
+	  </p>
+      </td></tr>
+    </table>
+
+    <a name="attr"></a><h5>Option variables</h5>
+
+    <table border="0" cellspacing="1" cellpadding="4" class="outer">
+      <tr class="head"><th>Attribute Name</th><th>Setting/Default</th><th>Description</th></tr>
+      <tr class="even"><td class="head">size</td><td><u>0</u></td><td>Länge des Eingabefeldes</td></tr>
+      <tr class="odd"><td class="head">maxlength</td><td><u>0</u></td><td>Maximale Länge der Eingabe</td></tr>
+      <tr class="even"><td class="head">rows</td><td><u>0</u></td><td>Anzahl der Zeilen in einem Textfeld</td></tr>
+      <tr class="odd"><td class="head">cols</td><td><u>0</u></td><td>Anzahl der Spalten in einem Textfeld</td></tr>
+      <tr class="even"><td class="head">notify_with_email</td><td><u>0</u></td><td>When setting 1 email address include in notification</td></tr>
+      <tr class="odd"><td class="head">export_charset</td><td><u>UTF-8</u></td><td>force setting encoding for CSV format file output.</td></tr>
+      <tr class="even"><td class="head">redirect</td><td>URI</td><td>Gehe zur URL nach dem Absenden des Formulares.</td></tr>
+      <tr class="odd"><td class="head">other names</td><td>RegExp</td><td>Input format checking regular expressions
+	  <p>Beispiel: Ziffernüberprüfung <tt>numeric=[-+]?[0-9]+</tt>;, Telefonnummer <tt>tel="\+?[0-9][0-9-,]*[0-9]"</tt><br />In Formularen die Attribute wie folg benutzen <tt>check=tel</tt>.</p>
+	  <p>Regular expressions using JavaScript acceptable range. (Server side use perl regexp, but client side use JavaScript)</p>
+      </td></tr>
+    </table>
+  <blockquote>
+
+  <a name="tips"></a><h5>Tips zur Benutzung</h5>
+
+  <h6>Notification</h6>
+  <p>
+    Notification using XOOPS notification system.
+    Except for contact person/group setting.
+    Contact person/group notification occurrence any time.
+  </p>
+  <ul>
+    <li>Event notification method is use user settings.</li>
+    <li>Contact Person setting 'None', notification to Kontaktgruppe.</li>
+    <li>Contact Person subscribe notification setting at the message.</li>
+    <li>Kontaktgruppe member can setting notification each forms.</li>
+    <li>Administrator can setting notification for all message.</li>
+  </ul>
+
+  <h6>Wichtig für die Sicherheit</h6>
+  <p>In this module using XOOPS comment system.
+    When you use Comment custamization (modules/blocks/plugins/hacks...)
+    to display, need to carefully. Comments in this module, include private
+    information.
+  </p>
+  <p>
+    For example, Using "System" module's "Recent Comments" block,
+    there is display comment title in this module.
+    In this case, can not read message body, but some other information
+    will be leak.
+  </p>
+  <p>
+    Otherwise, Like "Whatsnew" module using, comment body display.
+  </p>
+
+  <h6>"Contact person" setting member of group</h6>
+  <p>
+    "Contact person" setting "Member[group]" mean choose a person
+    when form sending, using HTTP argument "uid=YY" (YY is userid that
+    member of group).
+  </p>
+
+  <pre>XOOPS_URL/modules/ccenter/index.php?form=XX<b>&amp;uid=YY</b></pre>
+
+  <p>
+    This setting to use assume link from other pages. Can not use
+    stand alone in this module.
+  </p>
+
+  <p>
+    Typical use, In case "Some page that contact to auther" form.
+    Modify template other module, for adding the link to form.
+  </p>
+
+  <a name="changes"></a><h5>Changes</h5>
+  <dl>
+  <dt>2009-06-12 ccenter 0.91</dt>
+  <dd>
+    <ul>
+      <li>Display use definitions in radio, select, checkbox widgets</li>
+      <li>Fix overall template not worked</li>
+      <li>Fix form's managemnt link mistake</li>
+      <li>Fix widget template for attachment file (thx yata)</li>
+      <li>Fix email store length expand to 256 chars (thx shige-p)</li>
+    </ul>
+  </dd>
+  <dt>2009-06-06 ccenter 0.90</dt>
+  <dd>
+    <ul>
+      <li>Fix XOOPS 2.3 compatibility</li>
+      <li>Add option variables on each forms</li>
+      <li>Fix mail address store in body</li>
+      <li>Make form widgets use template</li>
+      <li>Fix mistake display posted datetime (thx zorro87)</li>
+      <li>Fix onetime password mistake authentication (thx zorro87)</li>
+      <li>Fix form block submit url (thx uhouho)</li>
+      <li>Add language resources "portuguese" (thx leco1)</li>
+    </ul>
+  </dd>
+  <dt>2009-03-15 ccenter 0.89</dt>
+  <dd>
+    <ul>
+      <li>Parse "Attributes" make to robust in preferences</li>
+      <li>Fix event notifications when send form (thx yue178)</li>
+      <li>Fix required textarea problem</li>
+      <li>Fix mail template message</li>
+      <li>Apply 'const/hidden' user variable</li>
+      <li>Fix show message page template</li>
+    </ul>
+  </dd>
+  <dt>2008-06-15 ccenter 0.88</dt>
+  <dd>
+    <ul>
+      <li>show access mark in message listing</li>
+      <li>fix dispaly access time mistake</li>
+      <li>contactee access time update every time</li>
+      <li>revice JavaScript regexp match escape</li>
+      <li>remove HTML tags in CSV labels</li>
+      <li>CSV output encoding set by attribute in preferences (export_charset=UTF-8)</li>
+      <li>fix notify_with_email=1 saved extra email address</li>
+      <li>fix textarea check require error when newline include</li>
+    </ul>
+  </dd>
+  <dt>2008-06-01 ccenter 0.87</dt>
+  <dd>
+    <ul>
+      <li>Template mode show with comment</li>
+      <li>Attribute name using checking regular expressions</li>
+      <li>Form defunitions accept CSV quotation</li>
+      <li>Blocks form using select button</li>
+      <li>Admin preview reviced</li>
+      <li>Fix when no saveing redirection page</li>
+      <li>Add contactee access time in database (Following read contactee)</li>
+    </ul>
+  </dd>
+  <dt>2008-05-17 ccenter 0.86</dt>
+  <dd>
+    <ul>
+      <li>add "Never store" mode for "Store in Database"</li>
+      <li>Create sample form when new install</li>
+      <li>Add "Default Form attributes", notify_with_email=1 setting show email address in notify email</li>
+      <li>Form item name start "-", show that same line with previus item</li>
+    </ul>
+  </dd>
+  <dt>2008-02-29 ccenter 0.85</dt>
+  <dd>
+    <ul>
+      <li>Add form item input helper</li>
+      <li>Add comment notification event when do evaluation</li>
+      <li>Fix present status logging when evaluation</li>
+      <li>Fix last year range mistake when CSV output</li>
+    </ul>
+  </dd>
+  <dt>2008-01-31 ccenter 0.84</dt>
+  <dd>
+    <ul>
+      <li>Add language english</li>
+      <li>Extent alternate label to Item name</li>
+      <li>Add a item type "const"</li>
+      <li>Add form block</li>
+      <li>Fix bug handling quote(')</li>
+      <li>Fix require checking in JavaScript on IE</li>
+    </ul>
+  </dd>
+  <dt>2007-11-01 ccenter 0.83</dt>
+  <dd>
+    <ul>
+      <li>add CSV output limit range</li>
+      <li>Fix member of group to work</li>
+      <li>Logging and notification when evaluation</li>
+    </ul>
+  </dd>
+  <dt>2007-10-27 ccenter 0.82</dt>
+  <dd>
+    <ul>
+      <li>add notification variable {REMOTE_ADDR}, {HTTP_USER_AGENT}</li>
+      <li>add "Wide template" mode</li>
+      <li>Fix guset comment and logging failer</li>
+      <li>add item initialize variable ({X_UNAME}=username etc)</li>
+      <li>Fix admin status bulk change failer</li>
+      <li>Fix admin status change reporting error</li>
+    </ul>
+  </dd>
+  <dt>2007-08-06 ccenter 0.81</dt>
+  <dd>
+    <ul>
+      <li>Rivised breadcrumbs</li>
+      <li>Fix blocks declear global for XCL 2.1</li>
+    </ul>
+  </dd>
+  <dt>2007-08-03 ccenter 0.8</dt>
+  <dd>
+    <ul>
+      <li>Add status change notification</li>
+      <li>Add message admin page</li>
+      <li>Revised contact person selecting</li>
+      <li>Using functionaly list</li>
+      <li>Add block conditions</li>
+      <li>Revised page title</li>
+      <li>separate Sending/Contact page and enhancement</li>
+      <li>Fix can not access when no messages</li>
+      <li>Add logging table</li>
+      <li>Using altsys when exists</li>
+    </ul>
+  </dd>
+  <dt>2007-06-14 ccenter 0.71</dt>
+  <dd>
+    <ul>
+      <li>Allow form item use default value</li>
+      <li>Fix comment reply notify to guest</li>
+      <li>Fix multibyte filename handling</li>
+      <li>Fix hilien and mail item conflict failer</li>
+      <li>Fix radio item using others default checked</li>
+    </ul>
+  </dd>
+  <dt>2007-05-13 ccenter 0.7</dt>
+  <dd>
+    <ul>
+      <li>Add contact person set group</li>
+      <li>Change CSV output encode SJIS to UTF-8</li>
+      <li>Fix can use DELETE status</li>
+      <li>Add others with text with checkbox/radio items</li>
+      <li>Checking attribute extention (check=xx)</li>
+      <li>Add hilien type</li>
+      <li>fix comment display</li>
+    </ul>
+  </dd>
+  <dt>2007-03-07 ccenter 0.6</dt>
+  </dl>
+
+<hr/>
+<aliress>Nobuhiro YASUTOMI &lt;<a href="mailto:nobuhiro.yasutomi@nifty.ne.jp">nobuhiro.yasutomi@nifty.ne.jp</a>&gt;</aliress>
+MySite Users <a href="http://myht.org/">http://myht.org/</a><br/>
+$Id: help.html,v 1.1 2009/07/02 01:57:48 nobu Exp $
+</body>
+</html>

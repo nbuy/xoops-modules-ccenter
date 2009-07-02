@@ -1,6 +1,6 @@
 <?php
 // contact to member
-// $Id: index.php,v 1.23 2009/06/12 05:11:27 nobu Exp $
+// $Id: index.php,v 1.24 2009/07/02 02:57:05 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -40,6 +40,7 @@ if ($xoopsDB->getRowsNum($res)!=1) {
 	$forms[] = $form;
     }
     $xoopsTpl->assign('forms', $forms);
+    $breadcrumbs->assign();
     include XOOPS_ROOT_PATH."/footer.php";
     exit;
 }

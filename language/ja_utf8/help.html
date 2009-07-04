@@ -1,0 +1,395 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html languagee="ja">
+<head>
+<title>お問合せ窓口モジュール</title>
+<style>
+.outer { background-color: #808080; }
+td,th { padding: 4px; background: #e8e8e8;}
+.head th  { padding: 4px; background: #d0d0d0; }
+.bnf { color: #008000; }
+.note { font-size: 80%; color: #800000; padding: 0.5em;}
+h1, h2, h3, h4, h5, h6 { color: #000040; }
+pre { color: #600000; }
+</style>
+</head>
+<body>
+  <h4>お問合せ窓口モジュール</h4>
+  <ul>
+  <li><a href="#intro">概要</a></li>
+  <li><a href="#form">フォームの指定</a></li>
+  <li><a href="#custom">カスタムフォーム</a></li>
+  <li><a href="#config">一般設定</a></li>
+  <li><a href="#attr">オプション変数</a></li>
+  <li><a href="#tips">使い方メモ</a></li>
+  <li><a href="#changes">変更履歴</a></li>
+  </ul>
+
+  <hr>
+
+  <a name="intro"></a><h5>概要</h5>
+
+  <p>「お問合せ窓口」は、問い合わせフォーム のようなものを使うための
+    モジュールである。モジュールは、次のような特徴を持っている。</p>
+
+  <ul>
+    <li>カスタマイズ可能な問合せフォーム</li>
+    <li>問合せのデータベース保存</li>
+    <li>問合せ対応機能</li>
+    <li>対応品質の評価</li>
+  </ul>
+
+  <p>従来のメールフォームと異なるのは、問合せをデータベースに保存し、
+    問合せ対応まで支援する点である。</p>
+
+  <a name="form"></a><h5>フォームの指定</h5>
+
+  フォームの作成は、管理メニューの「フォームの作成」で行う。
+
+  「フォームの定義」項目を指定できる。指定の書式は次通り。
+  <blockquote class="bnf">
+      行 ::= 項目名["*"][=表示ラベル][,タイプ][,属性指定...][,引数...]<p />
+      タイプ ::= {text|checkbox|radio|textarea|select|const|hidden|mail|file}<br />
+      引数 ::= [値 ["+"] "="] ラベル<br />
+      属性指定 ::= 属性名 "=" 値<br />
+      属性名 ::= {size|rows|maxlength|cols|prop|check}
+  </blockquote>
+  <ul>
+    <li>"*" は必須項目を表す。</li>
+    <li>"#" でフォーム中に追加するコメントを記述できる。</li>
+    <li>"," は区切記号のため、引数中で使う場合 "\" を前に置いてエスケープする。</li>
+    <li>引数の値が省略された場合、ラベルと同じになる。</li>
+    <li>"+" 選択項目 (checkbox, radio, select) の選択状態を指示する。</li>
+    <li>テキスト領域 (text, textarea) での、その他の引数は標準値となる。</li>
+    <li>有効な属性は要素に異なる (text: "size=n", textarea: "cols=n" "rows=n")。</li>
+    <li>check属性は検査条件を指定する (require: 必須／項目名の "*" と同じ、"num": 数値、"mail": メール書式、その他: 正規表現で指定)</li>
+    <li>checkbox, radio の引数として、値 "*" を指定すると、その他をテキスト入力で指定できる。</li>
+    <li>mail は、特別なフィールドとして扱われる。自動的に確認用の項目が生成され、一致確認が行われる。フォーム中で一度だけ使用できる。</li>
+    <li>file は、添付ファイルのアップロードを指定する。</li>
+    <li>
+      既定値の文字列として、<tt>{X_名前}</tt> のように変数を指定すれば、
+      ログインユーザの場合初期値として展開され、ゲストの場合は空文字列になる。
+      具体的には {X_UNAME}, {X_NAME}, {X_EMAIL}, {X_BIO} などが指定できる。
+    </li>
+    <li>
+      「通常の説明文」において項目名を "-" で始めた場合、その項目
+      は前の行と同じ行に表示する。
+
+      これはフォーム用テンプレート (ccenter_form.html,
+      ccenter_confirm.html) で実現されている便宜上の機能である。
+    </li>
+  </ul>
+
+  <h6>例:</h6>
+
+  <blockquote>
+  <form>
+    <table border="0" cellspacing="1" cellpadding="4" class="outer">
+      <tr class="head"><th>表記</th><th>フォーム形態</th><th>説明</th></tr>
+      <tr class="even"><td>名前*</td><td>名前* <input name='samp1' /></td><td>項目名の末尾に * を付けると必須項目になる。タイプを省略した場合 text。</td></tr>
+      <tr class="odd"><td>名前*,size=5</td><td>名前* <input name='samp2' size=5 /></td><td>属性 (大きさ) を指定する。</td></tr>
+      <tr class="even"><td>名前*,size=10,規定値,#コメント文</td><td>名前* <input name='samp3' size='10' value='規定値'/> コメント文</td><td>引数の先頭を "#" にすると説明文として表示する</td></tr>
+      <tr class="odd"><td>名前,size=10,check=reqire,{X_NAME},#コメント文</td><td>名前 <input name='samp3' size='10' value='本名'/> コメント文</td><td>必須検査は require として指定できる。既定値の <tt>{X_NAME}</tt>はユーザ情報の本名に設定しているものになる。</td></tr>
+      <tr class="even"><td>選択,radio,項目1+,項目2&lt;br/&gt;,*=その他</td><td>選択 <input type='radio' name='samp4' value='1' checked /> 項目1 &nbsp; <input type='radio' name='samp4' value='2' /> 項目2<br/> <input type='radio' name='samp4' value='*' /> その他 <input name='etc4' size='8'/> </td><td>引数には HTML タグを含めることができるが値としては無効。値を "*" に指定するとその他をテキスト指定できる。</td></tr>
+      <tr class="odd"><td>選択,checkbox,項目1+,項目2,項目3</td><td>選択 <input type='checkbox' name='samp5_1' checked /> 項目1 &nbsp; <input type='checkbox' name='samp5_2' /> 項目2 &nbsp; <input type='checkbox' name='samp5_3' /> 項目3 &nbsp; </td><td>選択値のデフォルト選択は、"+" を付加する。</td></tr>
+      <tr class="even"><td>選択,select,項目1,項目2,項目3</td><td>選択 <select name='samp6'><option>項目1</option><option>項目2</option><option>項目3</option></select></td><td></td></tr>
+      <tr class="odd"><td>ラベル,const,値</td><td><em>ラベル 値</em></td><td>固定値として表示され、それが入力値となる。</td></tr>
+      <tr class="even"><td>ラベル,hidden,値</td><td><em>(フォームには表示されない)</em></td><td>入力値としては表示される。</td></tr>
+      <tr class="odd"><td>#コメント文</td><td>コメント文</td><td>フォーム上に表示されるが入力値にはならない</td></tr>
+    </table>
+  </form>
+  </blockquote>
+
+  <a name="custom"></a><h5>カスタムフォーム</h5>
+
+  <p>「説明文の扱い」をテンプレートとして指定すると、説明文をフォー
+  ムのテンプレートとして扱う。テンプレート中には、フォーム要素を
+  変数 <tt>{名前}</tt> として埋め込むことができる。</p>
+
+  <blockquote>
+    <table border="0" cellspacing="1" cellpadding="4" class="outer">
+      <tr class="head"><th>変数名</th><th>説明</th></tr>
+      <tr class="even"><td>{FORM_ATTR}</td><td>フォームタグ属性</td></tr>
+      <tr class="odd"><td>{SUBMIT}</td><td>送信ボタン</td></tr>
+      <tr class="even"><td>{BACK}</td><td>再編集ボタン</td></tr>
+      <tr class="odd"><td>{CHECK_SCRIPT}</td><td>検査用の JavaScript</td></tr>
+      <tr class="even"><td>{要素名}</td><td>フォーム要素の名前</td></tr>
+      <tr class="odd"><td>{TO_UNAME} {TO_NAME}</td><td>ユーザ指定のフォームにおける送信先ユーザ名</td></tr>
+    </table>
+  <ul>
+  <li>各変数は必ず1回だけ出現すること</li>
+  <li>フォーム作成画面で「テンプレートの追加」ボタンで使って変数一式を生成できる。</li>
+  <li>フォーム全体は次のような構成をとる (要素は form タグの内側へ任意に配置可能)</li>
+    <pre>&lt;form {FORM_ATTR}&gt;
+要素1: {要素1}
+要素2*: {要素2}
+  :
+要素n: {要素n}
+{SUBMIT} {BACK}
+&lt;/form&gt;
+{CHECK_SCRIPT}</pre>
+  <li><tt>[desc]説明文[/desc]</tt> とすると、
+  「説明文」はフォームでだけ表示され確認画面では表示されない。</li>
+  <li>{TO_UNAME}, {TO_NAME} は、通常のフォームの説明文中でも有効</li>
+  <li>「全体テンプレート」を指定すると XOOPS のテーマは使用されず、純粋に HTML による表示となる。</li>
+  <li>「全域テンプレート」を指定するとブロックを無効化して動作する。「部分テンプレート」との違いは、smarty の <tt>$xoops_show{c,l,r}block</tt> 変数を 0 に指定することなので、テンプレートがこれらの変数を考慮している必要がある。</li>
+  </ul>
+  </blockquote>
+
+  <a name="config"></a><h5>一般設定</h5>
+  <p>モジュールの一般設定では以下の項目を指定できる。</p>
+
+  <blockquote>
+    <table border="0" cellspacing="1" cellpadding="4" class="outer">
+      <tr class="head"><th>項目名</th><th>設定/既定値</th><th>説明</th></tr>
+      <tr class="even"><td class="head">一覧表示の数</td><td><u>25</u></td><td>一覧表示で表示する行数を指定する</td></tr>
+      <tr class="odd"><td class="head">属性の既定値</td><td>size=60, rows=5, cols=50, notify_with_email=0</td><td>フォームの要素に指定する属性の既定値などを設定する。</td></tr>
+      <tr class="even"><td class="head">状況の選択肢</td><td><pre>全部: - a b c
+作業待ち: - a
+作業済み: b c
+--------:
+受付待: -
+作業中: a
+応答済: b
+完了: c</pre></td><td>書式は 表示名: [状態1[,状態2...]] を複数行指定する。状態は (-,a,b,c) の文字で指定する。
+	  <p>
+	    それぞれの状態の意味は、-:受付待ち, a:作業中,
+	    b: 応答済み, c: 完了 となる。
+	  </p>
+      </td></tr>
+    </table>
+
+    <a name="attr"></a><h5>オプション変数</h5>
+
+    <table border="0" cellspacing="1" cellpadding="4" class="outer">
+      <tr class="head"><th>属性名</th><th>設定/既定値</th><th>説明</th></tr>
+      <tr class="even"><td class="head">size</td><td><u>0</u></td><td>テキスト入力項目 (input) の入力領域幅</td></tr>
+      <tr class="odd"><td class="head">maxlength</td><td><u>0</u></td><td>テキスト入力項目 (input) の入力上限文字数</td></tr>
+      <tr class="even"><td class="head">rows</td><td><u>0</u></td><td>テキストエリアの行数</td></tr>
+      <tr class="odd"><td class="head">cols</td><td><u>0</u></td><td>テキストエリアの桁数</td></tr>
+      <tr class="even"><td class="head">notify_with_email</td><td><u>0</u></td><td>1に設定したら問合せ通知メールにメールアドレスを表示する</td></tr>
+      <tr class="odd"><td class="head">export_charset</td><td><u>UTF-8</u></td><td>CSV ファイルへ出力する場合のエンコーディングを指定する。</td></tr>
+      <tr class="even"><td class="head">redirect</td><td>なし</td><td>フォームの送信後に遷移するページの URLを指定する</td></tr>
+      <tr class="odd"><td class="head">他の名称</td><td>正規表現</td><td>入力検査の文字列定義
+	  <p>例: 数値 <tt>numeric=[-+]?[0-9]+</tt>、電話番号<tt>tel="\+?[0-9][0-9-,]*[0-9]"</tt><br />利用は、入力の定義で <tt>check=tel</tt> のように利用する。</p>
+	  <p>正規表現は、JavaScript で使える範囲のものを使うこと。(サーバ側は perl の正規表現が使うが、クライアント側は JavaScript を利用するため)</p>
+      </td></tr>
+    </table>
+  <blockquote>
+
+  <a name="tips"></a><h5>使い方メモ</h5>
+
+  <h6>問合せの通知</h6>
+  <p>
+    問合せの通知は、XOOPSのイベント通知の設定にしたがって行われる。
+    ただし、担当者や担当グループへの通知は、特に設定を行わない場合も行われる。
+  </p>
+  <ul>
+    <li>イベント通知の方法 (メール/PM/停止) はユーザの設定に従う</li>
+    <li>担当者が指定されていない場合、担当グループに通知が行われる</li>
+    <li>問合せの担当者になったユーザには、その問合せへのコメント通知が設定される</li>
+    <li>担当者グループのメンバーはフォーム毎の通知を設定できる</li>
+    <li>管理権限がある場合、問合せの全体の通知を設定できる</li>
+  </ul>
+
+  <h6>情報漏洩対策</h6>
+  <p>XOOPS のコメントシステムを利用する構造上、コメントを強制的に表示するようなブロック、モジュールの扱いには注意すること。</p>
+  <p>
+    例えば、「システム管理」の「最近のコメント」ブロックの利用した場合、
+    問合せでのコメントのタイトルが表示されることになる。
+    この場合、表示ページでアクセス制限されるので本文を読むことはできないが、
+    頻度やメッセージの時間は漏れてしまう。
+  </p>
+  <p>
+    あるいは、Whatsnew(新着情報) モジュールで、コメント本文を表示すると
+    内容が漏れてしまう。
+  </p>
+
+  <h6>メンバ指定によるフォーム</h6>
+  <p>受付担当者として、メンバ[グループ] で指定したフォームは、
+    HTTP引数に uid を指定することで担当者を指定したフォーム送信を
+    行うことができる。</p>
+
+  <pre>XOOPS_URL/modules/ccenter/index.php?form=XX<b>&amp;uid=YY</b></pre>
+
+  <p>
+    この設定は、別ページから上記形式のリンクを張ることで利用する
+    ことを想定しており、このモジュール単独で使うことはない。
+  </p>
+
+  <p>
+    典型的には「ある記事の著者に対する問合せフォーム」と言うもの
+    で、テンプレートをカスタマイズして上記リンクを埋め込むことで利用する。
+  </p>
+
+  <a name="changes"></a><h5>変更履歴</h5>
+  <dl>
+  <dt>2009-06-12 ccenter 0.92</dt>
+  <dd>
+    <ul>
+      <li></li>
+      <li>フォームブロックの編集で初期値に旧設定を反映する</li>
+      <li>パンくずリストの終端をリンクにしない</li>
+      <li>カスタムフォームでもパンくずリストの設定を行う</li>
+      <li>テンプレートの誤りによる誤動作を修正</li>
+    </ul>
+  </dd>
+  <dt>2009-06-12 ccenter 0.91</dt>
+  <dd>
+    <ul>
+      <li>内容表示を radio, select, checkbox の表示文字列で行う</li>
+      <li>全体テンプレートの表示が働いてなかったものを修正</li>
+      <li>フォームテンプレートの管理リンクの間違いを修正</li>
+      <li>添付ファイル (file) のテンプレートの誤りを修正 (thx yata)</li>
+      <li>メールアドレスの最大長を256に拡張 (thx shige-p)</li>
+    </ul>
+  </dd>
+  <dt>2009-06-06 ccenter 0.90</dt>
+  <dd>
+    <ul>
+      <li>XOOPS 2.3 互換のための修正</li>
+      <li>フォーム毎のオプションの上書きを可能にする</li>
+      <li>メールアドレスが非表示にならない障害を修正</li>
+      <li>フォーム部品をテンプレートで生成するように変更</li>
+      <li>問合せ日時の表示が更新時間になっていたものを修正 (thx zorro87)</li>
+      <li>1タイムパスワードでエンコードによる認証失敗を防ぐ修正 (thx zorro87)</li>
+      <li>フォームブロックの送信先設定の誤りを修正 (thx uhouho)</li>
+      <li>ポルトガル語の言語リソースを追加 (thx leco1)</li>
+    </ul>
+  </dd>
+  <dt>2009-02-12 ccenter 0.89</dt>
+  <dd>
+    <ul>
+      <li>「属性の既定値」の書式解析を頑健に変更</li>
+      <li>イベント通知機能の問合せ通知が機能していない障害を修正 (thx yue178)</li>
+      <li>入力が空の場合文字列検査が正しく行われない障害を修正</li>
+      <li>英語の問合せ確認のメールテンプレートの修正</li>
+      <li>定義中のユーザー変数を評価する</li>
+      <li>メッセージ表示画面のテンプレート修正</li>
+    </ul>
+  </dd>
+  <dt>2008-06-15 ccenter 0.88</dt>
+  <dd>
+    <ul>
+      <li>一覧へアクセス時間(参照マーク)の表示を追加</li>
+      <li>アクセス時間の表示を修正</li>
+      <li>アクセス時間の更新を常に反映するように変更</li>
+      <li>JavaScript の正規表現エスケープを改善</li>
+      <li>CSV 出力時のラベルから HTML タグを除く</li>
+      <li>CSV 出力の文字コード指定を属性に追加 (export_charset=UTF-8)</li>
+      <li>notify_with_email=1 で保存データに email が含まないように修正</li>
+      <li>textarea の必須検査で改行するとエラーになる障害を修正</li>
+    </ul>
+  </dd>
+  <dt>2008-06-01 ccenter 0.87</dt>
+  <dd>
+    <ul>
+      <li>テンプレートモードでもコメントを表示する</li>
+      <li>属性名を使って入力検査指定を可能にする</li>
+      <li>フォーム書式を CSV 形式で扱えるように厳密化</li>
+      <li>ブロックのフォーム指定を選択ボタンに変更</li>
+      <li>管理者プレビューを改善</li>
+      <li>保存なしの場合の送信後ページの誤りを修正</li>
+      <li>問合せ者のアクセス時間を記録する (相手が読んだことを知るため)</li>
+    </ul>
+  </dd>
+  <dt>2008-05-17 ccenter 0.86</dt>
+  <dd>
+    <ul>
+      <li>データベースの保存モード「記録しない」を追加</li>
+      <li>導入時にサンプルフォームを作成する</li>
+      <li>フォーム属性の既定値 notify_with_email=1 を設定するとメールアドレスを表示する</li>
+      <li>項目名の先頭を "-" にすると前項目と同じ行に表示する</li>
+    </ul>
+  </dd>
+  <dt>2008-02-29 ccenter 0.85</dt>
+  <dd>
+    <ul>
+      <li>フォーム定義用の入力ヘルパを追加</li>
+      <li>完了時にコメント通知が発生するようにした</li>
+      <li>完了時ログの状態名称が間違っていたものを修正</li>
+      <li>CSV出力の前年の範囲が誤っていたものを修正</li>
+    </ul>
+  </dd>
+  <dt>2008-01-31 ccenter 0.84</dt>
+  <dd>
+    <ul>
+      <li>英語リソースの追加</li>
+      <li>項目名の代替ラベルを拡張</li>
+      <li>項目型に定数 (const) を追加</li>
+      <li>フォームブロックを追加</li>
+      <li>クオート(')処理のバグを修正</li>
+      <li>IE での JavaScript検査の不具合を修正</li>
+    </ul>
+  </dd>
+  <dt>2007-11-01 ccenter 0.83</dt>
+  <dd>
+    <ul>
+      <li>CSV出力に期間指定を追加</li>
+      <li>担当者グループの指定が働くように修正</li>
+      <li>評価終了時の通知/記録を行うように修正</li>
+    </ul>
+  </dd>
+  <dt>2007-10-27 ccenter 0.82</dt>
+  <dd>
+    <ul>
+      <li>{REMOTE_ADDR}と{HTTP_USER_AGENT}をメール変数に定義</li>
+      <li>「全域テンプレート」モードを追加</li>
+      <li>ゲストのコメント障害とコメント履歴記録を修正</li>
+      <li>変数初期値 ({X_UNAME}=ユーザ名など) の指定を実装</li>
+      <li>管理画面での一括変更で受付待ちにできない障害を修正</li>
+      <li>管理画面での状態変更がエラーになる障害を修正</li>
+    </ul>
+  </dd>
+  <dt>2007-08-06 ccenter 0.81</dt>
+  <dd>
+    <ul>
+      <li>パンくずの定義を改善</li>
+      <li>XCL 2.1 用に blocks での global 宣言を追加</li>
+    </ul>
+  </dd>
+  <dt>2007-08-03 ccenter 0.8</dt>
+  <dd>
+    <ul>
+      <li>状態変更の通知をイベント通知に変更</li>
+      <li>問合せ管理ページを追加</li>
+      <li>担当者の選択方法を改善</li>
+      <li>リスト表示の汎用化</li>
+      <li>ブロック表示の条件拡張</li>
+      <li>ページタイトルを改善</li>
+      <li>担当者/問合せのページを分離と強化</li>
+      <li>メッセージがないとき受付ページにアクセスできない障害を修正</li>
+      <li>監査用テーブル (log) を追加</li>
+      <li>altsys があれば利用する</li>
+    </ul>
+  </dd>
+  <dt>2007-06-14 ccenter 0.71</dt>
+  <dd>
+    <ul>
+      <li>属性の既定値を指定可能にする</li>
+      <li>障害修正: コメントのリプライ投稿時にゲストの通知が行われない</li>
+      <li>障害修正: 漢字のファイル名がハンドリングできない</li>
+      <li>障害修正: hilien と mail を組み合わせると異常が起きる</li>
+      <li>障害修正: radio で、「その他」機能を使うと、デフォルトで有効になる</li>
+    </ul>
+  </dd>
+  <dt>2007-05-13 ccenter 0.7</dt>
+  <dd>
+    <ul>
+      <li>担当者を動的に任意ユーザにする</li>
+      <li>CSV 出力を SJIS から UTF-8 に変更</li>
+      <li>削除状態の指定できないのを修正</li>
+      <li>checkbox, radio に、その他 [テキスト] を使えるようにする</li>
+      <li>検査の一般的の拡張 (check=xx)</li>
+      <li>hilien アイテムの実装</li>
+      <li>バグ修正: コメントの表示位置がおかしい</li>
+    </ul>
+  </dd>
+  <dt>2007-03-07 ccenter 0.6</dt>
+  </dl>
+
+<hr/>
+<aliress>安富 伸浩 &lt;<a href="mailto:nobuhiro.yasutomi@nifty.ne.jp">nobuhiro.yasutomi@nifty.ne.jp</a>&gt;</aliress>
+マイサイト ユーザーズ <a href="http://myht.org/">http://myht.org/</a><br/>
+$Id: help.html,v 1.1 2009/07/04 03:54:37 nobu Exp $
+</body>
+</html>

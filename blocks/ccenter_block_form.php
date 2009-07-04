@@ -1,6 +1,6 @@
 <?php
 // Display contact form in block
-// $Id: ccenter_block_form.php,v 1.4 2009/06/05 07:12:35 nobu Exp $
+// $Id: ccenter_block_form.php,v 1.5 2009/07/04 05:24:38 nobu Exp $
 
 global $xoopsConfig;
 
@@ -38,13 +38,14 @@ function b_ccenter_form_show($options) {
 
 function b_ccenter_form_edit($options) {
     global $xoopsConfig, $msg_status, $xoopsDB;
-    $id = intval($options[0]);
+    $oid = intval($options[0]);
     $ln = "<div><b>"._BL_CCENTER_FORMS_ID."</b> ".
 	"<select name='options[0]'>\n<option value='0'>".
 	_BL_CCENTER_FORMS_FIRST."</option>\n";
     $res = $xoopsDB->query("SELECT formid,title FROM ".FORMS." WHERE active ORDER BY weight,formid");
     while (list($id, $title)=$xoopsDB->fetchRow($res)) {
-	$ln .= "<option value='$id'>".htmlspecialchars($title)."</option>";
+	$ck = ($id==$oid)?" selected='selected'":"";
+	$ln .= "<option value='$id'$ck>".htmlspecialchars($title)."</option>";
     }
     $ln .= "</select>\n";
     return $ln;

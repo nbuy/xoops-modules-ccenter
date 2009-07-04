@@ -64,7 +64,7 @@ else msg_detail(intval($_GET['msgid']));
 xoops_cp_footer();
 
 function msg_list() {
-    global $msg_status, $xoopsDB, $xoopsUser, $xoopsModuleConfig, $xoopsModule;
+    global $msg_status, $xoopsDB, $xoopsUser, $xoopsModuleConfig, $xoopsModule, $myts;
 
     $labels=array('mtime'=>_AM_FORM_MTIME, 'status'=>_AM_MSG_STATUS,
 		  'fidref'=>_AM_FORM_TITLE, 'cfrom'=>_AM_MSG_FROM,
@@ -76,6 +76,7 @@ function msg_list() {
     $listctrl = new ListCtrl('msgadm', $orders);
     
     $start = isset($_GET['start'])?intval($_GET['start']):0;
+    $search = isset($_GET['q'])?$myts->stripSlashesGPC($_GET['q']):'';
     $max = $xoopsModuleConfig['max_lists'];
 
     $users = $xoopsDB->prefix('users');
@@ -87,6 +88,7 @@ LEFT JOIN $users u ON touid=u.uid LEFT JOIN $users f ON m.uid=f.uid";
     $sql2 = "WHERE ".$listctrl->sqlcondition();
     $formid = isset($_REQUEST['formid'])?intval($_REQUEST['formid']):0;
     if ($formid) $sql2 .= " AND fidref=$formid";
+    if ($search) $sql2 .= " AND CONCAT(body,' ',m.email) like ".$xoopsDB->quoteString("%$search%");
 
     $res = $xoopsDB->query("SELECT count(msgid) $sql0 $sql2");
     list($total) = $xoopsDB->fetchRow($res);
@@ -94,13 +96,14 @@ LEFT JOIN $users u ON touid=u.uid LEFT JOIN $users f ON m.uid=f.uid";
     $nav = new XoopsPageNav($total, $max, $start, "start", $args);
 
     $res = $xoopsDB->query("SELECT m.*,title,u.uname, f.uname cfrom, count(com_id) comms $sql0 $sql1 $sql2 GROUP BY msgid".$listctrl->sqlorder(), $max, $start);
-    echo $xoopsDB->error();
     echo "<style>td.num { text-align: right; }</style>\n";
     echo "<h2>"._AM_MSG_ADMIN."</h2>\n";
     echo "<table class='ccinfo' width='100%'>\n<tr><td width='30%'>"._AM_MSG_COUNT." $total</td>\n";
     echo "<td align='center'>".$nav->renderNav()."</td>\n";
     echo "<td align='right' width='30%'>
-  <form method='get'>"._CC_STATUS." ".$listctrl->renderStat()."
+  <form method='get'>"._SEARCH."
+    <input name='q' value=\"".htmlspecialchars($search).'" size="8" /> &nbsp; '.
+	_CC_STATUS." ".$listctrl->renderStat()."
       <noscript> <input type='submit' type='submit' value='"._AM_SUBMIT_VIEW."'></noscript>
   </form>
 </td></tr>\n";
@@ -124,6 +127,7 @@ LEFT JOIN $users u ON touid=u.uid LEFT JOIN $users f ON m.uid=f.uid";
 	$n = 0;
 	$dirname = basename(dirname(dirname(__FILE__)));
 	$mbase = XOOPS_URL."/modules/$dirname";
+	$strcut = (XOOPS_USE_MULTIBYTES && function_exists('mb_strcut'))?'strcut':'substr';
 	while ($data = $xoopsDB->fetchArray($res)) {
 	    $id = $data['msgid'];
 	    $title = htmlspecialchars($data['title']);
@@ -135,9 +139,17 @@ LEFT JOIN $users u ON touid=u.uid LEFT JOIN $users f ON m.uid=f.uid";
 	    $priuname = empty($data['uname'])?_AM_FORM_PRIM_NONE:htmlspecialchars($data['uname']);
 	    $from = empty($data['uid'])?$data['email']:htmlspecialchars($data['cfrom']);
 	    $box = "<input type='checkbox' name='ids[]' value='$id'/>";
-	    $ope = " <a href='$msg'>"._AM_DETAIL."</a>";
+	    $ope = "<a href='$msg'>"._AM_DETAIL."</a>";
+	    $ope .= " | <a href='?msgid=$id'>"._EDIT."</a>";
+	    $vals = unserialize_text($data['body']);
+	    $fval = preg_replace('/[\n\r].*$/', '...', array_shift($vals));
+	    $slen = 30;
+	    if (strlen($fval)>$slen) {
+		$fval = preg_replace('/\.\.\.$/', '', $fval);
+		$fval = $strcut($fval, 0, $slen)."...";
+	    }
 	    $readit = $data['mtime']<$data['atime']?_CC_MARK_READIT:'';
-	    echo "<tr class='$bg stat$stat'><td align='center'>$box</td><td>$date</td><td>".$msg_status[$stat].$readit."</td><td><a href='?msgid=$id'>$title</a></td><td>$from</td><td>$priuname</td><td class='num'>".$data['comms']."</td><td>$ope</td></tr>\n";
+	    echo "<tr class='$bg stat$stat'><td align='center'>$box</td><td>$date</td><td>".$msg_status[$stat].$readit."</td><td>$title: $fval</td><td>$from</td><td>$priuname</td><td class='num'>".$data['comms']."</td><td>$ope</td></tr>\n";
 	}
 	echo "</table>\n";
 	echo "<div>"._AM_MSG_CHANGESTATUS." <select name='op'><option></option>\n";

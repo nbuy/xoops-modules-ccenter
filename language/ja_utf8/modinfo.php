@@ -1,5 +1,5 @@
 <?php
-// $Id: modinfo.php,v 1.1 2009/07/04 03:54:37 nobu Exp $
+// $Id: modinfo.php,v 1.2 2009/07/04 05:24:38 nobu Exp $
 // Module Info
 
 // The name of this module
@@ -62,6 +62,7 @@ define("_MI_SAMPLE_DEFS","お名前*,size=40\nメール*,mail,size=60\n種類*,r
 
 // for altsys 
 if (!defined('_MD_A_MYMENU_MYTPLSADMIN')) {
+    define('_MD_A_MYMENU_MYLANGADMIN','言語定数管理');
     define('_MD_A_MYMENU_MYTPLSADMIN','テンプレート管理');
     define('_MD_A_MYMENU_MYBLOCKSADMIN','ブロック/アクセス管理');
     define('_MD_A_MYMENU_MYPREFERENCES','一般設定');

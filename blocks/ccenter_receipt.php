@@ -1,6 +1,6 @@
 <?php
 // Person receipt blocks
-// $Id: ccenter_receipt.php,v 1.3 2007/08/06 13:54:27 nobu Exp $
+// $Id: ccenter_receipt.php,v 1.4 2009/07/04 05:24:38 nobu Exp $
 
 global $xoopsConfig;
 
@@ -26,7 +26,6 @@ function b_ccenter_receipt_show($options) {
   FROM ".$xoopsDB->prefix('ccenter_message')." m,
     ".$xoopsDB->prefix('ccenter_form')." WHERE (priuid=$uid OR priuid=0) $cond
    AND fidref=formid ORDER BY status,m.mtime $order", $max);
-    echo $xoopsDB->error();
     if (!$res || $xoopsDB->getRowsNum($res)==0) return null;
     $list = array();
     while ($data = $xoopsDB->fetchArray($res)) {

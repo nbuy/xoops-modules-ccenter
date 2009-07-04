@@ -127,10 +127,15 @@ LEFT JOIN $users u ON touid=u.uid LEFT JOIN $users f ON m.uid=f.uid";
 	$n = 0;
 	$dirname = basename(dirname(dirname(__FILE__)));
 	$mbase = XOOPS_URL."/modules/$dirname";
-	$strcut = (XOOPS_USE_MULTIBYTES && function_exists('mb_strcut'))?'strcut':'substr';
+	$strcut = (XOOPS_USE_MULTIBYTES && function_exists('mb_strcut'))?'mb_strcut':'substr';
+	if (!function_exists('easiestml')) { /* XXX: support multi lang site */
+	    function easiestml($text) { return $text; }
+	} else {
+	    $GLOBALS['easiestml_lang'] = substr($GLOBALS['xoopsConfig']['language'], 0, 2);
+	}
 	while ($data = $xoopsDB->fetchArray($res)) {
 	    $id = $data['msgid'];
-	    $title = htmlspecialchars($data['title']);
+	    $title = easiestml(htmlspecialchars($data['title']));
 	    $stat = $data['status'];
 	    $url = "$mbase/message.php?id=$id";
 	    $msg = $url.($data['touid']<0?"&amp;uid=".$xoopsUser->getVar('uid'):"");

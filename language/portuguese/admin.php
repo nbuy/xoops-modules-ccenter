@@ -1,5 +1,5 @@
 <?php
-// $Id: admin.php,v 1.2 2009/06/06 03:28:04 nobu Exp $
+// $Id: admin.php,v 1.3 2009/07/07 12:00:42 nobu Exp $
 // Traduzido para o Portugues do Brasil por: Miraldo Antoninho Ohse (m_ohse@hotmail.com).
 
 
@@ -13,7 +13,7 @@ define('_AM_INS_TEMPLATE', 'Adição de modelo');
 define('_AM_FORM_ACCEPT_GROUPS', 'Grupos permitidos');
 define('_AM_FORM_ACCEPT_GROUPS_DESC', 'Este formulário de contato possibilita a configuração dos grupos');
 define('_AM_FORM_DEFS', 'Definições do formulário');
-define('_AM_FORM_DEFS_DESC', '<a href="help.php#form" target="_blank">Definições</a> <small>Tipos: text checkbox radio textarea selecione a constante escondendo o arquivo de mail</small>');
+define('_AM_FORM_DEFS_DESC', '<a href="help.php#form" target="_blank">Definições</a> <small>Tipos: text checkbox radio textarea selecione a constante aceito pelo arquivo mail</small>');
 define('_AM_FORM_PRIM_CONTACT', 'Contato pessoal');
 define('_AM_FORM_PRIM_NONE', 'Nenhum');
 define('_AM_FORM_PRIM_DESC', 'Selecione o membro do grupo. O contato pessoal necessita ser selecionado pelo argumento uid do grupo');
@@ -23,9 +23,9 @@ define('_AM_FORM_STORE', 'Armazenar no banco de dados');
 define('_AM_FORM_CUSTOM', 'Digite a descrição');
 define('_AM_FORM_WEIGHT', 'Peso');
 define('_AM_FORM_REDIRECT', 'Página que será mostrada após o envio');
-define('_AM_FORM_OPTIONS', 'Opção variáveis');
-define("_MI_FORM_OPTIONS_DESC","Configuração das definições do formulário e o valor de outros <a href='help.php#attr'>opção padrão valores</a>. Exemplo: <tt>size=60,rows=5,cols=50</tt>");
-define('_AM_FORM_ACTIVE', 'Formuário ativo');
+define('_AM_FORM_OPTIONS', 'Opção de variáveis');
+define("_AM_FORM_OPTIONS_DESC","Configuração da definição do formulário e outros atributos <a href='help.php#attr'>Opções padrão</a>. Exemplo: <tt>size=60,rows=5,cols=50</tt>");
+define('_AM_FORM_ACTIVE', 'Formulário ativo');
 define('_AM_DELETE_FORM', 'Deletar formulário');
 define('_AM_FORM_LAB', 'Nome do item');
 define('_AM_FORM_LABREQ', 'Por favor, informe o nome do item');
@@ -36,7 +36,7 @@ define('_AM_CUSTOM_DESCRIPTION', '0=Normal[bb],4=Descrição do Html[bb],1=Parte d
 define('_AM_CHECK_NOEXIST', 'As variáves não existem');
 define('_AM_CHECK_DUPLICATE', 'Variáveis duplicadas');
 define('_AM_DETAIL', 'Detalhe');
-define('_AM_OPERATION', 'Operações');
+define('_AM_OPERATION', 'Operação');
 define('_AM_CHANGE','Mudança');
 define('_AM_SEARCH_USER', 'Buscar usuário');
 
@@ -51,12 +51,12 @@ define('_AM_MSG_FROM', 'De');
 define('_AM_MSG_COMMS', 'Comentários');
 
 define('_AM_MSG_WAIT', 'Aguardar');
-define('_AM_MSG_WORK', 'Trabalhar');
+define('_AM_MSG_WORK', 'Em análise');
 define('_AM_MSG_REPLY', 'Responder');
 define('_AM_MSG_CLOSE', 'Fechar');
 define('_AM_MSG_DEL', 'Deletar');
 
-define('_AM_MSG_CTIME', 'Registrada');
+define('_AM_MSG_CTIME', 'Registrad');
 define('_AM_MSG_MTIME', 'Atualizada');
 
 define('_AM_MSG_UPDATED', 'Status mudado');

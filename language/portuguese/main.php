@@ -1,5 +1,5 @@
 <?php
-// $Id: main.php,v 1.1 2009/06/05 07:10:26 nobu Exp $
+// $Id: main.php,v 1.2 2009/07/07 12:00:42 nobu Exp $
 // Traduzido para o Portugues do Brasil por: Miraldo Antoninho Ohse (m_ohse@hotmail.com).
 
 define('_MD_EVALS','Avaliação');
@@ -24,7 +24,7 @@ define('_MD_CONFIRM_ERR', 'O valor informado é inadequado');
 
 define('_MD_CCENTER_CHARGE','Contato para mim');
 define('_MD_CCENTER_QUERY','Minhas mensagens');
-define('_MD_CCENTER_RECEPTION','Administração');
+define('_MD_CCENTER_RECEPTION','Suporte administrativo');
 define('_MD_NOTIFY_SUBJ','{X_SITENAME}:{SUBJECT}');
 define('_MD_NOTIFY_URL','Esta mensagem provêm da seguinte URL:');
 define('_MD_CONTACT_DONE','Mensagem de contato enviada');
@@ -46,9 +46,9 @@ define('_MD_MODDATE','Atualizado');
 define('_MD_ATTACHMENT','Anexar');
 define('_MD_MSG_READTHIS','Lida');
 define('_MD_MSG_NOTREAD','Não lida');
-define('_MD_EVAL_THANKYOU','Obrigado pela avaliação.');
+define('_MD_EVAL_THANKYOU','Obrigado pela sua avaliação.');
 define('_MD_EVAL_VALUE','Este contato responde pela avaliação');
-define('_MD_EVAL_DESC','Faça contato, se você não estiver satifeito com nossas respostas? Sua avaliação é importante. Se você responder, por favor seja especifico nos comentários. Se você tiver mais algumas dúvidas, por favor responda ao comentário clicando no botão "reply".');
+define('_MD_EVAL_DESC','Faça contato, se você não estiver satifeito com nossas respostas? Sua avaliação é importante. Se você responder, por favor seja especifico nos comentários. Se você tiver mais algumas dúvidas, por favor responda ao comentário clicando no botão "responder".');
 define('_MD_EVAL_COMMENT','Avaliar comentário');
 define('_MD_EVAL_SUBMIT','Enviar avaliação');
 define('_MD_EVAL_DATE','Avaliação');

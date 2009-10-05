@@ -1,6 +1,6 @@
 <?php
 // contact to member
-// $Id: reception.php,v 1.11 2009/06/05 09:20:08 nobu Exp $
+// $Id: reception.php,v 1.12 2009/10/05 06:00:15 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -88,7 +88,6 @@ if ($form['custom']) {
     $form['description'] = $myts->displayTarea($form['description']);
 }
 $form['mdate'] = formatTimestamp($form['mtime']);
-$form['cdate'] = formatTimestamp($form['ctime']);
 foreach ($items as $k=>$item) {
     if (empty($item['label'])) unset($items[$k]);
 }

@@ -1,6 +1,6 @@
 <?php
 // ccenter common functions
-// $Id: functions.php,v 1.34 2009/06/26 02:05:55 nobu Exp $
+// $Id: functions.php,v 1.35 2009/10/05 06:00:14 nobu Exp $
 
 global $xoopsDB;		// for blocks scope
 // using tables
@@ -689,6 +689,7 @@ function custom_template($form, $items, $conf=false) {
 	if (!empty($item['comment'])) {
 	    $value .= "<span class='note'>".$item['comment']."</span>";
 	}
+	if (empty($item['name'])) continue;
 	$str[] = '{'.$item['name'].'}';
 	$rep[] = $value;
 	$fname = $item['field'];

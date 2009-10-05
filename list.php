@@ -1,6 +1,6 @@
 <?php
 // show message list
-// $Id: list.php,v 1.4 2007/09/26 07:08:58 nobu Exp $
+// $Id: list.php,v 1.5 2009/10/05 06:00:15 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -27,7 +27,7 @@ $labels=array('mtime'=>_MD_POSTDATE, 'formid'=>_MD_CONTACT_FORM,
 $orders=array('mtime'=>'ASC', 'formid'=>'ASC', 'touid'=>'ASC', 'status'=>'ASC',
 	      'orders'=>array('mtime'));
 
-$listctrl = new ListCtrl('mylist', $orders, $combo);
+$listctrl = new ListCtrl('mylist', $orders);
 
 $cond = " AND ".$listctrl->sqlcondition();
 

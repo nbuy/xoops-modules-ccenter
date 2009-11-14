@@ -1,6 +1,6 @@
 <?php
 // ccenter common functions
-// $Id: functions.php,v 1.35 2009/10/05 06:00:14 nobu Exp $
+// $Id: functions.php,v 1.36 2009/11/14 18:23:57 nobu Exp $
 
 global $xoopsDB;		// for blocks scope
 // using tables
@@ -142,7 +142,8 @@ function cc_csv_parse($ln) {
     return $result;
 }
 
-function get_form_attribute($defs) {
+function get_form_attribute($defs, $labels='', $prefix="cc") {
+    $labs = unserialize_vars($labels);
     $num = 0;
     $result = array();
     $types = array('text', 'checkbox', 'radio', 'textarea', 'select', 'hidden','const', 'mail', 'file');
@@ -157,7 +158,7 @@ function get_form_attribute($defs) {
 	    $label = $d[1];
 	    $name = preg_replace('/=(.*)$/', '', $name);
 	} else {
-	    $label = $name;
+	    $label = isset($labs[$name])?$labs[$name]:$name;
 	}
 	$type='text';
 	$comment='';
@@ -168,7 +169,7 @@ function get_form_attribute($defs) {
 	if (preg_match('/\*$/', $name)) { // syntax convention
 	    $attr['check'] = 'require';
 	    $name = preg_replace('/\s*\*$/', '', $name);
-	    $label = preg_replace('/\s*\*$/', _MD_REQUIRE_MARK, $label);
+	    if (defined('_MD_REQUIRE_MARK')) $label = preg_replace('/\s*\*$/', _MD_REQUIRE_MARK, $label);
 	}
 	while (isset($opts[0]) && (preg_match('/^(size|rows|maxlength|cols|prop)=(\d+)$/', $opts[0], $d) || preg_match('/^(check)=(.+)$/', $opts[0], $d))) {
 	    array_shift($opts);
@@ -209,7 +210,7 @@ function get_form_attribute($defs) {
 	    $attr['size'] = get_attr_value($attr, 'size');
 	}
 
-	$fname = "cc".++$num;
+	$fname = $prefix.++$num;
 	$result[$name] = array(
 	    'name'=>$name, 'label'=>$label, 'field'=>$fname,
 	    'options'=>$options, 'type'=>$type, 'comment'=>$comment,
@@ -435,6 +436,7 @@ function cc_make_widget($item) {
 if (!function_exists("unserialize_vars")) {
     // expand: label=value[,\n](label=value...) 
     function unserialize_vars($text,$rev=false) {
+	if (preg_match("/^\w+: /", $text)) return unserialize_text($text);
 	$array = array();
 	$text = ltrim($text);
 	$pat = array('/""/', '/^"(.*)"$/');

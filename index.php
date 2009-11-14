@@ -1,6 +1,6 @@
 <?php
 // contact to member
-// $Id: index.php,v 1.24 2009/07/02 02:57:05 nobu Exp $
+// $Id: index.php,v 1.25 2009/11/14 18:23:57 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -208,6 +208,7 @@ function store_message($items, $form) {
 		  'TO_USER'=>$toUname,
 		  'FROM_USER'=>$uname,
 		  'FROM_EMAIL'=>$email,
+		  'REPLY_COMMENT'=> get_attr_value(null, 'reply_comment'),
 		  'REMOTE_ADDR'=>$_SERVER["REMOTE_ADDR"],
 		  'HTTP_USER_AGENT'=>$_SERVER["HTTP_USER_AGENT"]);
     $tpl = 'form_confirm.tpl';

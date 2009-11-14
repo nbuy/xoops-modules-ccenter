@@ -5,13 +5,19 @@ include '../functions.php';
 include_once XOOPS_ROOT_PATH."/class/xoopsformloader.php";
 include_once 'myformselect.php';
 
+// option variables form definitions
+define('_CC_OPTDEFS',"notify_with_email,radio,1="._YES.",="._NO."
+redirect,text,size=60
+reply_comment,textarea,cols=60,rows=10
+reply_tpl_use,radio,1="._YES.",="._NO);
+
 $myts =& MyTextSanitizer::getInstance();
 $op = isset($_GET['op'])?$_GET['op']:'';
 if (isset($_POST['op'])) $op = $_POST['op'];
 $formid = isset($_REQUEST['formid'])?intval($_REQUEST['formid']):0;
 
 $fields = array('title', 'description', 'defs', 'priuid', 'cgroup',
-		'store', 'custom', 'weight', 'active', 'optvars');
+		'store', 'custom', 'weight', 'active');
 $optfields = array();
 if ($op == 'delform') {
     $formid = intval($_POST['formid']);
@@ -33,6 +39,19 @@ if ($op == 'delform') {
 	} else {
 	    $vals[$fname] = $v;
 	}
+    }
+    $items = get_form_attribute(_CC_OPTDEFS, '', 'optvar');
+    $errors = assign_post_values($items);
+    $vars = array();
+    foreach ($items as $item) {
+	if ($item['value']) $vars[$item['name']] = $item['value'];
+    }
+    $v = $xoopsDB->quoteString(serialize_text($vars));
+    $fname = 'optvars';
+    if ($formid) {
+	$vals[] = $fname."=".$v;
+    } else {
+	$vals[$fname] = $v;
     }
     $v = '|';
     foreach ($_POST['grpperm'] as $gid) {
@@ -222,7 +241,7 @@ function build_form($formid=0) {
     $grpperm->setDescription(_AM_FORM_ACCEPT_GROUPS_DESC);
     $form->addElement($grpperm);
     $defs_tray = new XoopsFormElementTray(_AM_FORM_DEFS);
-    $defs_tray->addElement(new XoopsFormTextArea('', 'defs', $data['defs']));
+    $defs_tray->addElement(new XoopsFormTextArea('', 'defs', $data['defs'], 10, 60));
     $defs_tray->addElement(new XoopsFormLabel('', 
 '<div id="itemhelper" style="display:none; white-space:nowrap;">
   '._AM_FORM_LAB.' <input name="xelab" size="10">
@@ -278,7 +297,22 @@ function build_form($formid=0) {
     $form->addElement(new XoopsFormRadioYN(_AM_FORM_ACTIVE, 'active' , $data['active']));
 
     $form->addElement(new XoopsFormText(_AM_FORM_WEIGHT, 'weight', 2, 8, $data['weight']));
-    $optvars = new XoopsFormTextarea(_AM_FORM_OPTIONS, 'optvars', $data['optvars']);
+    {
+	$items = get_form_attribute(_CC_OPTDEFS, _AM_OPTVARS_LABEL, 'optvar');
+	$vars = unserialize_text($data['optvars']);
+	foreach ($items as $k=>$item) {
+	    $name = $item['name'];
+	    if (isset($vars[$name])) $items[$k]['default'] = $vars[$name];
+	}
+	assign_form_widgets($items);
+	$varform="";
+	foreach ($items as $item) {
+	    $br = ($item['type'] =="textarea")?"<br/>":"";
+	    $varform .= "<div>".$item['label'].": $br".$item['input']."</div>";
+	}
+    }
+    $ck = empty($data['optvars'])?"":" checked='checked'";
+    $optvars = new XoopsFormLabel(_AM_FORM_OPTIONS, "<script type='text/javascript'>document.write(\"<input type='checkbox' id='optshow' onChange='togle(this);'$ck/> "._AM_OPTVARS_SHOW."\");</script><div id='optvars'>$varform</div>");
     $optvars->setDescription(_AM_FORM_OPTIONS_DESC);
     $form->addElement($optvars);
     $submit = new XoopsFormElementTray('');
@@ -293,6 +327,11 @@ function build_form($formid=0) {
 '
 // display only JavaScript enable
 xoopsGetElementById("itemhelper").style.display = "block";
+
+function togle(a) {
+    xoopsGetElementById("optvars").style.display = a.checked?"block":"none";
+}
+togle(xoopsGetElementById("optshow"));
 
 function addFieldItem() {
     var myform = window.document.myform;

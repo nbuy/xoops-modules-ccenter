@@ -1,5 +1,5 @@
 <?php
-// $Id: admin.php,v 1.1 2009/07/04 03:54:37 nobu Exp $
+// $Id: admin.php,v 1.2 2009/11/14 18:23:57 nobu Exp $
 
 define('_AM_FORM_EDIT', 'コンタクトフォームの編集');
 define('_AM_FORM_NEW', '新規コンタクトフォームの作成');
@@ -67,6 +67,12 @@ define('_AM_FORM_UPDATE_FAIL', 'フォームの更新に失敗しました');
 define('_AM_TIME_UNIT', '%d分,%d時間,%d日,%s 前');
 define('_AM_NODATA', 'データがありません');
 define('_AM_SUBMIT_VIEW','再表示');
+define('_AM_OPTVARS_SHOW','設定項目を表示する');
+define('_AM_OPTVARS_LABEL','notify_with_email=メールアドレスを通知に表示する
+redirect=フォーム送信後に遷移するページ
+reply_comment=応答メールに付加する文
+reply_tpl_use=付加文を応答メール全文にする
+');
 
 include_once dirname(__FILE__)."/common.php";
 ?>

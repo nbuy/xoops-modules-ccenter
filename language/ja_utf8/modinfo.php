@@ -1,5 +1,5 @@
 <?php
-// $Id: modinfo.php,v 1.2 2009/07/04 05:24:38 nobu Exp $
+// $Id: modinfo.php,v 1.3 2009/11/14 18:23:57 nobu Exp $
 // Module Info
 
 // The name of this module
@@ -37,7 +37,7 @@ define("_MI_CCENTER_BLOCK_FORM","お問合せフォーム");
 define("_MI_CCENTER_LISTS","一覧表示の数");
 define("_MI_CCENTER_LISTS_DESC","一覧表示で表示する行数を指定する");
 define("_MI_CCENTER_DEF_ATTRS","オプション既定値");
-define("_MI_CCENTER_DEF_ATTRS_DESC","フォームの要素に指定する<a href='help.php#attr'>オプション変数</a>などを設定する。例 <tt>size=60,rows=5,cols=50</tt>");
+define("_MI_CCENTER_DEF_ATTRS_DESC","フォームの要素に指定する<a href='../../ccenter/admin/help.php#attr'>オプション変数</a>などを設定する。例 <tt>size=60,rows=5,cols=50</tt>");
 define("_MI_CCENTER_STATUS_COMBO","状況の選択肢");
 define("_MI_CCENTER_STATUS_COMBO_DESC","書式は <tt>表示名: [状態1[,状態2...]]</tt> を複数行指定する。状態は (-,a,b,c) の文字で指定する。例 <tt>作業待ち: - a</tt>");
 define("_MI_CCENTER_STATUS_COMBO_DEF","全部: - a b c\n作業待ち: - a\n作業済み: b c\n--------:\n受付待: -\n作業中: a\n応答済: b\n完了: c\n");

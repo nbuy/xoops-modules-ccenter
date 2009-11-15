@@ -9,7 +9,7 @@ include_once 'myformselect.php';
 define('_CC_OPTDEFS',"notify_with_email,radio,1="._YES.",="._NO."
 redirect,text,size=60
 reply_comment,textarea,cols=60,rows=10
-reply_tpl_use,radio,1="._YES.",="._NO);
+reply_use_comtpl,radio,1="._YES.",="._NO);
 
 $myts =& MyTextSanitizer::getInstance();
 $op = isset($_GET['op'])?$_GET['op']:'';
@@ -299,7 +299,7 @@ function build_form($formid=0) {
     $form->addElement(new XoopsFormText(_AM_FORM_WEIGHT, 'weight', 2, 8, $data['weight']));
     {
 	$items = get_form_attribute(_CC_OPTDEFS, _AM_OPTVARS_LABEL, 'optvar');
-	$vars = unserialize_text($data['optvars']);
+	$vars = unserialize_vars($data['optvars']);
 	foreach ($items as $k=>$item) {
 	    $name = $item['name'];
 	    if (isset($vars[$name])) $items[$k]['default'] = $vars[$name];

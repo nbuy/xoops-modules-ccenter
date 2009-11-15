@@ -1,5 +1,5 @@
 <?php
-// $Id: admin.php,v 1.5 2009/11/14 18:23:57 nobu Exp $
+// $Id: admin.php,v 1.6 2009/11/15 06:39:10 nobu Exp $
 
 define('_AM_FORM_EDIT', 'Edit contact form');
 define('_AM_FORM_NEW', 'Create new contact form');
@@ -71,7 +71,7 @@ define('_AM_OPTVARS_SHOW','Show more settings');
 define('_AM_OPTVARS_LABEL','notify_with_email=Notify dispaly email address
 redirect=Redirect page after submit
 reply_comment=Add message in auto reply mail
-reply_tpl_use=Add message to be email template
+reply_use_comtpl=Add message to be email template
 ');
 
 include_once dirname(__FILE__)."/common.php";

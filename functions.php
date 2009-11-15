@@ -1,6 +1,6 @@
 <?php
 // ccenter common functions
-// $Id: functions.php,v 1.36 2009/11/14 18:23:57 nobu Exp $
+// $Id: functions.php,v 1.37 2009/11/15 06:39:10 nobu Exp $
 
 global $xoopsDB;		// for blocks scope
 // using tables
@@ -647,8 +647,14 @@ function cc_notify_mail($tpl, $tags, $users, $from="") { // return: error count
     $xoopsMailer->setFromName($xoopsModule->getVar('name'));
     $xoopsMailer->setSubject(_CC_NOTIFY_SUBJ);
     $xoopsMailer->assign($tags);
-    $xoopsMailer->setTemplateDir(template_dir($tpl));
-    $xoopsMailer->setTemplate($tpl);
+    $comment = get_attr_value(null, 'reply_comment');
+    if (get_attr_value(null, 'reply_use_comtpl')) {
+	$xoopsMailer->setBody($comment);
+    } else {
+	$xoopsMailer->assign('REPLY_COMMENT', $comment);
+	$xoopsMailer->setTemplateDir(template_dir($tpl));
+	$xoopsMailer->setTemplate($tpl);
+    }
     return $xoopsMailer->send()?0:1;
 }
 

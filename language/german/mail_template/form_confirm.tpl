@@ -1,4 +1,5 @@
 Dies ist eine automatisch erstellte Nachricht.
+{REPLY_COMMENT}
 Wir erhielten folgende Kontakt Nachricht.
 
 Please wait reply again form us.

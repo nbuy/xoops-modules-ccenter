@@ -1,5 +1,4 @@
 This is auto reply message.
-
 {REPLY_COMMENT}
 We received following contact message.
 

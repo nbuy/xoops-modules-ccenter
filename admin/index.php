@@ -9,7 +9,8 @@ include_once 'myformselect.php';
 define('_CC_OPTDEFS',"notify_with_email,radio,1="._YES.",="._NO."
 redirect,text,size=60
 reply_comment,textarea,cols=60,rows=10
-reply_use_comtpl,radio,1="._YES.",="._NO);
+reply_use_comtpl,radio,1="._YES.",="._NO."
+others,textarea");
 
 $myts =& MyTextSanitizer::getInstance();
 $op = isset($_GET['op'])?$_GET['op']:'';
@@ -40,13 +41,7 @@ if ($op == 'delform') {
 	    $vals[$fname] = $v;
 	}
     }
-    $items = get_form_attribute(_CC_OPTDEFS, '', 'optvar');
-    $errors = assign_post_values($items);
-    $vars = array();
-    foreach ($items as $item) {
-	if ($item['value']) $vars[$item['name']] = $item['value'];
-    }
-    $v = $xoopsDB->quoteString(serialize_text($vars));
+    $v = $xoopsDB->quoteString($data['optvars'] = post_optvars());
     $fname = 'optvars';
     if ($formid) {
 	$vals[] = $fname."=".$v;
@@ -117,6 +112,23 @@ default:
 }
 
 xoops_cp_footer();
+
+function post_optvars() {
+    $items = get_form_attribute(_CC_OPTDEFS, '', 'optvar');
+    $errors = assign_post_values($items);
+    $vars = array();
+    foreach ($items as $item) {
+	$fname = $item['name'];
+	if ($fname == "others") {
+	    foreach (unserialize_vars($item['value']) as $k=>$v) {
+		$vars[$k] = $v;
+	    }
+	} else {
+	    if ($item['value']) $vars[$fname] = $item['value'];
+	}
+    }
+    return serialize_text($vars);
+}
 
 function list_forms() {
     global $xoopsDB, $xoopsUser;
@@ -191,6 +203,7 @@ function build_form($formid=0) {
 	foreach ($fields as $name) {
 	    $data[$name] = $myts->stripSlashesGPC($_POST[$name]);
 	}
+	$data['optvars'] = post_optvars();
 	$data['grpperm'] = $_POST['grpperm'];
 	$formid = intval($_POST['formid']);
 	// form preview
@@ -226,16 +239,25 @@ function build_form($formid=0) {
     if (!empty($data['mtime'])) $form->addElement(new XoopsFormLabel(_AM_FORM_MTIME, formatTimestamp($data['mtime'])));
     $desc = new XoopsFormElementTray(_AM_FORM_DESCRIPTION, "<br/>");
     $description = $data['description'];
-    $desc->addElement(new XoopsFormDhtmlTextArea('', 'description', $description));
-    $button = new XoopsFormButton('', 'ins_tpl', _AM_INS_TEMPLATE);
-    $button->setExtra("onClick=\"myform.description.value += defsToString();\"");
-    $desc->addElement($button);
+    $editor = get_attr_value(null, 'use_fckeditor');
+    if ($editor) {
+	$desc->addElement(new XoopsFormTextArea('', 'description', $description, 10, 60));
+    } else {
+	$desc->addElement(new XoopsFormDhtmlTextArea('', 'description', $description, 10, 60));
+    }
+    if (!$editor) {
+	$button = new XoopsFormButton('', 'ins_tpl', _AM_INS_TEMPLATE);
+	$button->setExtra("onClick=\"myform.description.value += defsToString();\"");
+	$desc->addElement($button);
+    }
     $error = check_form_tags($data['custom'], $data['defs'], $description);
     if ($error) $desc->addElement(new XoopsFormLabel('', "<div style='color:red;'>$error</div>"));
     $form->addElement($desc);
     $custom = new XoopsFormSelect(_AM_FORM_CUSTOM, 'custom' , $data['custom']);
     $custom->setExtra(' onChange="myform.ins_tpl.disabled = (this.value==0||this.value==4);"');
-    $custom->addOptionArray(unserialize_vars(_AM_CUSTOM_DESCRIPTION));
+    $custom_type = unserialize_vars(_AM_CUSTOM_DESCRIPTION);
+    if ($editor) unset($custom_type[0]);
+    $custom->addOptionArray($custom_type);
     $form->addElement($custom);
     $grpperm = new XoopsFormSelectGroup(_AM_FORM_ACCEPT_GROUPS, 'grpperm', true, $data['grpperm'], 4, true);
     $grpperm->setDescription(_AM_FORM_ACCEPT_GROUPS_DESC);
@@ -300,10 +322,19 @@ function build_form($formid=0) {
     {
 	$items = get_form_attribute(_CC_OPTDEFS, _AM_OPTVARS_LABEL, 'optvar');
 	$vars = unserialize_vars($data['optvars']);
+	$others = "";
 	foreach ($items as $k=>$item) {
 	    $name = $item['name'];
-	    if (isset($vars[$name])) $items[$k]['default'] = $vars[$name];
+	    if (isset($vars[$name])) {
+		$items[$k]['default'] = $vars[$name];
+		unset($vars[$name]);
+	    }
 	}
+	$val = "";
+	foreach ($vars as $i=>$v) {
+	    $val .= "$i=$v\n";
+	}
+	$items[$k]['default'] = $val;
 	assign_form_widgets($items);
 	$varform="";
 	foreach ($items as $item) {
@@ -313,7 +344,6 @@ function build_form($formid=0) {
     }
     $ck = empty($data['optvars'])?"":" checked='checked'";
     $optvars = new XoopsFormLabel(_AM_FORM_OPTIONS, "<script type='text/javascript'>document.write(\"<input type='checkbox' id='optshow' onChange='togle(this);'$ck/> "._AM_OPTVARS_SHOW."\");</script><div id='optvars'>$varform</div>");
-    $optvars->setDescription(_AM_FORM_OPTIONS_DESC);
     $form->addElement($optvars);
     $submit = new XoopsFormElementTray('');
     $submit->addElement(new XoopsFormButton('' , 'formdefs', _SUBMIT, 'submit'));
@@ -322,12 +352,21 @@ function build_form($formid=0) {
 
     echo "<a name='form'></a>";
     $form->display();
+    if ($editor) {
+	$base = XOOPS_URL."/common/fckeditor";
+	global $xoopsTpl;
+	echo "<script type='text/javascript' src='$base/fckeditor.js'></script>\n";
+	$editor =
+"var ccFCKeditor = new FCKeditor('description', '100%', '350', '$editor');
+ccFCKeditor.BasePath = '$base/';
+ccFCKeditor.ReplaceTextarea();";
+    }
     echo '<script language="JavaScript">'.
 	$priuid->renderSupportJS(false).
 '
 // display only JavaScript enable
 xoopsGetElementById("itemhelper").style.display = "block";
-
+'.$editor.'
 function togle(a) {
     xoopsGetElementById("optvars").style.display = a.checked?"block":"none";
 }
@@ -381,7 +420,6 @@ function defsToString() {
 
 fvalue = document.myform.custom.value;
 document.myform.ins_tpl.disabled = (fvalue==0 || fvalue==4);
-//fckeditor_exec();
 </script>
 ';
 }

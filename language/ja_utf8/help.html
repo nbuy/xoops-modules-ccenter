@@ -169,7 +169,8 @@ pre { color: #600000; }
       <tr class="even"><td class="head">notify_with_email</td><td><u>0</u></td><td>1に設定したら問合せ通知メールにメールアドレスを表示する</td></tr>
       <tr class="odd"><td class="head">export_charset</td><td><u>UTF-8</u></td><td>CSV ファイルへ出力する場合のエンコーディングを指定する。</td></tr>
       <tr class="even"><td class="head">redirect</td><td>なし</td><td>フォームの送信後に遷移するページの URLを指定する</td></tr>
-      <tr class="odd"><td class="head">他の名称</td><td>正規表現</td><td>入力検査の文字列定義
+      <tr class="odd"><td class="head">use_fckeditor</td><td>なし</td><td>コメント編集に FCKeditor 使う。設定値は Basic または Default</td></tr>
+      <tr class="even"><td class="head">他の名称</td><td>正規表現</td><td>入力検査の文字列定義
 	  <p>例: 数値 <tt>numeric=[-+]?[0-9]+</tt>、電話番号<tt>tel="\+?[0-9][0-9-,]*[0-9]"</tt><br />利用は、入力の定義で <tt>check=tel</tt> のように利用する。</p>
 	  <p>正規表現は、JavaScript で使える範囲のものを使うこと。(サーバ側は perl の正規表現が使うが、クライアント側は JavaScript を利用するため)</p>
       </td></tr>
@@ -223,6 +224,13 @@ pre { color: #600000; }
 
   <a name="changes"></a><h5>変更履歴</h5>
   <dl>
+  <dt>2009-11-15 ccenter 0.93</dt>
+  <dd>
+    <ul>
+      <li>通知メールの追加コメント/テンプレートをフォーム毎にオプション変数で指定</li>
+      <li>オプション変数の取扱い機構を変更</li>
+    </ul>
+  </dd>
   <dt>2009-07-04 ccenter 0.92</dt>
   <dd>
     <ul>
@@ -391,6 +399,6 @@ pre { color: #600000; }
 <hr/>
 <aliress>安富 伸浩 &lt;<a href="mailto:nobuhiro.yasutomi@nifty.ne.jp">nobuhiro.yasutomi@nifty.ne.jp</a>&gt;</aliress>
 マイサイト ユーザーズ <a href="http://myht.org/">http://myht.org/</a><br/>
-$Id: help.html,v 1.2 2009/07/04 05:39:23 nobu Exp $
+$Id: help.html,v 1.3 2009/11/15 09:51:08 nobu Exp $
 </body>
 </html>

@@ -1,6 +1,6 @@
 <?php
 // ccenter common functions
-// $Id: functions.php,v 1.37 2009/11/15 06:39:10 nobu Exp $
+// $Id: functions.php,v 1.38 2009/12/13 11:24:59 nobu Exp $
 
 global $xoopsDB;		// for blocks scope
 // using tables
@@ -50,7 +50,7 @@ define('LABEL_ETC', '*');	// radio, checkbox widget 'etc' text input.
 define('OPTION_ATTRS', 'size,rows,maxlength,cols,prop,notify_with_email');
 
 // attribute config option expanding
-function get_attr_value($pri, $name=null) {
+function get_attr_value($pri, $name=null, $value=null) {
     static $defs;		// default option value
 
     if ($name && is_array($pri) && isset($pri[$name])) return $pri[$name];
@@ -83,7 +83,7 @@ function get_attr_value($pri, $name=null) {
 	}
     }
     if (isset($defs[$name])) return $defs[$name];
-    return null;
+    return $value;
 }
 
 function cc_display_values($vals, $items, $msgid=0, $add="") {
@@ -646,8 +646,7 @@ function cc_notify_mail($tpl, $tags, $users, $from="") { // return: error count
     $xoopsMailer->setFromEmail($from?$from:$xoopsConfig['adminmail']);
     $xoopsMailer->setFromName($xoopsModule->getVar('name'));
     $xoopsMailer->setSubject(_CC_NOTIFY_SUBJ);
-    $xoopsMailer->assign($tags);
-    $comment = get_attr_value(null, 'reply_comment');
+    $comment = get_attr_value(null, 'reply_comment', '');
     if (get_attr_value(null, 'reply_use_comtpl')) {
 	$xoopsMailer->setBody($comment);
     } else {
@@ -655,6 +654,7 @@ function cc_notify_mail($tpl, $tags, $users, $from="") { // return: error count
 	$xoopsMailer->setTemplateDir(template_dir($tpl));
 	$xoopsMailer->setTemplate($tpl);
     }
+    $xoopsMailer->assign($tags);
     return $xoopsMailer->send()?0:1;
 }
 

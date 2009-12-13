@@ -7,7 +7,7 @@
 <{/if}>
 <div class="evform">
 <h2><{$form.title}></h2>
-<p><{$form.desc}></p>
+<{$form.desc}>
 <a name="form"></a>
 <form action="<{$form.cc_url}>/<{$form.action}>" name="ccenter" class="ccform" method="post"<{if $form.check_script}> onsubmit="return xoopsFormValidate_ccenter();"<{/if}><{if $form.hasfile}> enctype="multipart/form-data"<{/if}>>
 <input type="hidden" name="op" value="<{$op}>" />

@@ -1,6 +1,6 @@
 <?php
 // show messages file
-// $Id: message.php,v 1.20 2009/06/12 05:11:27 nobu Exp $
+// $Id: message.php,v 1.21 2009/12/18 13:01:37 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -71,6 +71,13 @@ if ($isadmin) {
 }
 $breadcrumbs->set($lab.': '.$values[$lab], '');
 $breadcrumbs->assign();
+$has_mail = false;
+foreach ($items as $item) {
+    if ($item['type'] == 'mail') {
+	$has_mail = true;
+	break;
+    }
+}
 $xoopsTpl->assign(
     array('subject'=>$title,
 	  'sender'=>xoops_getLinkedUnameFromId($data['uid']),
@@ -87,6 +94,7 @@ $xoopsTpl->assign(
 	  'is_getmine'=>$data['touid']==0 && $uid && in_array($data['cgroup'], $xoopsUser->getGroups()),
 	  'own_status'=>array_slice($msg_status, 1, $isadmin?4:3),
 	  'xoops_pagetitle'=> htmlspecialchars($xoopsModule->getVar('name')." | ".$data['title']),
+	  'has_mail'=>$has_mail,
 	));
 
 

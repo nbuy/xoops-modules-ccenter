@@ -1,6 +1,6 @@
 <?php
 // contact to member
-// $Id: index.php,v 1.26 2009/11/15 06:39:10 nobu Exp $
+// $Id: index.php,v 1.27 2010/08/25 13:33:03 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -209,8 +209,9 @@ function store_message($items, $form) {
 		  'FROM_USER'=>$uname,
 		  'FROM_EMAIL'=>$email,
 		  'REMOTE_ADDR'=>$_SERVER["REMOTE_ADDR"],
-		  'HTTP_USER_AGENT'=>$_SERVER["HTTP_USER_AGENT"]);
-    $tpl = 'form_confirm.tpl';
+		  'HTTP_USER_AGENT'=>$_SERVER["HTTP_USER_AGENT"],
+		  'MSGID'=>$id);
+    $tpl = get_attr_value(null, 'from_confirm_tpl', 'form_confirm.tpl');
     $msgurl = XOOPS_URL.($id?"/modules/$dirname/message.php?id=$id":'/');
     if ($email) {		// reply automaticaly
 	$tags['VALUES'] = "$rtext$atext";
@@ -227,10 +228,10 @@ function store_message($items, $form) {
     if ($id) $notification_handler->subscribe('message', $id, 'comment');
     if ($touid) {
 	if ($id) $notification_handler->subscribe('message', $id, 'comment', null, null, $touid);
-	cc_notify_mail($tpl, $tags, $toUser, $from);
+	cc_notify_mail(get_attr_value(null, 'charge_notify_tpl', $tpl), $tags, $toUser, $from);
     } elseif ($form['cgroup']) { // contact group notify
 	$users = $member_handler->getUsersByGroup($form['cgroup'], true);
-	cc_notify_mail($tpl, $tags, $users, $from);
+	cc_notify_mail(get_attr_value(null, 'group_notify_tpl', $tpl), $tags, $users, $from);
     }
 
     if ($id) $msgurl .= $parg;

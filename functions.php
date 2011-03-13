@@ -1,6 +1,6 @@
 <?php
 // ccenter common functions
-// $Id: functions.php,v 1.38 2009/12/13 11:24:59 nobu Exp $
+// $Id: functions.php,v 1.39 2011/03/13 15:35:28 nobu Exp $
 
 global $xoopsDB;		// for blocks scope
 // using tables
@@ -21,30 +21,36 @@ define('_DB_STORE_LOG',  0);	// logging only in db
 define('_DB_STORE_YES',  1);	// store information in db
 define('_DB_STORE_NONE', 2);	// query not store in db
 
-define('_CC_WIDGET_TPL', basename(dirname(__FILE__))."_form_widgets.html");
+define('_CC_WIDGET_TPL', "ccenter_form_widgets.html");
 
-if (defined('_CC_STATUS_NONE')) {
-    global $msg_status, $export_range;
-    $msg_status = array(
+if (!defined('_CC_STATUS_NONE')) {
+    $moddir = dirname(__FILE__);
+    $lang = $GLOBALS['xoopsConfig']['language'];
+    if (!include_once("$moddir/language/$lang/common.php")) {
+	include_once("$moddir/language/english/common.php");
+    }
+}
+global $msg_status, $export_range;
+
+$msg_status = array(
 	_STATUS_NONE  =>_CC_STATUS_NONE,
 	_STATUS_ACCEPT=>_CC_STATUS_ACCEPT,
 	_STATUS_REPLY =>_CC_STATUS_REPLY,
 	_STATUS_CLOSE =>_CC_STATUS_CLOSE,
 	_STATUS_DEL   =>_CC_STATUS_DEL);
 
-    $export_range = array(
+ $export_range = array(
 	'm0'=>_CC_EXPORT_THIS_MONTH,
 	'm1'=>_CC_EXPORT_LAST_MONTH,
 	'y0'=>_CC_EXPORT_THIS_YEAR,
 	'y1'=>_CC_EXPORT_LAST_YEAR,
 	'all'=>_CC_EXPORT_ALL);
 
-    define('_CC_TPL_NONE',  0);
-    define('_CC_TPL_BLOCK', 1);
-    define('_CC_TPL_FULL',  2);
-    define('_CC_TPL_FRAME', 3);	// obsolete
-    define('_CC_TPL_NONE_HTML', 4);
-}
+define('_CC_TPL_NONE',  0);
+define('_CC_TPL_BLOCK', 1);
+define('_CC_TPL_FULL',  2);
+define('_CC_TPL_FRAME', 3);	// obsolete
+define('_CC_TPL_NONE_HTML', 4);
 
 define('LABEL_ETC', '*');	// radio, checkbox widget 'etc' text input.
 define('OPTION_ATTRS', 'size,rows,maxlength,cols,prop,notify_with_email');
@@ -146,7 +152,7 @@ function get_form_attribute($defs, $labels='', $prefix="cc") {
     $labs = unserialize_vars($labels);
     $num = 0;
     $result = array();
-    $types = array('text', 'checkbox', 'radio', 'textarea', 'select', 'hidden','const', 'mail', 'file');
+    $types = array('text', 'checkbox', 'radio', 'textarea', 'select', 'hidden','const', 'mail', 'file', 'date');
     foreach (cc_csv_parse($defs) as $opts) {
 	if (empty($opts)) continue;
 	if (preg_match('/^#/', $opts[0])) {
@@ -203,7 +209,9 @@ function get_form_attribute($defs, $labels='', $prefix="cc") {
 	} elseif ($type != 'checkbox') {
 	    $defs = eval_user_value(join(',', $options));
 	}
-	if ($type=='textarea') {
+	if ($type=='date') {
+	    if (empty($defs)) $defs = formatTimestamp(time(), 'Y-m-d');
+	} elseif ($type=='textarea') {
 	    $attr['rows'] = get_attr_value($attr, 'rows');
 	    $attr['cols'] = get_attr_value($attr, 'cols');
 	} else {
@@ -395,9 +403,9 @@ function eval_user_value($str) {
     return str_replace(array_keys($defuser), $defuser, $str);
 }
 
-function cc_make_widget($item) {
+function cc_make_widget($item, $vars=null) {
     global $myts;
-    $fname = preg_replace('/_conf$/', '', $item['field']);
+    $fname = $item['field'];
     $value = null;
     $type = $item['type'];
     $options = &$item['options'];
@@ -430,6 +438,7 @@ function cc_make_widget($item) {
     $item['value'] = $value;
     $tpl=new XoopsTpl;
     $tpl->assign('item', $item);
+    if (isset($vars)) $tpl->assign($vars);
     return $tpl->fetch('db:'._CC_WIDGET_TPL);
 }
 
@@ -445,7 +454,7 @@ if (!function_exists("unserialize_vars")) {
 	while ($text && preg_match("/^(\"[^\"]*\"|[^\"$delm]*)*[$delm]?/", $text, $d)) {
 	    $ln = preg_replace("/[\\s$delm]\$/", '', $d[0]);
 	    $text = ltrim(substr($text, strlen($d[0])));
-	    if (preg_match('/^\s*([^=]+)\s*=\s*(.+)$/', $ln, $d)) {
+	    if (preg_match('/^\s*([^=]+)\s*=\s*(.*)$/', $ln, $d)) {
 		if (preg_match('/^#/', $d[1])) continue;
 		if ($rev) {
 		    $k = $d[2];
@@ -1030,4 +1039,34 @@ class XoopsBreadcrumbs {
 
 }
 
+function check_perm($msgid) {
+    global $xoopsDB, $xoopsUser, $xoopsModule;
+
+    $uid = is_object($xoopsUser)?$xoopsUser->getVar('uid'):0;
+    $isadmin = $uid && $xoopsUser->isAdmin($xoopsModule->getVar('mid'));
+
+    if (isset($_GET['p'])) {
+	$_SESSION['onepass'] = $myts->stripSlashesGPC($_GET['p']);
+    }
+    $pass = empty($_SESSION['onepass'])?"XX":$_SESSION['onepass'];
+
+    $cond = " AND status<>".$xoopsDB->quoteString(_STATUS_DEL);
+    if (!$isadmin) {
+	if (is_object($xoopsUser)) {
+	    $cond .= " AND (cgroup IN (".join(',', $xoopsUser->getGroups()).") OR touid=$uid OR uid=$uid)";
+	} else {
+	    $cond .= " AND onepass=".$xoopsDB->quoteString($pass);
+	}
+    }
+    $res = $xoopsDB->query("SELECT m.*, title, cgroup, defs FROM ".CCMES." m,".FORMS." WHERE msgid=$msgid $cond AND fidref=formid");
+    if (!$res || $xoopsDB->getRowsNum($res)==0) {
+	if (is_object($xoopsUser)) {
+	    redirect_header("index.php", 3, _NOPERM);
+	} else {
+	    redirect_header(XOOPS_URL.'/user.php', 3, _NOPERM);
+	}
+	exit;
+    }
+    return $xoopsDB->fetchArray($res);
+}
 ?>

@@ -1,6 +1,6 @@
 <?php
 // show messages file
-// $Id: message.php,v 1.21 2009/12/18 13:01:37 nobu Exp $
+// $Id: message.php,v 1.22 2011/03/13 15:35:28 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -8,33 +8,10 @@ include "functions.php";
 $myts =& MyTextSanitizer::getInstance();
 $xoopsOption['template_main'] = "ccenter_message.html";
 $uid = is_object($xoopsUser)?$xoopsUser->getVar('uid'):0;
-$isadmin = $uid && $xoopsUser->isAdmin($xoopsModule->getVar('mid'));
 
 $msgid = intval($_GET['id']);
 
-if (isset($_GET['p'])) {
-    $_SESSION['onepass'] = $myts->stripSlashesGPC($_GET['p']);
-}
-$pass = empty($_SESSION['onepass'])?"":$_SESSION['onepass'];
-
-$cond = " AND status<>'x'";
-if (!$isadmin) {
-    if (is_object($xoopsUser)) {
-        $cond .= " AND (cgroup IN (".join(',', $xoopsUser->getGroups()).") OR touid=$uid OR uid=$uid)";
-    } else {
-        $cond .= " AND onepass=".$xoopsDB->quoteString($pass);
-    }
-}
-$res = $xoopsDB->query("SELECT m.*, title, cgroup, defs FROM ".CCMES." m,".FORMS." WHERE msgid=$msgid $cond AND fidref=formid");
-if (!$res || $xoopsDB->getRowsNum($res)==0) {
-    if (is_object($xoopsUser)) {
-	redirect_header("index.php", 3, _NOPERM);
-    } else {
-	redirect_header(XOOPS_URL.'/user.php', 3, _NOPERM);
-    }
-    exit;
-}
-$data = $xoopsDB->fetchArray($res);
+$data = check_perm($msgid);
 if (!cc_check_perm($data)) {
     redirect_header(XOOPS_URL.'/user.php', 3, _NOPERM);
     exit;

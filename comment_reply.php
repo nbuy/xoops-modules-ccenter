@@ -1,5 +1,5 @@
 <?php
-// $Id: comment_reply.php,v 1.3 2007/06/14 05:09:13 nobu Exp $
+// $Id: comment_reply.php,v 1.4 2011/03/14 13:59:16 nobu Exp $
 //  ------------------------------------------------------------------------ //
 //                XOOPS - PHP Content Management System                      //
 //                    Copyright (c) 2000 XOOPS.org                           //
@@ -25,6 +25,10 @@
 //  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA //
 //  ------------------------------------------------------------------------ //
 include '../../mainfile.php';
+include 'functions.php';
+
+$com_itemid = isset($_GET['com_itemid']) ? intval($_GET['com_itemid']) : 0;
+cc_get_message($com_itemid);
 
 include XOOPS_ROOT_PATH.'/include/comment_reply.php';
 ?>

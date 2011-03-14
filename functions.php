@@ -1,6 +1,6 @@
 <?php
 // ccenter common functions
-// $Id: functions.php,v 1.39 2011/03/13 15:35:28 nobu Exp $
+// $Id: functions.php,v 1.40 2011/03/14 13:59:16 nobu Exp $
 
 global $xoopsDB;		// for blocks scope
 // using tables
@@ -584,6 +584,18 @@ function cc_check_perm($data) {
     return false;
 }
 
+function cc_get_message($msgid) {
+    global $xoopsDB;
+    $res = $xoopsDB->query("SELECT m.*, title FROM ".CCMES." m,".FORMS." WHERE msgid=$com_itemid AND status<>".$xoopsDB->quoteString(_STATUS_DEL)." AND fidref=formid");
+ 
+    $data = $xoopsDB->fetchArray($res);
+    if (!cc_check_perm($data)) {
+	redirect_header(XOOPS_URL.'/user.php', 3, _NOPERM);
+	exit;
+    }
+    return $data;
+}
+
 function cc_onetime_ticket($genseed="mypasswdbasestring") {
     return substr(preg_replace('/[^a-zA-Z0-9]/', '', base64_encode(pack("H*",md5($genseed.time())))), 0, 8);
 }
@@ -1037,36 +1049,5 @@ class XoopsBreadcrumbs {
 	return $xoopsTpl->assign('xoops_breadcrumbs', $this->get());
     }
 
-}
-
-function check_perm($msgid) {
-    global $xoopsDB, $xoopsUser, $xoopsModule;
-
-    $uid = is_object($xoopsUser)?$xoopsUser->getVar('uid'):0;
-    $isadmin = $uid && $xoopsUser->isAdmin($xoopsModule->getVar('mid'));
-
-    if (isset($_GET['p'])) {
-	$_SESSION['onepass'] = $myts->stripSlashesGPC($_GET['p']);
-    }
-    $pass = empty($_SESSION['onepass'])?"XX":$_SESSION['onepass'];
-
-    $cond = " AND status<>".$xoopsDB->quoteString(_STATUS_DEL);
-    if (!$isadmin) {
-	if (is_object($xoopsUser)) {
-	    $cond .= " AND (cgroup IN (".join(',', $xoopsUser->getGroups()).") OR touid=$uid OR uid=$uid)";
-	} else {
-	    $cond .= " AND onepass=".$xoopsDB->quoteString($pass);
-	}
-    }
-    $res = $xoopsDB->query("SELECT m.*, title, cgroup, defs FROM ".CCMES." m,".FORMS." WHERE msgid=$msgid $cond AND fidref=formid");
-    if (!$res || $xoopsDB->getRowsNum($res)==0) {
-	if (is_object($xoopsUser)) {
-	    redirect_header("index.php", 3, _NOPERM);
-	} else {
-	    redirect_header(XOOPS_URL.'/user.php', 3, _NOPERM);
-	}
-	exit;
-    }
-    return $xoopsDB->fetchArray($res);
 }
 ?>

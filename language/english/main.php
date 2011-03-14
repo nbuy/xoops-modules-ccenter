@@ -1,5 +1,5 @@
 <?php
-// $Id: main.php,v 1.3 2008/06/01 13:54:23 nobu Exp $
+// $Id: main.php,v 1.4 2011/03/14 13:59:16 nobu Exp $
 
 define('_MD_EVALS','Evaluate');
 define('_MD_COUNT','Count');
@@ -64,6 +64,4 @@ define('_MD_EVAL_VAL_MAX','best');
 define("_MD_EXPORT_CHARSET", "UTF-8");
 define('_MD_EXPORT_CSV','CSV format');
 define('_MD_EXPORT_RANGE','Range');
-
-include_once dirname(__FILE__)."/common.php";
 ?>

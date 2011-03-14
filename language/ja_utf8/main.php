@@ -1,5 +1,5 @@
 <?php
-// $Id: main.php,v 1.1 2009/07/04 03:54:37 nobu Exp $
+// $Id: main.php,v 1.2 2011/03/14 13:59:17 nobu Exp $
 
 define('_MD_EVALS','評価');
 define('_MD_COUNT','件数');
@@ -64,6 +64,4 @@ define('_MD_EVAL_VAL_MAX','良い');
 define("_MD_EXPORT_CHARSET", "UTF-8");
 define('_MD_EXPORT_CSV','CSV形式');
 define('_MD_EXPORT_RANGE','期間');
-
-include_once dirname(__FILE__)."/common.php";
 ?>

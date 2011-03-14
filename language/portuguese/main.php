@@ -1,5 +1,5 @@
 <?php
-// $Id: main.php,v 1.2 2009/07/07 12:00:42 nobu Exp $
+// $Id: main.php,v 1.3 2011/03/14 13:59:17 nobu Exp $
 // Traduzido para o Portugues do Brasil por: Miraldo Antoninho Ohse (m_ohse@hotmail.com).
 
 define('_MD_EVALS','Avaliação');
@@ -65,6 +65,4 @@ define('_MD_EVAL_VAL_MAX','bom');
 define("_MD_EXPORT_CHARSET", "UTF-8");
 define('_MD_EXPORT_CSV','Formato CSV');
 define('_MD_EXPORT_RANGE','Faixa');
-
-include_once dirname(__FILE__)."/common.php";
 ?>

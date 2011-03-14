@@ -1,6 +1,6 @@
 <?php
 // show messages file
-// $Id: message.php,v 1.22 2011/03/13 15:35:28 nobu Exp $
+// $Id: message.php,v 1.23 2011/03/14 13:59:16 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -11,7 +11,8 @@ $uid = is_object($xoopsUser)?$xoopsUser->getVar('uid'):0;
 
 $msgid = intval($_GET['id']);
 
-$data = check_perm($msgid);
+$res = $xoopsDB->query("SELECT m.*, title FROM ".CCMES." m,".FORMS." WHERE msgid=$msgid AND status<>".$xoopsDB->quoteString(_STATUS_DEL)." AND fidref=formid");
+$data = $xoopsDB->fetchArray($res);
 if (!cc_check_perm($data)) {
     redirect_header(XOOPS_URL.'/user.php', 3, _NOPERM);
     exit;

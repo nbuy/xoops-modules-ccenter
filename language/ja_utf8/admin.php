@@ -1,5 +1,5 @@
 <?php
-// $Id: admin.php,v 1.4 2009/11/15 09:51:08 nobu Exp $
+// $Id: admin.php,v 1.5 2011/03/14 13:59:17 nobu Exp $
 
 define('_AM_FORM_EDIT', 'コンタクトフォームの編集');
 define('_AM_FORM_NEW', '新規コンタクトフォームの作成');
@@ -74,6 +74,4 @@ reply_comment=応答メールに付加する文
 reply_use_comtpl=付加文を応答メールのテンプレートにする
 others=その他の変数 (「名前=値」の形式)
 ');
-
-include_once dirname(__FILE__)."/common.php";
 ?>

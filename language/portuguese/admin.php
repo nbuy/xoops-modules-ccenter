@@ -1,5 +1,5 @@
 <?php
-// $Id: admin.php,v 1.5 2009/11/15 09:51:08 nobu Exp $
+// $Id: admin.php,v 1.6 2011/03/14 13:59:17 nobu Exp $
 // Traduzido para o Portugues do Brasil por: Miraldo Antoninho Ohse (m_ohse@hotmail.com).
 
 define('_AM_FORM_EDIT', 'Editar o formulário de contato');
@@ -75,6 +75,4 @@ reply_comment=Adicionar mensagem no correio de resposta automática
 reply_use_comtpl=Adicionar mensagem de e-mail para ser modelo
 others=Outras variáveis ("Name=Valor" style)
 ');
-
-include_once dirname(__FILE__)."/common.php";
 ?>

@@ -12,7 +12,8 @@
 <form action="<{$form.cc_url}>/<{$form.action}>" name="ccenter" class="ccform" method="post"<{if $form.check_script}> onsubmit="return xoopsFormValidate_ccenter();"<{/if}><{if $form.hasfile}> enctype="multipart/form-data"<{/if}>>
 <input type="hidden" name="op" value="<{$op}>" />
 
-<table class="outer" align="center" cellspacing="1" border="0"  summary="Contact form items">
+<table class="outer" align="center" cellspacing="1" border="0" summary="Contact form items">
+  <col style="width: 20%;"/>
 <{foreach from=$form.items item=fm name=item}>
   <{if preg_match("/^-/", $form.items[$smarty.foreach.item.iteration].label)}>
     <{if empty($form_continue)}>

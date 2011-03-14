@@ -1,6 +1,6 @@
 <?php
 # show language help.html
-# $Id: help.php,v 1.2 2009/06/06 03:28:04 nobu Exp $
+# $Id: help.php,v 1.3 2011/03/14 13:59:16 nobu Exp $
 
 include '../../../include/cp_header.php';
 global $mydirpath, $mydirname;
@@ -23,7 +23,7 @@ if(!function_exists("file_get_contents")) {
 xoops_cp_header();
 include 'mymenu.php';
 if (function_exists('Legacy_function_stylesheet')) {
-    echo "<link href=\"".XOOPS_URL."/modules/legacyRender/admin/css.php?file=module.css&dirname=legacy\" media=\"all\" type=\"text/css\" rel=\"stylesheet\" />\n";
+    echo "<link href=\"".XOOPS_URL."/modules/legacyRender/admin/css.php?file=module.css&amp;dirname=legacy\" media=\"all\" type=\"text/css\" rel=\"stylesheet\"/>\n";
 }
 
 $myts =& MyTextSanitizer::getInstance();

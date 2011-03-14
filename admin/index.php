@@ -343,7 +343,7 @@ function build_form($formid=0) {
 	}
     }
     $ck = empty($data['optvars'])?"":" checked='checked'";
-    $optvars = new XoopsFormLabel(_AM_FORM_OPTIONS, "<script type='text/javascript'>document.write(\"<input type='checkbox' id='optshow' onChange='togle(this);'$ck/> "._AM_OPTVARS_SHOW."\");</script><div id='optvars'>$varform</div>");
+    $optvars = new XoopsFormLabel(_AM_FORM_OPTIONS, "<script type='text/javascript'>document.write(\"<input type='checkbox' id='optshow' onChange='toggle(this);'$ck/> "._AM_OPTVARS_SHOW."\");</script><div id='optvars'>$varform</div>");
     $form->addElement($optvars);
     $submit = new XoopsFormElementTray('');
     $submit->addElement(new XoopsFormButton('' , 'formdefs', _SUBMIT, 'submit'));
@@ -367,7 +367,7 @@ ccFCKeditor.ReplaceTextarea();";
 // display only JavaScript enable
 xoopsGetElementById("itemhelper").style.display = "block";
 '.$editor.'
-function togle(a) {
+function toggle(a) {
     xoopsGetElementById("optvars").style.display = a.checked?"block":"none";
 }
 togle(xoopsGetElementById("optshow"));

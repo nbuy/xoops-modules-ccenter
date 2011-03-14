@@ -1,5 +1,5 @@
 <?php
-// $Id: common.php,v 1.1 2009/07/04 03:54:37 nobu Exp $
+// $Id: common.php,v 1.2 2011/03/14 13:59:17 nobu Exp $
 // common user and admin
 
 // message status

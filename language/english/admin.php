@@ -1,5 +1,5 @@
 <?php
-// $Id: admin.php,v 1.7 2009/11/15 09:51:08 nobu Exp $
+// $Id: admin.php,v 1.8 2011/03/14 13:59:16 nobu Exp $
 
 define('_AM_FORM_EDIT', 'Edit contact form');
 define('_AM_FORM_NEW', 'Create new contact form');
@@ -74,6 +74,4 @@ reply_comment=Add message in auto reply mail
 reply_use_comtpl=Add message to be email template
 others=Other variables ("Name=Value" style)
 ');
-
-include_once dirname(__FILE__)."/common.php";
 ?>

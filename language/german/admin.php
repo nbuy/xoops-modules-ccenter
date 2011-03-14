@@ -1,5 +1,5 @@
 <?php
-// $Id: admin.php,v 1.3 2009/11/15 09:51:08 nobu Exp $
+// $Id: admin.php,v 1.4 2011/03/14 13:59:16 nobu Exp $
 
 define('_AM_FORM_EDIT', 'Edit contact form');
 define('_AM_FORM_NEW', 'Neues Kontaktformular erstellen');
@@ -74,6 +74,4 @@ reply_comment=Nachricht hinzuf«ägen in automatische E-Mail
 reply_use_comtpl=Hinzuf«ägen Nachricht an e-Mail-Vorlage
 others=Andere Variablen ("Name=Value"-Stil)
 ');
-
-include_once dirname(__FILE__)."/common.php";
 ?>

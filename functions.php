@@ -1,6 +1,6 @@
 <?php
 // ccenter common functions
-// $Id: functions.php,v 1.40 2011/03/14 13:59:16 nobu Exp $
+// $Id: functions.php,v 1.41 2011/03/14 14:25:45 nobu Exp $
 
 global $xoopsDB;		// for blocks scope
 // using tables
@@ -573,7 +573,12 @@ function cc_check_perm($data) {
     global $xoopsUser, $xoopsModule;
     $uid = is_object($xoopsUser)?$xoopsUser->getVar('uid'):0;
 
-    $pass = isset($_GET['p'])?$_GET['p']:(empty($_SESSION['onepass'])?"":$_SESSION['onepass']);
+    $pass = isset($_GET['p'])?$_GET['p']:"";
+    if ($pass) {
+	$_SESSION['onepass'] = $pass;
+    } else {
+	$pass = (empty($_SESSION['onepass'])?"":$_SESSION['onepass']);
+    }
     if (!empty($data['onepass']) && $data['onepass']==$pass) return true;
 
     $mid = is_object($xoopsModule)?$xoopsModule->getVar('mid'):0;
@@ -586,8 +591,8 @@ function cc_check_perm($data) {
 
 function cc_get_message($msgid) {
     global $xoopsDB;
-    $res = $xoopsDB->query("SELECT m.*, title FROM ".CCMES." m,".FORMS." WHERE msgid=$com_itemid AND status<>".$xoopsDB->quoteString(_STATUS_DEL)." AND fidref=formid");
- 
+    $res = $xoopsDB->query("SELECT m.*, title FROM ".CCMES." m,".FORMS." WHERE msgid=".(int)$msgid." AND status<>".$xoopsDB->quoteString(_STATUS_DEL)." AND fidref=formid");
+
     $data = $xoopsDB->fetchArray($res);
     if (!cc_check_perm($data)) {
 	redirect_header(XOOPS_URL.'/user.php', 3, _NOPERM);

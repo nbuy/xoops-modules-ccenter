@@ -1,5 +1,5 @@
 <?php
-// $Id: comment_edit.php,v 1.2 2011/03/14 13:59:16 nobu Exp $
+// $Id: comment_edit.php,v 1.3 2011/03/15 13:50:36 nobu Exp $
 //  ------------------------------------------------------------------------ //
 //                XOOPS - PHP Content Management System                      //
 //                    Copyright (c) 2000 XOOPS.org                           //
@@ -28,6 +28,7 @@ include '../../mainfile.php';
 include 'functions.php';
 
 $com_itemid = isset($_GET['com_itemid']) ? intval($_GET['com_itemid']) : 0;
-cc_get_message($com_itemid);
+$com_id = isset($_GET['com_id']) ? intval($_GET['com_id']) : 0;
+cc_get_message(cc_check_comment($com_itemid, $com_id));
 include XOOPS_ROOT_PATH.'/include/comment_edit.php';
 ?>

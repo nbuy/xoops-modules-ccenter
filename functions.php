@@ -1,6 +1,6 @@
 <?php
 // ccenter common functions
-// $Id: functions.php,v 1.41 2011/03/14 14:25:45 nobu Exp $
+// $Id: functions.php,v 1.42 2011/03/15 13:50:36 nobu Exp $
 
 global $xoopsDB;		// for blocks scope
 // using tables
@@ -599,6 +599,13 @@ function cc_get_message($msgid) {
 	exit;
     }
     return $data;
+}
+
+function cc_check_comment($msgid, $com_id) {
+    global $xoopsDB, $xoopsModule;
+    $res = $xoopsDB->query("SELECT com_itemid FROM ".$xoopsDB->prefix('xoopscomments')." WHERE com_id=".(int)$com_id." AND com_itemid=".(int)$msgid." AND com_modid=".$xoopsModule->getVar('mid'));
+    list($com_itemid) = $xoopsDB->fetchRow($res);
+    return $com_itemid;
 }
 
 function cc_onetime_ticket($genseed="mypasswdbasestring") {

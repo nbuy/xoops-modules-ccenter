@@ -1,6 +1,6 @@
 <?php
 // show messages file
-// $Id: message.php,v 1.24 2011/03/14 14:25:45 nobu Exp $
+// $Id: message.php,v 1.25 2011/03/15 14:51:51 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -31,7 +31,9 @@ $breadcrumbs = new XoopsBreadcrumbs(_MD_CCENTER_RECEPTION, 'reception.php');
 
 $add = $pass?"p=".urlencode($pass):"";
 $to_uname = XoopsUser::getUnameFromId($data['touid']);
-$items = get_form_attribute($data['defs']);
+$res = $xoopsDB->query("SELECT * FROM ".FORMS." WHERE formid=".$data['fidref']);
+$form = $xoopsDB->fetchArray($res);
+$items = get_form_attribute($form['defs']);
 $values = cc_display_values(unserialize_text($data['body']), $items, $data['msgid'], $add);
 $data['comment'] = $myts->displayTarea($data['comment']);
 $isadmin = $uid && $xoopsUser->isAdmin($xoopsModule->getVar('mid'));
@@ -44,13 +46,7 @@ if ($isadmin) {
 }
 $breadcrumbs->set($lab.': '.$values[$lab], '');
 $breadcrumbs->assign();
-$has_mail = false;
-foreach ($items as $item) {
-    if ($item['type'] == 'mail') {
-	$has_mail = true;
-	break;
-    }
-}
+$has_mail = !empty($data['email']);
 $xoopsTpl->assign(
     array('subject'=>$title,
 	  'sender'=>xoops_getLinkedUnameFromId($data['uid']),

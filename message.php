@@ -1,6 +1,6 @@
 <?php
 // show messages file
-// $Id: message.php,v 1.26 2011/04/24 09:50:54 nobu Exp $
+// $Id: message.php,v 1.27 2011/04/24 10:31:09 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -29,7 +29,7 @@ include XOOPS_ROOT_PATH."/header.php";
 
 $breadcrumbs = new XoopsBreadcrumbs(_MD_CCENTER_RECEPTION, 'reception.php');
 
-$pass = isset($_GET['p'])$_GET['p']:'';
+$pass = isset($_GET['p'])?$_GET['p']:'';
 $add = $pass?"p=".urlencode($pass):"";
 $to_uname = XoopsUser::getUnameFromId($data['touid']);
 $res = $xoopsDB->query("SELECT * FROM ".FORMS." WHERE formid=".$data['fidref']);

@@ -1,6 +1,6 @@
 <?php
 // ccenter common functions
-// $Id: functions.php,v 1.42 2011/03/15 13:50:36 nobu Exp $
+// $Id: functions.php,v 1.43 2011/04/24 09:50:54 nobu Exp $
 
 global $xoopsDB;		// for blocks scope
 // using tables
@@ -591,7 +591,7 @@ function cc_check_perm($data) {
 
 function cc_get_message($msgid) {
     global $xoopsDB;
-    $res = $xoopsDB->query("SELECT m.*, title FROM ".CCMES." m,".FORMS." WHERE msgid=".(int)$msgid." AND status<>".$xoopsDB->quoteString(_STATUS_DEL)." AND fidref=formid");
+    $res = $xoopsDB->query("SELECT m.*, title, cgroup FROM ".CCMES." m,".FORMS." WHERE msgid=".(int)$msgid." AND status<>".$xoopsDB->quoteString(_STATUS_DEL)." AND fidref=formid");
 
     $data = $xoopsDB->fetchArray($res);
     if (!cc_check_perm($data)) {

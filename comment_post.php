@@ -1,5 +1,5 @@
 <?php
-// $Id: comment_post.php,v 1.4 2007/06/14 05:09:13 nobu Exp $
+// $Id: comment_post.php,v 1.5 2011/04/24 09:50:54 nobu Exp $
 //  ------------------------------------------------------------------------ //
 //                XOOPS - PHP Content Management System                      //
 //                    Copyright (c) 2000 XOOPS.org                           //

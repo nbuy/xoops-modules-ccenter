@@ -175,6 +175,10 @@ Done: c</pre></td><td>the Format as: Display-label: [status1[,status2...]], incl
       <tr class="even"><td class="head">notify_with_email</td><td><u>0</u></td><td>When setting 1 email address include in notification</td></tr>
       <tr class="odd"><td class="head">export_charset</td><td><u>UTF-8</u></td><td>force setting encoding for CSV format file output.</td></tr>
       <tr class="even"><td class="head">redirect</td><td>URI</td><td>Move to page URI when after sending form.</td></tr>
+      <tr class="odd"><td class="head">use_fckeditor</td><td>None</td><td>Using FCKeditor for edit description. Setting values <tt>Basic</tt> or <tt>Default</tt></td></tr>
+      <tr class="even"><td class="head">from_confirm_tpl</td><td><u>form_confirm.tpl</u></td><td>Set reply email template filename.</td></tr>
+      <tr class="odd"><td class="head">charge_notify_tpl</td><td>None</td><td>Notification template filename for person in charge. Default use from_confirm_tpl setting.</td></tr>
+      <tr class="even"><td class="head">group_notify_tpl</td><td>なし</td><td>Notification template filename for groups in charge. Default use from_confirm_tpl setting.</td></tr>
       <tr class="odd"><td class="head">other names</td><td>RegExp</td><td>Input format checking regular expressions
 	  <p>Example: Numeric check <tt>numeric=[-+]?[0-9]+</tt>, Phone Number <tt>tel="\+?[0-9][0-9-,]*[0-9]"</tt><br />Using in Contact form's "Form defunisions" attribute like <tt>check=tel</tt>.</p>
 	  <p>Regular expressions using JavaScript acceptable range. (Server side use perl regexp, but client side use JavaScript)</p>
@@ -235,12 +239,21 @@ Done: c</pre></td><td>the Format as: Display-label: [status1[,status2...]], incl
 
   <a name="changes"></a><h5>Changes</h5>
   <dl>
+  <dt>2011-04-24 ccenter 0.95</dt>
+  <dd>
+    <ul>
+      <li>Fix can not post comment when guest access</li>
+      <li>Fix group in charge access control failer</li>
+      <li>Add documentation for email template in option variables</li>
+    </ul>
+  </dd>
   <dt>2011-03-15 ccenter 0.94</dt>
   <dd>
     <ul>
       <li>Fix security vulnerability (thx Hosiryuhosi)</li>
       <li>Fix conflict with altsys language manager</li>
       <li>Fix malfunction rename module folder</li>
+      <li>Allow replace reply email tamplate by option variable setting</li>
     </ul>
   </dd>
   <dt>2009-11-15 ccenter 0.93</dt>
@@ -418,6 +431,6 @@ Done: c</pre></td><td>the Format as: Display-label: [status1[,status2...]], incl
 <hr/>
 <aliress>Nobuhiro YASUTOMI &lt;<a href="mailto:nobuhiro.yasutomi@nifty.ne.jp">nobuhiro.yasutomi@nifty.ne.jp</a>&gt;</aliress>
 MySite Users <a href="http://myht.org/">http://myht.org/</a><br/>
-$Id: help.html,v 1.17 2011/03/15 13:53:02 nobu Exp $
+$Id: help.html,v 1.18 2011/04/24 09:50:54 nobu Exp $
 </body>
 </html>

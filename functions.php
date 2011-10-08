@@ -1,6 +1,6 @@
 <?php
 // ccenter common functions
-// $Id: functions.php,v 1.43 2011/04/24 09:50:54 nobu Exp $
+// $Id: functions.php,v 1.44 2011/10/08 07:31:23 nobu Exp $
 
 global $xoopsDB;		// for blocks scope
 // using tables
@@ -248,23 +248,6 @@ function assign_post_values(&$items) {
 		$val = $myts->stripSlashesGPC($val);
 	    }
 	}
-	switch ($check) {
-	case '':
-	    break;
-	case 'require':
-	    if ($val==='') $errors[] = $lab.": "._MD_REQUIRE_ERR;
-	    break;
-	case 'mail':
-	    if (!checkEmail($val)) $errors[] = $lab.": "._MD_ADDRESS_ERR;
-	    break;
-	case 'num':
-	    $check='numeric';
-	default:
-	    $v = get_attr_value(null, $check);
-	    if (!empty($v)) $check = $v;
-	    if (!preg_match('/^'.$check.'$/', $val)) $errors[] = $lab.": ".($val?_MD_REGEXP_ERR:_MD_REQUIRE_ERR);
-	    break;
-	}
 	switch ($type) {
 	case 'checkbox':
 	    if (empty($val)) $val = array();
@@ -310,6 +293,23 @@ function assign_post_values(&$items) {
 		    $errors[] = sprintf(_MD_CONF_LABEL, $lab).": "._MD_CONFIRM_ERR;
 		}
 	    }
+	    break;
+	}
+	switch ($check) {
+	case '':
+	    break;
+	case 'require':
+	    if ($val==='') $errors[] = $lab.": "._MD_REQUIRE_ERR;
+	    break;
+	case 'mail':
+	    if (!checkEmail($val)) $errors[] = $lab.": "._MD_ADDRESS_ERR;
+	    break;
+	case 'num':
+	    $check='numeric';
+	default:
+	    $v = get_attr_value(null, $check);
+	    if (!empty($v)) $check = $v;
+	    if (!preg_match('/^'.$check.'$/', $val)) $errors[] = $lab.": ".($val?_MD_REGEXP_ERR:_MD_REQUIRE_ERR);
 	    break;
 	}
 	$items[$key]['value'] = $val;
@@ -435,6 +435,7 @@ function cc_make_widget($item, $vars=null) {
 	    }
 	}
     }
+    if ($type == 'file' && $value) $item['preview'] = cc_attach_image(0, $value, false);
     $item['value'] = $value;
     $tpl=new XoopsTpl;
     $tpl->assign('item', $item);
@@ -978,9 +979,8 @@ function set_checkvalue(&$form) {
 	$type = $item['type'];
 	$lab = htmlspecialchars(strip_tags($item['label']));
 	$check = isset($item['attr']['check'])?$item['attr']['check']:'';
-	if ($type == 'file') {
-	    $hasfile=true;
-	} elseif (preg_match('/_conf$/', $fname)) {
+	if ($type == 'file') $hasfile=true;
+	if (preg_match('/_conf$/', $fname)) {
 	    $confirm[preg_replace('/_conf$/', '', $fname)] = $lab;
 	} elseif (!empty($check)) {
 	    if ($type == 'checkbox') $fname .= '[]';

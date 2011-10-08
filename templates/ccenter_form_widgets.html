@@ -49,7 +49,14 @@
 <{elseif $item.type == "file"}>
 
   <input name="<{$item.field}>" id="<{$item.field}>" type="file" <{if $item.attr.size}> size="<{$item.attr.size}>"<{/if}> />
-  <{$item.value|escape}><input name="<{$item.field}>_prev" type="hidden" value="<{$item.value|escape}>"<{if $item.attr.size}> size="<{$item.attr.size}>"<{/if}> />
+  <div class="cc_prev_file">
+    <{if $item.preview}>
+      <{$item.preview}>
+    <{else}>
+      <{$item.value|escape}>
+    <{/if}>
+    <input name="<{$item.field}>_prev" id="<{$item.field}>_prev" type="hidden" value="<{$item.value|escape}>"<{if $item.attr.size}> size="<{$item.attr.size}>"<{/if}> />
+  </div>
 
 <{elseif $item.type != "javascript"}><{* as text *}>
 
@@ -60,22 +67,26 @@
 <script type="text/javascript">
 <!--//
 function checkItem(obj, lab, pat) {
-  msg = lab+": <{$smarty.const._MD_REQUIRE_ERR}>\n";
-  if (typeof(obj.selectedIndex)=="number" && obj.value != "") return "";
-  if (typeof(obj.length)=="number") {
-     for (i=0; i<obj.length; i++) {
-        if (obj[i].checked) return "";
-     }
-     return msg;
-  }
-  if (obj.value.match(new RegExp('^'+pat+'\$', 'm'))) return "";
-  if (obj.value == "") return msg;
-  return lab+": <{$smarty.const._MD_REGEXP_ERR}>\n";
+   var msg = lab+": <{$smarty.const._MD_REQUIRE_ERR}>\n";
+   if (typeof(obj.selectedIndex)=="number" && obj.value != "") return "";
+   if (typeof(obj.length)=="number") {
+      for (i=0; i<obj.length; i++) {
+	 if (obj[i].checked) return "";
+      }
+      return msg;
+   }
+   if (obj.value.match(new RegExp('^'+pat+'\$', 'm'))) return "";
+   if (obj.type == "file" && obj.value == "") {
+      var prev = xoopsGetElementById(obj.id+"_prev");
+      if (prev != null && prev.value != "") return "";
+   }
+   if (obj.value == "") return msg;
+   return lab+": <{$smarty.const._MD_REGEXP_ERR}>\n";
 }
 function xoopsFormValidate_ccenter() {
-    myform = window.document.ccenter;
-    msg = "";
-    obj = null;
+    var myform = window.document.ccenter;
+    var msg = "";
+    var obj = null;
 
 <{foreach key=name item=val from=$item.checks}>
     msg = msg+checkItem(myform["<{$name}>"], "<{$val.message|escape}>", "<{$val.pattern}>");
@@ -95,7 +106,7 @@ function xoopsFormValidate_ccenter() {
     return false;
 }
 function checkedEtcText(lab) {
-   obj = xoopsGetElementById(lab+"_eck");
+   var obj = xoopsGetElementById(lab+"_eck");
    if (obj) obj.checked=true;
 }
 //-->

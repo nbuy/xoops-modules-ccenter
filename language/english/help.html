@@ -172,6 +172,14 @@ Done: c</pre></td><td>the Format as: Display-label: [status1[,status2...]], incl
       <tr class="odd"><td class="head">maxlength</td><td><u>0</u></td><td>maxlength of text input</td></tr>
       <tr class="even"><td class="head">rows</td><td><u>0</u></td><td>rows number of textarea</td></tr>
       <tr class="odd"><td class="head">cols</td><td><u>0</u></td><td>columns number of textarea</td></tr>
+      <tr class="even"><td class="head">accept_ext</td><td>None</td><td>accept upload file extention in file type input.
+	  <p>Example: <tt>accept_type=jpg|gif|png|xls</tt></p>
+      </td></tr>
+      <tr class="odd"><td class="head">accept_type</td><td>None</td><td>accept upload file type in file type input.
+	  <p>Example: <tt>accept_type=image/jp*g|image/gif|image/png|application/*</tt></p>
+	  <p>Note: <tt>accept_type</tt> and <tt>accept_ext</tt> set same number elements (number of part seperate with '|'), check strict both position match.
+	  </p>
+      </td></tr>
       <tr class="even"><td class="head">notify_with_email</td><td><u>0</u></td><td>When setting 1 email address include in notification</td></tr>
       <tr class="odd"><td class="head">export_charset</td><td><u>UTF-8</u></td><td>force setting encoding for CSV format file output.</td></tr>
       <tr class="even"><td class="head">redirect</td><td>URI</td><td>Move to page URI when after sending form.</td></tr>
@@ -239,6 +247,13 @@ Done: c</pre></td><td>the Format as: Display-label: [status1[,status2...]], incl
 
   <a name="changes"></a><h5>Changes</h5>
   <dl>
+  <dt>2012-01-14 ccenter 0.97</dt>
+  <dd>
+    <ul>
+      <li>fix directory traversal vulnerability (thx Marijuana)</li>
+      <li>Add to check attribute upload file extentin (accept_ext) and mime type(accept_type)</li>
+    </ul>
+  </dd>
   <dt>2011-10-08 ccenter 0.96</dt>
   <dd>
     <ul>
@@ -438,6 +453,6 @@ Done: c</pre></td><td>the Format as: Display-label: [status1[,status2...]], incl
 <hr/>
 <aliress>Nobuhiro YASUTOMI &lt;<a href="mailto:nobuhiro.yasutomi@nifty.ne.jp">nobuhiro.yasutomi@nifty.ne.jp</a>&gt;</aliress>
 MySite Users <a href="http://myht.org/">http://myht.org/</a><br/>
-$Id: help.html,v 1.19 2011/10/08 11:51:41 nobu Exp $
+$Id: help.html,v 1.20 2012/01/14 07:14:33 nobu Exp $
 </body>
 </html>

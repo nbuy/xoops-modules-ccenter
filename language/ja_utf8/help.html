@@ -166,6 +166,14 @@ pre { color: #600000; }
       <tr class="odd"><td class="head">maxlength</td><td><u>0</u></td><td>テキスト入力項目 (input) の入力上限文字数</td></tr>
       <tr class="even"><td class="head">rows</td><td><u>0</u></td><td>テキストエリアの行数</td></tr>
       <tr class="odd"><td class="head">cols</td><td><u>0</u></td><td>テキストエリアの桁数</td></tr>
+      <tr class="even"><td class="head">accept_ext</td><td>なし</td><td>file 型でアップロード可能な拡張子を指定する。
+	  <p>例: <tt>accept_type=jpg|gif|png|xls</tt></p>
+      </td></tr>
+      <tr class="odd"><td class="head">accept_type</td><td>なし</td><td>file 型でアップロード可能なファイルの型を指定する。
+	  <p>例: <tt>accept_type=image/jp*g|image/gif|image/png|application/*</tt></p>
+	  <p>注意: <tt>accept_type</tt> と <tt>accept_ext</tt> の要素数 ('|' で区切られた数) が等しい場合、対応位置の型が一致するか確認される。
+	  </p>
+      </td></tr>
       <tr class="even"><td class="head">notify_with_email</td><td><u>0</u></td><td>1に設定したら問合せ通知メールにメールアドレスを表示する</td></tr>
       <tr class="odd"><td class="head">export_charset</td><td><u>UTF-8</u></td><td>CSV ファイルへ出力する場合のエンコーディングを指定する。</td></tr>
       <tr class="even"><td class="head">redirect</td><td>なし</td><td>フォームの送信後に遷移するページの URLを指定する</td></tr>
@@ -227,6 +235,13 @@ pre { color: #600000; }
 
   <a name="changes"></a><h5>変更履歴</h5>
   <dl>
+  <dt>2012-01-14 ccenter 0.97</dt>
+  <dd>
+    <ul>
+      <li>ディレクトリトラバーサルの静寂性の修正 (thx Marijuana)</li>
+      <li>アップロードファイルの拡張子(accept_ext)、mime型(accept_type)の検査の追加</li>
+    </ul>
+  </dd>
   <dt>2011-10-08 ccenter 0.96</dt>
   <dd>
     <ul>
@@ -426,6 +441,6 @@ pre { color: #600000; }
 <hr/>
 <aliress>安富 伸浩 &lt;<a href="mailto:nobuhiro.yasutomi@nifty.ne.jp">nobuhiro.yasutomi@nifty.ne.jp</a>&gt;</aliress>
 マイサイト ユーザーズ <a href="http://myht.org/">http://myht.org/</a><br/>
-$Id: help.html,v 1.7 2011/10/08 11:51:42 nobu Exp $
+$Id: help.html,v 1.8 2012/01/14 07:14:34 nobu Exp $
 </body>
 </html>

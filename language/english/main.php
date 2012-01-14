@@ -1,5 +1,5 @@
 <?php
-// $Id: main.php,v 1.4 2011/03/14 13:59:16 nobu Exp $
+// $Id: main.php,v 1.5 2012/01/14 07:14:33 nobu Exp $
 
 define('_MD_EVALS','Evaluate');
 define('_MD_COUNT','Count');
@@ -20,6 +20,7 @@ define('_MD_NUMITEM_ERR', 'Please input numbers');
 define('_MD_ADDRESS_ERR', 'Please input EMAIL address');
 define('_MD_REGEXP_ERR', 'Please input correct format');
 define('_MD_CONFIRM_ERR', 'Input value is mismatched');
+define('_MD_UPLOADFILE_ERR', 'Upload file type not accepted');
 
 define('_MD_CCENTER_CHARGE','Contact for me');
 define('_MD_CCENTER_QUERY','My Messages');

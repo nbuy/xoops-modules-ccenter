@@ -1,6 +1,6 @@
 <?php
 // ccenter common functions
-// $Id: functions.php,v 1.44 2011/10/08 07:31:23 nobu Exp $
+// $Id: functions.php,v 1.45 2012/01/14 07:14:32 nobu Exp $
 
 global $xoopsDB;		// for blocks scope
 // using tables
@@ -53,7 +53,8 @@ define('_CC_TPL_FRAME', 3);	// obsolete
 define('_CC_TPL_NONE_HTML', 4);
 
 define('LABEL_ETC', '*');	// radio, checkbox widget 'etc' text input.
-define('OPTION_ATTRS', 'size,rows,maxlength,cols,prop,notify_with_email');
+define('OPTION_NUM_ATTRS', 'size|maxlength|rows|cols');
+define('OPTION_STR_ATTRS', 'prop|notify_with_email|accept_ext|accept_type');
 
 // attribute config option expanding
 function get_attr_value($pri, $name=null, $value=null) {
@@ -62,7 +63,7 @@ function get_attr_value($pri, $name=null, $value=null) {
     if ($name && is_array($pri) && isset($pri[$name])) return $pri[$name];
     if (!isset($defs)) {
 	$defs = array('numeric'=>'[-+]?[0-9]+', 'tel'=>'\+?[0-9][0-9-,]*[0-9]');
-	foreach (explode(',', OPTION_ATTRS) as $key) {
+	foreach (explode('|', OPTION_NUM_ATTRS) as $key) {
 	    $defs[$key] = 0;
 	}
 	// override module config values
@@ -177,7 +178,7 @@ function get_form_attribute($defs, $labels='', $prefix="cc") {
 	    $name = preg_replace('/\s*\*$/', '', $name);
 	    if (defined('_MD_REQUIRE_MARK')) $label = preg_replace('/\s*\*$/', _MD_REQUIRE_MARK, $label);
 	}
-	while (isset($opts[0]) && (preg_match('/^(size|rows|maxlength|cols|prop)=(\d+)$/', $opts[0], $d) || preg_match('/^(check)=(.+)$/', $opts[0], $d))) {
+	while (isset($opts[0]) && (preg_match('/^('.OPTION_NUM_ATTRS.')=(\d+)$/', $opts[0], $d) || preg_match('/^('.OPTION_STR_ATTRS.')=(.+)$/', $opts[0], $d))) {
 	    array_shift($opts);
 	    $attr[$d[1]] = $d[2];
 	}
@@ -211,13 +212,17 @@ function get_form_attribute($defs, $labels='', $prefix="cc") {
 	}
 	if ($type=='date') {
 	    if (empty($defs)) $defs = formatTimestamp(time(), 'Y-m-d');
-	} elseif ($type=='textarea') {
-	    $attr['rows'] = get_attr_value($attr, 'rows');
-	    $attr['cols'] = get_attr_value($attr, 'cols');
 	} else {
-	    $attr['size'] = get_attr_value($attr, 'size');
+	    // widget specific attrs
+	    static $wattr = array('textarea'=>array('rows','cols'), 'file'=>array('accept_type', 'accept_ext'));
+	    if (isset($wattr[$type])) {
+		foreach ($wattr[$type] as $aname) {
+		    $attr[$aname] = get_attr_value($attr, $aname);
+		}
+	    } else {
+		$attr['size'] = get_attr_value($attr, 'size');
+	    }
 	}
-
 	$fname = $prefix.++$num;
 	$result[$name] = array(
 	    'name'=>$name, 'label'=>$label, 'field'=>$fname,
@@ -225,6 +230,11 @@ function get_form_attribute($defs, $labels='', $prefix="cc") {
 	    'attr'=>$attr, 'default'=>$defs);
     }
     return $result;
+}
+
+// wildcard pattern translate to reguler expression
+function preg_wildcard($pat) {
+    return str_replace(array('*', '?', '/'),array('.*', '.', '\/'), $pat);
 }
 
 function assign_post_values(&$items) {
@@ -266,18 +276,39 @@ function assign_post_values(&$items) {
 	    $val = eval_user_value(join(',', $item['options']));
 	    break;
 	case 'file':
-	    $val = '';		// filename
 	    $upfile = isset($_FILES[$name])?$_FILES[$name]:array('name'=>'');
+
+	    $fname = $upfile['name'];
+	    $exts = preg_wildcard(get_attr_value($attr, 'accept_ext'));
+	    $types = preg_wildcard(get_attr_value($attr, 'accept_type'));
+	    if ($exts && $fname) {
+		if (!preg_match("/\\.($exts)\$/", $fname, $d)) {
+		    $errors[] = $lab.": ". _MD_UPLOADFILE_ERR;
+		} elseif ($types) {
+		    $aexts = explode('|', $exts);
+		    $nth = array_search($d[1], $exts, $ext);
+		    $atypes = explode('|', $types);
+		    // same count accept to check strict
+		    if (count($aexts) == count($atypes)) $types = $atypes[$nth];
+		}
+	    }
+	    $tmpfile = $upfile['tmp_name'];
+	    if ($types && $tmpfile) {
+		$ftype = cc_mime_content_type($tmpfile);
+		if (!preg_match('/^('.$types.')$/', $ftype)) $errors[] = $lab.": ". _MD_UPLOADFILE_ERR;
+	    }
+
+	    $val = '';		// filename
 	    if (isset($_POST[$name."_prev"])) {
 		$val = $myts->stripSlashesGPC($_POST[$name."_prev"]);
-		if (!empty($upfile['name'])) {
+		if (!empty($fname)) {
 		    unlink(XOOPS_UPLOAD_PATH.cc_attach_path(0, $val));
 		    $val = '';
 		}
 	    }
 	    if (empty($val)) {
-		$val = $upfile['name'];
-		if ($val) move_attach_file($upfile['tmp_name'], $val);
+		$val = $fname;
+		if ($val) move_attach_file($tmpfile, $val);
 		elseif (isset($_POST[$name])) {	// confirm
 		    $val = $myts->stripSlashesGPC($_POST[$name]);
 		}
@@ -360,7 +391,7 @@ function assign_form_widgets(&$items, $conf=false) {
 		}
 	    }
 	} else {
-	    $input = cc_make_widget($item);
+  	    $input = cc_make_widget($item);
 	    if ($mconf && isset($item['type']) && $item['type']=='mail' &&
 		isset($item['attr']['check'])&& $item['attr']['check']=='require') {
 		$cfname = $fname.'_conf';
@@ -534,7 +565,7 @@ if (!function_exists("template_dir")) {
 function cc_attach_path($id, $file) {
     $dirname = basename(dirname(__FILE__));
     $dir = $id?sprintf("%05d", $id):"work".substr(session_id(), 0, 8);
-    return "/$dirname/$dir".($file?"/$file":"");
+    return "/$dirname/$dir".($file?"/".basename($file):"");
 }
 
 function cc_attach_image($id, $file, $urlonly=false, $add='') {
@@ -813,7 +844,7 @@ function myTimestamp($t, $fmt="l", $unit="%dmin,%dhour,%dday,past %s") {
     if ($past > PAST_TIME_DAY) {
 	return formatTimestamp($t, $fmt);
     }
-    $units = split(',', $unit);
+    $units = explode(',', $unit);
     if ($past < PAST_TIME_MIN) {
 	$ret = sprintf($units[0], intval($past/60));
     } elseif ($past < PAST_TIME_HOUR) {
@@ -1061,5 +1092,16 @@ class XoopsBreadcrumbs {
 	return $xoopsTpl->assign('xoops_breadcrumbs', $this->get());
     }
 
+}
+
+function cc_mime_content_type($path) {
+    if (function_exists('finfo_file')) {
+	$finfo = finfo_open(FILEINFO_MIME_TYPE);
+	$ret = finfo_file($finfo, $path);
+	finfo_close($finfo);
+	return $ret;
+    } else {	// for backword compatible
+	return mime_content_type($path);
+    }
 }
 ?>

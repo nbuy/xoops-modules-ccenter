@@ -1,5 +1,5 @@
 <?php
-// $Id: main.php,v 1.2 2011/03/14 13:59:17 nobu Exp $
+// $Id: main.php,v 1.3 2012/01/14 07:14:35 nobu Exp $
 
 define('_MD_EVALS','評価');
 define('_MD_COUNT','件数');
@@ -20,6 +20,7 @@ define('_MD_NUMITEM_ERR', '数値を入力してください。');
 define('_MD_ADDRESS_ERR', 'メールアドレスを入力してください');
 define('_MD_REGEXP_ERR', '正しい書式で入力してください');
 define('_MD_CONFIRM_ERR', '内容が一致しません');
+define('_MD_UPLOADFILE_ERR', 'アップロードファイルの形式が不正です');
 
 define('_MD_CCENTER_CHARGE','担当問合せ');
 define('_MD_CCENTER_QUERY','あなたの問合せ');

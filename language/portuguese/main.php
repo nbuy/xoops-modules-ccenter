@@ -1,5 +1,5 @@
 <?php
-// $Id: main.php,v 1.3 2011/03/14 13:59:17 nobu Exp $
+// $Id: main.php,v 1.4 2012/01/14 07:14:35 nobu Exp $
 // Traduzido para o Portugues do Brasil por: Miraldo Antoninho Ohse (m_ohse@hotmail.com).
 
 define('_MD_EVALS','Avaliação');
@@ -21,6 +21,7 @@ define('_MD_NUMITEM_ERR', 'Por favor, informe números');
 define('_MD_ADDRESS_ERR', 'Por favor, informe o endereço de e-mail');
 define('_MD_REGEXP_ERR', 'Por favor, informe o formato correto');
 define('_MD_CONFIRM_ERR', 'O valor informado é inadequado');
+define('_MD_UPLOADFILE_ERR', 'Upload de tipo de arquivo não aceito');
 
 define('_MD_CCENTER_CHARGE','Contato para mim');
 define('_MD_CCENTER_QUERY','Minhas mensagens');

@@ -1,5 +1,5 @@
 <?php
-// $Id: admin.php,v 1.8 2011/03/14 13:59:16 nobu Exp $
+// $Id: admin.php,v 1.9 2012/01/21 16:55:16 nobu Exp $
 
 define('_AM_FORM_EDIT', 'Edit contact form');
 define('_AM_FORM_NEW', 'Create new contact form');
@@ -46,6 +46,7 @@ define('_AM_MSG_STATUS', 'Status');
 define('_AM_MSG_CHARGE', 'Charge');
 define('_AM_MSG_FROM', 'From');
 define('_AM_MSG_COMMS', 'Comments');
+define('_AM_MSG_VALUE', 'Evaluate');
 
 define('_AM_MSG_WAIT', 'Wait');
 define('_AM_MSG_WORK', 'Work');

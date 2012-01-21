@@ -103,7 +103,7 @@ case 'delete':
     $res=$xoopsDB->query("SELECT title FROM ".FORMS." WHERE formid=".$formid);
     list($title) = $xoopsDB->fetchRow($res);
     xoops_confirm(array('op'=>'delform', 'formid'=>$formid), '',
-		  _AM_DELETE_FORM.' - '.htmlspecialchars($title)." (ID:$formid)",
+		  _AM_DELETE_FORM.' - '.htmlspecialchars($title, ENT_QUOTES )." (ID:$formid)",
 		  _DELETE);
     break;
 default:
@@ -154,7 +154,7 @@ FROM ".FORMS." LEFT JOIN ".CCMES." ON fidref=formid AND status<>'x' GROUP BY for
     $groups = $member_handler->getGroupList(new Criteria('groupid', XOOPS_GROUP_ANONYMOUS, '!='));
     while ($data = $xoopsDB->fetchArray($res)) {
 	$id = $data['formid'];
-	$title = htmlspecialchars($data['title']);
+	$title = htmlspecialchars($data['title'], ENT_QUOTES );
 	$url = "$mbase?form=$id";
 	$priuid = $data['priuid'];
 	$form = $url;
@@ -211,7 +211,7 @@ function build_form($formid=0) {
 	$items = get_form_attribute($data['defs']);
 	assign_form_widgets($items);
 	if ($_POST['preview']) {
-	    echo "<h2>"._PREVIEW." : ".htmlspecialchars($data['title'])."</h2>\n";
+	    echo "<h2>"._PREVIEW." : ".htmlspecialchars($data['title'], ENT_QUOTES )."</h2>\n";
 	    echo "<div class='preview'>\n";
 	    $data['action'] = '';
 	    $data['check_script'] = "";

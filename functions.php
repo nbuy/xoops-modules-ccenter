@@ -1,6 +1,6 @@
 <?php
 // ccenter common functions
-// $Id: functions.php,v 1.45 2012/01/14 07:14:32 nobu Exp $
+// $Id: functions.php,v 1.46 2012/01/21 16:55:15 nobu Exp $
 
 global $xoopsDB;		// for blocks scope
 // using tables
@@ -812,7 +812,7 @@ function cc_log_message($formid, $comment, $msgid=0) {
     global $xoopsDB, $xoopsUser;
     $uid = is_object($xoopsUser)?$xoopsUser->getVar('uid'):0;
     $now = time();
-    $xoopsDB->queryF("INSERT INTO ".CCLOG."(ltime, fidref, midref, euid, comment)VALUES($now, $formid, $msgid, $uid, ".$xoopsDB->quoteString(preg_replace('/\n/', ", ", $comment)).")");
+    $xoopsDB->queryF("INSERT INTO ".CCLOG."(ltime, fidref, midref, euid, comment)VALUES($now, $formid, $msgid, $uid, ".$xoopsDB->quoteString($comment).")");
     if ($msgid) {
 	$msgurl = XOOPS_URL."/modules/".basename(dirname(__FILE__))."/message.php?id=$msgid";
 	$res = $xoopsDB->query("SELECT title FROM ".FORMS." WHERE formid=".$formid);
@@ -1077,7 +1077,7 @@ class XoopsBreadcrumbs {
 
     function set($name, $url) {
 	if (preg_match('/^\w+:\/\//', $url)) $url = $this->moddir.$url;
-	$this->pairs[] = array('name'=>htmlspecialchars(strip_tags($name), ENT_QUOTES), 'url'=>$url);
+	$this->pairs[] = array('name'=>htmlspecialchars($name, ENT_QUOTES), 'url'=>$url);
     }
 
     function get() {

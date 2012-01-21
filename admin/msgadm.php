@@ -10,7 +10,7 @@ $op = isset($_REQUEST['op'])?$myts->stripSlashesGPC($_REQUEST['op']):'';
 
 if (isset($_POST['store'])) {
     $msgid = intval($_POST['msgid']);
-    $touid = intval($_POST['touid']);
+    $touid = 0;
     $stat = $myts->stripSlashesGPC($_POST['status']);
     $res = $xoopsDB->query("SELECT * FROM ".CCMES." WHERE msgid=".$msgid);
     $back = isset($_SERVER['HTTP_REFERER'])?$_SERVER['HTTP_REFERER']:"msgadm.php";
@@ -18,16 +18,24 @@ if (isset($_POST['store'])) {
 	$data = $xoopsDB->fetchArray($res);
 	$sets = array();
 	$log = '';
-	if ($data['status'] != $stat) {
-	    $sets[] = 'status='.$xoopsDB->quoteString($stat);
-	    $log .= sprintf(_CC_LOG_STATUS, $msg_status[$data['status']], $msg_status[$stat]);
-	}
-	if ($data['touid'] != $touid) {
-	    $sets[] = 'touid='.$touid;
-	    if ($log) $log .= "\n";
-	    $log .= sprintf(_CC_LOG_TOUSER, ccUname($data['touid']), ccUname($touid));
-	} else {
-	    $touid = 0;		// not changed
+	$invalues = array('status'=>_AM_MSG_STATUS, 'touid'=>_AM_MSG_CHARGE,
+			  'value'=>_AM_MSG_VALUE, 'comment'=>_AM_MSG_COMMS);
+	foreach ($invalues as $k=>$lab) {
+	    $v = in_array($k, array('touid', 'value'))?(int)$_POST[$k]:$myts->stripSlashesGPC($_POST[$k]);
+	    if ($v != $data[$k]) {	// change value
+		$sets[] = $k.'='.$xoopsDB->quoteString($v);
+		if ($log) $log .= "\n";
+		switch ($k) {	// special edit field
+		case 'status':
+		    $log .= sprintf(_CC_LOG_STATUS, $msg_status[$data['status']], $msg_status[$v]);
+		    break;
+		case 'touid':
+		    $log .= sprintf(_CC_LOG_TOUSER, ccUname($data['touid']), ccUname($touid = $v));
+		    break;
+		default:
+		    $log .= sprintf(_CC_LOG_VALUE, $lab, $data[$k], $v);
+		}
+	    }
 	}
 	if (count($sets)) {
 	    $sets[] = 'mtime='.time();
@@ -70,7 +78,7 @@ function msg_list() {
 		  'fidref'=>_AM_FORM_TITLE, 'cfrom'=>_AM_MSG_FROM,
 		  'uname'=>_AM_MSG_CHARGE, 'comms'=>_AM_MSG_COMMS,
 		  'ope'=>_AM_OPERATION);
-    $orders=array('mtime'=>'ASC', 'fidref'=>'ASC', 'uname'=>'ASC',
+    $orders=array('mtime'=>'DESC', 'fidref'=>'ASC', 'uname'=>'ASC',
 		  'status'=>'ASC', 'uid'=>'ASC', 'orders'=>array('mtime'));
 
     $listctrl = new ListCtrl('msgadm', $orders);
@@ -92,7 +100,7 @@ LEFT JOIN $users u ON touid=u.uid LEFT JOIN $users f ON m.uid=f.uid";
 
     $res = $xoopsDB->query("SELECT count(msgid) $sql0 $sql2");
     list($total) = $xoopsDB->fetchRow($res);
-    $args = $formid?"formid=$formid":"";
+    $args = preg_replace('/\\b&?start=\\d+/', '', $_SERVER['QUERY_STRING']);
     $nav = new XoopsPageNav($total, $max, $start, "start", $args);
 
     $res = $xoopsDB->query("SELECT m.*,title,u.uname, f.uname cfrom, count(com_id) comms $sql0 $sql1 $sql2 GROUP BY msgid".$listctrl->sqlorder(), $max, $start);
@@ -100,9 +108,9 @@ LEFT JOIN $users u ON touid=u.uid LEFT JOIN $users f ON m.uid=f.uid";
     echo "<h2>"._AM_MSG_ADMIN."</h2>\n";
     echo "<table class='ccinfo' width='100%'>\n<tr><td width='30%'>"._AM_MSG_COUNT." $total</td>\n";
     echo "<td align='center'>".$nav->renderNav()."</td>\n";
-    echo "<td align='right' width='30%'>
+    echo "<td align='right' width='30%' nowrap='nowrap'>
   <form method='get'>"._SEARCH."
-    <input name='q' value=\"".htmlspecialchars($search).'" size="8" /> &nbsp; '.
+    <input name='q' value=\"".htmlspecialchars($search, ENT_QUOTES ).'" size="8" /> &nbsp; '.
 	_CC_STATUS." ".$listctrl->renderStat()."
       <noscript> <input type='submit' type='submit' value='"._AM_SUBMIT_VIEW."'></noscript>
   </form>
@@ -114,11 +122,12 @@ LEFT JOIN $users u ON touid=u.uid LEFT JOIN $users f ON m.uid=f.uid";
 	echo "<form method='post' name='msglist'>\n";
 	echo "<table class='outer' border='0' cellspacing='1'>\n";
 	echo "<tr><th><input type='checkbox' id='checkall' name='checkall' onClick='xoopsCheckAll(\"msglist\", \"checkall\");'/>";
+	$args = preg_replace('/\\b&?\w{3,}=(asc|desc)/', '', $args);
 	foreach ($listctrl->getLabels($labels) as $lab) {
 	    if (isset($lab['value'])) {
 		$extra = empty($lab['extra'])?'':$lab['extra'];
-		$args = $lab['name']."=".$lab['next'];
-		$anc = " <a href='?$args' title='"._CC_SORT_ORDER."'$extra><img src='../images/".$lab['value'].".gif'></a>";
+		$sargs = ($args?"$args&":'').$lab['name']."=".$lab['next'];
+		$anc = " <a href='?$sargs' title='"._CC_SORT_ORDER."'$extra><img src='../images/".$lab['value'].".gif'></a>";
 	    } else $anc = '';
 		
 	    echo "<th>".$lab['text']."$anc</th>\n";
@@ -135,14 +144,14 @@ LEFT JOIN $users u ON touid=u.uid LEFT JOIN $users f ON m.uid=f.uid";
 	}
 	while ($data = $xoopsDB->fetchArray($res)) {
 	    $id = $data['msgid'];
-	    $title = easiestml(htmlspecialchars($data['title']));
+	    $title = easiestml(htmlspecialchars($data['title'], ENT_QUOTES ));
 	    $stat = $data['status'];
 	    $url = "$mbase/message.php?id=$id";
 	    $msg = $url.($data['touid']<0?"&amp;uid=".$xoopsUser->getVar('uid'):"");
 	    $bg = $n++%2?'even':'odd';
 	    $date = myTimestamp($data['mtime'], "m", _AM_TIME_UNIT);
-	    $priuname = empty($data['uname'])?_AM_FORM_PRIM_NONE:htmlspecialchars($data['uname']);
-	    $from = empty($data['uid'])?$data['email']:htmlspecialchars($data['cfrom']);
+	    $priuname = empty($data['uname'])?_AM_FORM_PRIM_NONE:htmlspecialchars($data['uname'] , ENT_QUOTES );
+	    $from = empty($data['uid'])?$data['email']:htmlspecialchars($data['cfrom'] , ENT_QUOTES );
 	    $box = "<input type='checkbox' name='ids[]' value='$id'/>";
 	    $ope = "<a href='$msg'>"._AM_DETAIL."</a>";
 	    $ope .= " | <a href='?msgid=$id'>"._EDIT."</a>";
@@ -153,6 +162,7 @@ LEFT JOIN $users u ON touid=u.uid LEFT JOIN $users f ON m.uid=f.uid";
 		$fval = preg_replace('/\.\.\.$/', '', $fval);
 		$fval = $strcut($fval, 0, $slen)."...";
 	    }
+	    $fval = htmlspecialchars($fval, ENT_QUOTES );
 	    $readit = $data['mtime']<$data['atime']?_CC_MARK_READIT:'';
 	    echo "<tr class='$bg stat$stat'><td align='center'>$box</td><td>$date</td><td>".$msg_status[$stat].$readit."</td><td>$title: $fval</td><td>$from</td><td>$priuname</td><td class='num'>".$data['comms']."</td><td>$ope</td></tr>\n";
 	}
@@ -190,7 +200,8 @@ function msg_detail($msgid) {
     $data['mdate'] = myTimestamp($data['mtime'], 'm', _AM_TIME_UNIT);
     $labs = array('title'=>_AM_FORM_TITLE, 'uid'=>_AM_MSG_FROM,
 		  'stat'=>_AM_MSG_STATUS, 'cdate'=>_AM_MSG_CTIME, 
-		  'mdate'=>_AM_MSG_MTIME, 'uname'=>_AM_MSG_CHARGE);
+		  'mdate'=>_AM_MSG_MTIME, 'uname'=>_AM_MSG_CHARGE,
+		  'value'=>_AM_MSG_VALUE, 'comment'=>_AM_MSG_COMMS);
     $touid = false;
     echo "<h2>"._AM_MSG_ADMIN."</h2>\n";
     echo "<form method='post'>\n";
@@ -200,17 +211,17 @@ function msg_detail($msgid) {
     $upage = "../message.php?id=$msgid";
     foreach ($labs as $k=>$lab) {
 	$bg = ($n++%2)?'even':'odd';
-	$val = htmlspecialchars($data[$k]);
+	$val = htmlspecialchars($data[$k], ENT_QUOTES );
 	switch($k) {
 	case 'title':
 	    $val = "<a href='$upage'>$val</a>\n";
 	    break;
 	case 'uid':
 	    if ($val>0) {
-		$val = "<a href='".XOOPS_URL."/userinfo.php?uid=$val'>".htmlspecialchars($data['cfrom'])."</a>";
+		$val = "<a href='".XOOPS_URL."/userinfo.php?uid=$val'>".htmlspecialchars($data['cfrom'], ENT_QUOTES )."</a>";
 	    } else {
 		if ($data['email']) {
-		    $val = htmlspecialchars($data['email']);
+		    $val = htmlspecialchars($data['email'], ENT_QUOTES );
 		    $val = "<a href='mailto:$val'>$val</a>";
 		} else {
 		    $val = _CC_USER_NONE;
@@ -227,6 +238,12 @@ function msg_detail($msgid) {
 	    $touid->addOptionUsers($gid);
 	    $val = $touid->render()."\n<input type='hidden' name='cgroup' id='cgroup' value='$gid'/>\n";
 	    break;
+	case 'value':
+	    $val = "<input name='$k' size='4' value='$val'/>";
+	    break;
+	case 'comment':
+	    $val = "<textarea name='$k' cols='50' rows='4'>$val</textarea>";
+	    break;
 	default:
 	}
 	echo "<tr><th>$lab</th><td>$val</td></tr>\n";
@@ -241,8 +258,8 @@ function msg_detail($msgid) {
     $n = 0;
     foreach (unserialize_text($data['body']) as $k=>$v) {
 	$bg = $n++%2?'even':'odd';
-	$k = htmlspecialchars($k);
-	$v = nl2br(htmlspecialchars($v));
+	$k = htmlspecialchars($k, ENT_QUOTES );
+	$v = nl2br(htmlspecialchars($v, ENT_QUOTES ));
 	echo "<tr><td class='head'>$k</td><td class='$bg'>$v</td></tr>\n";
     }
     echo "</table>\n";
@@ -257,7 +274,7 @@ function msg_detail($msgid) {
 	$reg = array('/\(comid=(\d+)\)/');
 	$rep = array('(<a href="'.$upage.'#comment\1">comid=\1</a>)');
 	while ($data = $xoopsDB->fetchArray($res)) {
-	    $uname = htmlspecialchars(empty($data['uname'])?$anon:$data['uname']);
+	    $uname = htmlspecialchars(empty($data['uname'])?$anon:$data['uname'], ENT_QUOTES );
 	    $comment = preg_replace($reg, $rep,
 				    $myts->displayTarea($data['comment']));
 	    echo "<tr><td nowrap>".formatTimestamp($data['ltime'])."</td><td nowrap>".

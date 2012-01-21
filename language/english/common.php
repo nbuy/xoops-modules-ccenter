@@ -1,5 +1,5 @@
 <?php
-// $Id: common.php,v 1.3 2008/06/15 13:57:15 nobu Exp $
+// $Id: common.php,v 1.4 2012/01/21 16:55:16 nobu Exp $
 // common user and admin
 
 // message status
@@ -17,6 +17,7 @@ define('_CC_USER_NONE','None');
 define('_CC_FORM_PRIM_GROUP', 'Member [%s]');
 define('_CC_LOG_STATUS','Status: from "%s" to "%s"');
 define('_CC_LOG_TOUSER','Charge: from "%s" to "%s"');
+define('_CC_LOG_VALUE','Modify %s: from "%s" to "%s"');
 define('_CC_LOG_COMMENT','Post comment');
 define('_CC_LOG_BYCHARGE',':charge');
 define('_CC_NOTIFY_SUBJ','{X_SITENAME}:{SUBJECT}');

@@ -1,6 +1,6 @@
 <?php
 // show messages file
-// $Id: message.php,v 1.27 2011/04/24 10:31:09 nobu Exp $
+// $Id: message.php,v 1.28 2012/01/21 16:55:15 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -35,17 +35,18 @@ $to_uname = XoopsUser::getUnameFromId($data['touid']);
 $res = $xoopsDB->query("SELECT * FROM ".FORMS." WHERE formid=".$data['fidref']);
 $form = $xoopsDB->fetchArray($res);
 $items = get_form_attribute($form['defs']);
-$values = cc_display_values(unserialize_text($data['body']), $items, $data['msgid'], $add);
+$raws = unserialize_text($data['body']);
+$values = cc_display_values($raws, $items, $data['msgid'], $add);
 $data['comment'] = $myts->displayTarea($data['comment']);
 $isadmin = $uid && $xoopsUser->isAdmin($xoopsModule->getVar('mid'));
 $title = $data['title'];
-list($lab) = array_keys($values);
 if ($isadmin) {
     $breadcrumbs->set($title, "reception.php?form=".$data['fidref']);
 } else {
     $breadcrumbs->set($title, "index.php?form=".$data['fidref']);
 }
-$breadcrumbs->set($lab.': '.$values[$lab], '');
+list($lab) = array_keys($raws);
+$breadcrumbs->set($lab.': '.$raws[$lab], '');
 $breadcrumbs->assign();
 $has_mail = !empty($data['email']);
 $xoopsTpl->assign(

@@ -1,5 +1,5 @@
 <?php
-// $Id: common.php,v 1.2 2009/07/07 12:00:42 nobu Exp $
+// $Id: common.php,v 1.3 2012/01/21 16:55:16 nobu Exp $
 // common user and admin
 // Traduzido para o Portugues do Brasil por: Miraldo Antoninho Ohse (m_ohse@hotmail.com).
 
@@ -16,10 +16,11 @@ define('_CC_SORT_ORDER','Ordenação');
 define('_CC_USER_NONE','Nenhuma');
 
 define('_CC_FORM_PRIM_GROUP', 'Membro [%s]');
-define('_CC_LOG_STATUS','Status: de "%s" para "%s"');
-define('_CC_LOG_TOUSER','charge: de "%s" para "%s"');
+define('_CC_LOG_STATUS','Estado: de "%s" para "%s"');
+define('_CC_LOG_TOUSER','Carga: de "%s" para "%s"');
+define('_CC_LOG_VALUE','Modificar %s: de "%s" para "%s"');
 define('_CC_LOG_COMMENT','Postar comentário');
-define('_CC_LOG_BYCHARGE',':charge');
+define('_CC_LOG_BYCHARGE',':Carga');
 define('_CC_NOTIFY_SUBJ','{X_SITENAME}:{SUBJECT}');
 
 define('_CC_EXPORT_THIS_MONTH','Neste mês');

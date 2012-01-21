@@ -1,6 +1,6 @@
 <?php
 // query group users
-// $Id: getusers.php,v 1.2 2007/08/03 05:25:37 nobu Exp $
+// $Id: getusers.php,v 1.3 2012/01/21 16:55:15 nobu Exp $
 
 include '../../../include/cp_header.php';
 include_once 'mypagenav.php';
@@ -12,7 +12,7 @@ $max = _CC_MAX_USERS;
 $total = cc_group_users($group, $max, $start, true);
 
 foreach (cc_group_users($group, $max, $start) as $uid=>$uname) {
-    echo "$uid,".htmlspecialchars($uname)."\n";
+    echo "$uid,".htmlspecialchars($uname, ENT_QUOTES )."\n";
 }
 
 echo "<!---->\n";

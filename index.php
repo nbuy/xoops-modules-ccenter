@@ -1,6 +1,6 @@
 <?php
 // contact to member
-// $Id: index.php,v 1.28 2011/10/08 11:18:49 nobu Exp $
+// $Id: index.php,v 1.29 2012/01/21 16:55:15 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -88,7 +88,7 @@ $action = "index.php?form=".$form['formid'];
 if (!empty($form['priuser'])) $action .= '&amp;uid='.$form['priuser']['uid'];
 $form['action'] = $action;
 
-$title = htmlspecialchars($form['title']);
+$title = htmlspecialchars($form['title'], ENT_QUOTES);
 $breadcrumbs->set($title, "index.php?form=$id");
 
 

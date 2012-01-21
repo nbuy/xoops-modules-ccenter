@@ -69,7 +69,7 @@
       <td><{$msg.stat}><{if $msg.mtime<$msg.atime}><{$smarty.const._CC_MARK_READIT}><{/if}></td>
       <td><{$msg.uname}></td>
     <{foreach from=$msg.values item=val name=vals}>
-      <td><{$val}></td>
+      <td><{$val|escape}></td>
     <{/foreach}>
     <{/foreach}>
     </tr>

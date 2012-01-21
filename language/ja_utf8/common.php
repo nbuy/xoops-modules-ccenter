@@ -1,5 +1,5 @@
 <?php
-// $Id: common.php,v 1.2 2011/03/14 13:59:17 nobu Exp $
+// $Id: common.php,v 1.3 2012/01/21 16:55:16 nobu Exp $
 // common user and admin
 
 // message status
@@ -17,6 +17,7 @@ define('_CC_USER_NONE','未定義');
 define('_CC_FORM_PRIM_GROUP', 'メンバ [%s]');
 define('_CC_LOG_STATUS','状態を変更: "%s" → "%s"');
 define('_CC_LOG_TOUSER','担当者の変更: "%s" → "%s"');
+define('_CC_LOG_VALUE','%sの変更: "%s" → "%s"');
 define('_CC_LOG_COMMENT','コメント投稿');
 define('_CC_LOG_BYCHARGE',':担当者');
 define('_CC_NOTIFY_SUBJ','{X_SITENAME}:{SUBJECT}');

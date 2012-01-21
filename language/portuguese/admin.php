@@ -1,5 +1,5 @@
 <?php
-// $Id: admin.php,v 1.6 2011/03/14 13:59:17 nobu Exp $
+// $Id: admin.php,v 1.7 2012/01/21 16:55:16 nobu Exp $
 // Traduzido para o Portugues do Brasil por: Miraldo Antoninho Ohse (m_ohse@hotmail.com).
 
 define('_AM_FORM_EDIT', 'Editar o formulário de contato');
@@ -47,6 +47,7 @@ define('_AM_MSG_STATUS', 'Status');
 define('_AM_MSG_CHARGE', 'Mudar');
 define('_AM_MSG_FROM', 'De');
 define('_AM_MSG_COMMS', 'Comentários');
+define('_AM_MSG_VALUE', 'Avaliar');
 
 define('_AM_MSG_WAIT', 'Aguardar');
 define('_AM_MSG_WORK', 'Em análise');

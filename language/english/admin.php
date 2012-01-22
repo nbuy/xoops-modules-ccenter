@@ -1,5 +1,5 @@
 <?php
-// $Id: admin.php,v 1.9 2012/01/21 16:55:16 nobu Exp $
+// $Id: admin.php,v 1.10 2012/01/22 09:22:18 nobu Exp $
 
 define('_AM_FORM_EDIT', 'Edit contact form');
 define('_AM_FORM_NEW', 'Create new contact form');
@@ -73,6 +73,12 @@ define('_AM_OPTVARS_LABEL','notify_with_email=Notify dispaly email address
 redirect=Redirect page after submit
 reply_comment=Add message in auto reply mail
 reply_use_comtpl=Add message to be email template
+input_mail_confirm=Use confirm input for email address
+input_mail_login=Login user input email address
+accept_ext=Accept upload file extensions (Example: <tt>pdf|doc|jpg</tt>)
+accept_type=Accept upload file mime types (Example: <tt>application/pdf|image/*</tt>)
 others=Other variables ("Name=Value" style)
 ');
+define('_AM_EMAIL_LOGIN_NOCONF','Without confirm');
+
 ?>

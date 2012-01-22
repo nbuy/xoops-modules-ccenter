@@ -10,6 +10,10 @@ define('_CC_OPTDEFS',"notify_with_email,radio,1="._YES.",="._NO."
 redirect,text,size=60
 reply_comment,textarea,cols=60,rows=10
 reply_use_comtpl,radio,1="._YES.",="._NO."
+input_mail_confirm,radio,="._YES.",no="._NO."
+input_mail_login,radio,="._YES.",noconf="._AM_EMAIL_LOGIN_NOCONF.",no="._NO.",
+accept_ext,text,size=30
+accept_type,text,size=30
 others,textarea");
 
 $myts =& MyTextSanitizer::getInstance();
@@ -339,18 +343,19 @@ function build_form($formid=0) {
 	$varform="";
 	foreach ($items as $item) {
 	    $br = ($item['type'] =="textarea")?"<br/>":"";
-	    $varform .= "<div>".$item['label'].": $br".$item['input']."</div>";
+	    $class = $item['default']?' class="changed"':'';
+	    $varform .= "<div><span$class>".$item['label']."</span>: $br".$item['input']."</div>";
 	}
     }
     $ck = empty($data['optvars'])?"":" checked='checked'";
-    $optvars = new XoopsFormLabel(_AM_FORM_OPTIONS, "<script type='text/javascript'>document.write(\"<input type='checkbox' id='optshow' onChange='toggle(this);'$ck/> "._AM_OPTVARS_SHOW."\");</script><div id='optvars'>$varform</div>");
+    $optvars = new XoopsFormLabel(_AM_FORM_OPTIONS, "<script type='text/javascript'>document.write(\"<input type='checkbox' id='optshow' onChange='toggle(this);'$ck/> "._AM_OPTVARS_SHOW."\");</script><div id='optvars'".($ck?'':' style="display:none;"').">$varform</div>");
     $form->addElement($optvars);
     $submit = new XoopsFormElementTray('');
     $submit->addElement(new XoopsFormButton('' , 'formdefs', _SUBMIT, 'submit'));
     $submit->addElement(new XoopsFormButton('' , 'preview', _PREVIEW, 'submit'));
     $form->addElement($submit) ;
 
-    echo "<a name='form'></a>";
+    echo "<a name='form'></a><style>.changed {font-weight: bold;}</style>";
     $form->display();
     if ($editor) {
 	$base = XOOPS_URL."/common/fckeditor";

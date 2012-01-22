@@ -180,6 +180,9 @@ Done: c</pre></td><td>the Format as: Display-label: [status1[,status2...]], incl
 	  <p>Note: <tt>accept_type</tt> and <tt>accept_ext</tt> set same number elements (number of part seperate with '|'), check strict both position match.
 	  </p>
       </td></tr>
+      <tr class="even"><td class="head">input_mail_confirm</td><td><u>yes</u>/no</td><td>When setting "no", mail type input without confirm input</td></tr>
+      <tr class="odd"><td class="head">input_mail_login</td><td><u>yes</u>/noconf/no</td><td>When setting "noconf" with login user, mail type input without confirm input. Setting "no" mail type input not use.
+      <p>When "input_mail_confirm=no" settings, This default work same as "noconf" setting.</p></td></tr>
       <tr class="even"><td class="head">notify_with_email</td><td><u>0</u></td><td>When setting 1 email address include in notification</td></tr>
       <tr class="odd"><td class="head">export_charset</td><td><u>UTF-8</u></td><td>force setting encoding for CSV format file output.</td></tr>
       <tr class="even"><td class="head">redirect</td><td>URI</td><td>Move to page URI when after sending form.</td></tr>
@@ -254,6 +257,8 @@ Done: c</pre></td><td>the Format as: Display-label: [status1[,status2...]], incl
       <li>Add edit for evaluation value and comment by admin</li>
       <li>Fix message admin list condition lost when paging</li>
       <li>Change logging message format</li>
+      <li>Add option variables for email address input (input_mail_confirm, input_main_login)</li>
+      <li>Fix some bugs</li>
     </ul>
   </dd>
   <dt>2012-01-14 ccenter 0.97</dt>
@@ -462,6 +467,6 @@ Done: c</pre></td><td>the Format as: Display-label: [status1[,status2...]], incl
 <hr/>
 <aliress>Nobuhiro YASUTOMI &lt;<a href="mailto:nobuhiro.yasutomi@nifty.ne.jp">nobuhiro.yasutomi@nifty.ne.jp</a>&gt;</aliress>
 MySite Users <a href="http://myht.org/">http://myht.org/</a><br/>
-$Id: help.html,v 1.21 2012/01/21 16:55:16 nobu Exp $
+$Id: help.html,v 1.22 2012/01/22 09:22:18 nobu Exp $
 </body>
 </html>

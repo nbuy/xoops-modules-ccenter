@@ -1,6 +1,6 @@
 <?php
 // ccenter common functions
-// $Id: functions.php,v 1.46 2012/01/21 16:55:15 nobu Exp $
+// $Id: functions.php,v 1.47 2012/01/22 09:22:18 nobu Exp $
 
 global $xoopsDB;		// for blocks scope
 // using tables
@@ -54,7 +54,7 @@ define('_CC_TPL_NONE_HTML', 4);
 
 define('LABEL_ETC', '*');	// radio, checkbox widget 'etc' text input.
 define('OPTION_NUM_ATTRS', 'size|maxlength|rows|cols');
-define('OPTION_STR_ATTRS', 'prop|notify_with_email|accept_ext|accept_type');
+define('OPTION_STR_ATTRS', 'prop|check|notify_with_email|accept_ext|accept_type');
 
 // attribute config option expanding
 function get_attr_value($pri, $name=null, $value=null) {
@@ -292,15 +292,16 @@ function assign_post_values(&$items) {
 		    if (count($aexts) == count($atypes)) $types = $atypes[$nth];
 		}
 	    }
-	    $tmpfile = $upfile['tmp_name'];
+	    $tmpfile = isset($upfile['tmp_name'])?$upfile['tmp_name']:null;
 	    if ($types && $tmpfile) {
 		$ftype = cc_mime_content_type($tmpfile);
 		if (!preg_match('/^('.$types.')$/', $ftype)) $errors[] = $lab.": ". _MD_UPLOADFILE_ERR;
 	    }
 
 	    $val = '';		// filename
-	    if (isset($_POST[$name."_prev"])) {
-		$val = $myts->stripSlashesGPC($_POST[$name."_prev"]);
+	    $prename=$name."_prev";
+	    if (isset($_POST[$prename])) {
+		$val = $myts->stripSlashesGPC($_POST[$prename]);
 		if (!empty($fname)) {
 		    unlink(XOOPS_UPLOAD_PATH.cc_attach_path(0, $val));
 		    $val = '';
@@ -315,11 +316,14 @@ function assign_post_values(&$items) {
 	    }
 	    break;
 	case 'mail':
+	    if (is_object($GLOBALS['xoopsUser']) && get_attr_value(null, 'input_mail_login', '') == 'no') {
+		continue 2;
+	    }
 	    $name .= '_conf';
 	    if (!checkEmail($val)) {
 		$errors[] = $lab.": "._MD_ADDRESS_ERR;
 	    }
-	    if (isset($_POST[$name])) {
+	    if (get_attr_value(null, 'input_mail_confirm', '')!='no' && isset($_POST[$name])) {
 		if ($val != $myts->stripSlashesGPC($_POST[$name])) {
 		    $errors[] = sprintf(_MD_CONF_LABEL, $lab).": "._MD_CONFIRM_ERR;
 		}
@@ -349,14 +353,15 @@ function assign_post_values(&$items) {
 }
 
 function assign_form_widgets(&$items, $conf=false) {
-    $mconf = !$conf;
+    $mconf = !$conf;	// in side [conf] 
     $updates = array();
     foreach ($items as $item) {
 	if (empty($item['field'])) { // comment only
 	    $updates[] = $item;
 	    continue;
 	}
-	if ($item['type']=='hidden' && !$conf) continue;
+	$type = $item['type'];
+	if ($type=='hidden' && !$conf) continue;
 	$val =& $item['value'];
 	$fname =& $item['field'];
 	$opts = $item['options'];
@@ -372,7 +377,7 @@ function assign_form_widgets(&$items, $conf=false) {
 		$input .= htmlspecialchars(join(', ', $val), ENT_QUOTES);
 	    } else {
 		$v = htmlspecialchars($val, ENT_QUOTES);
-		switch ($item['type']) {
+		switch ($type) {
 		case 'hidden':
 		    $input = $v;
 		    break;
@@ -390,22 +395,30 @@ function assign_form_widgets(&$items, $conf=false) {
 		    break;
 		}
 	    }
-	} else {
+	} elseif ($type=='mail') {
   	    $input = cc_make_widget($item);
-	    if ($mconf && isset($item['type']) && $item['type']=='mail' &&
-		isset($item['attr']['check'])&& $item['attr']['check']=='require') {
+	    $attr =& $item['attr'];
+	    $mconf &= get_attr_value(null, 'input_mail_confirm', '')!='no';
+	    if (is_object($GLOBALS['xoopsUser'])) {
+		$mlogin = get_attr_value(null, 'input_mail_login', '');
+		if ($mlogin =='no') continue;
+		$mconf &= ($mlogin != 'noconf');
+	    }
+	    if ($mconf && isset($attr['check']) && $attr['check']=='require') {
 		$cfname = $fname.'_conf';
 		$citem = array(
 		    'name'=>sprintf(_MD_CONF_LABEL, $item['name']),
 		    'label'=>sprintf(_MD_CONF_LABEL, $item['label']),
-		    'field'=>$cfname, 'type'=>$item['type'],
-		    'comment'=>_MD_CONF_DESC, 'attr'=>$item['attr']);
+		    'field'=>$cfname, 'type'=>$type,
+		    'comment'=>_MD_CONF_DESC, 'attr'=>$attr);
 		$item['input'] = $input;
 		$updates[] = $item;
 		$input = cc_make_widget($citem);
 		$item = $citem;
 		$mconf = false;
 	    }
+	} else {
+  	    $input = cc_make_widget($item);
 	}
 	$item['input'] = $input;
 	$updates[] = $item;

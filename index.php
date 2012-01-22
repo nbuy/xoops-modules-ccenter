@@ -1,6 +1,6 @@
 <?php
 // contact to member
-// $Id: index.php,v 1.29 2012/01/21 16:55:15 nobu Exp $
+// $Id: index.php,v 1.30 2012/01/22 09:22:18 nobu Exp $
 
 include "../../mainfile.php";
 include "functions.php";
@@ -212,7 +212,7 @@ function store_message($items, $form) {
 		  'HTTP_USER_AGENT'=>$_SERVER["HTTP_USER_AGENT"],
 		  'MSGID'=>$id);
     foreach ($vals as $k=>$v) {
-	$tags[$k] = $v;
+	$tags[$k] = is_array($v)?implode(', ', $v):$v;
     }
     $tpl = get_attr_value(null, 'from_confirm_tpl', 'form_confirm.tpl');
     $msgurl = XOOPS_URL.($id?"/modules/$dirname/message.php?id=$id":'/');

@@ -1,5 +1,5 @@
 <?php
-// $Id: admin.php,v 1.6 2012/01/21 16:55:16 nobu Exp $
+// $Id: admin.php,v 1.7 2012/01/22 09:22:18 nobu Exp $
 
 define('_AM_FORM_EDIT', 'コンタクトフォームの編集');
 define('_AM_FORM_NEW', '新規コンタクトフォームの作成');
@@ -73,6 +73,12 @@ define('_AM_OPTVARS_LABEL','notify_with_email=メールアドレスを通知に�
 redirect=フォーム送信後に遷移するページ
 reply_comment=応答メールに付加する文
 reply_use_comtpl=付加文を応答メールのテンプレートにする
+input_mail_confirm=メールアドレスの確認入力をする
+input_mail_login=ログイン時にメールアドレス入力をする
+accept_ext=アップロードを許可する拡張子 (例: <tt>pdf|doc|jpg</tt>)
+accept_type=アップロードを許可するMIME型 (例: <tt>application/pdf|image/*</tt>)
 others=その他の変数 (「名前=値」の形式)
 ');
+define('_AM_EMAIL_LOGIN_NOCONF','確認入力をしない');
+
 ?>

@@ -1,5 +1,5 @@
 <?php
-// $Id: admin.php,v 1.5 2012/01/21 16:55:16 nobu Exp $
+// $Id: admin.php,v 1.6 2012/01/22 09:22:18 nobu Exp $
 
 define('_AM_FORM_EDIT', 'Edit contact form');
 define('_AM_FORM_NEW', 'Neues Kontaktformular erstellen');
@@ -73,6 +73,12 @@ define('_AM_OPTVARS_LABEL','notify_with_email=Benachrichtigen Sie per E-Mail-Adr
 redirect=Weiterleitung nach vorzulegen
 reply_comment=Nachricht hinzufügen in automatische E-Mail
 reply_use_comtpl=Hinzufügen Nachricht an e-Mail-Vorlage
+input_mail_confirm=Verwenden Sie bestätigen, Eingang für E-Mail-Adresse
+input_mail_login=Anmelden Benutzereingaben per E-Mail-Adresse
+accept_ext=Accept Upload-Datei-Erweiterungen (Beispiel: <tt>pdf|doc|jpg</tt>)
+accept_type=Accept Upload-Datei MIME-Typen (Beispiel: <tt>application/pdf|image/*</tt>)
 others=Andere Variablen ("Name=Value"-Stil)
 ');
+define('_AM_EMAIL_LOGIN_NOCONF','ohne Bestätigung');
+
 ?>

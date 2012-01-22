@@ -1,5 +1,5 @@
 <?php
-// $Id: admin.php,v 1.7 2012/01/21 16:55:16 nobu Exp $
+// $Id: admin.php,v 1.8 2012/01/22 09:22:18 nobu Exp $
 // Traduzido para o Portugues do Brasil por: Miraldo Antoninho Ohse (m_ohse@hotmail.com).
 
 define('_AM_FORM_EDIT', 'Editar o formulário de contato');
@@ -74,6 +74,12 @@ define('_AM_OPTVARS_LABEL','notify_with_email=Informe-mail mostrar
 redirect=Página de redirecionamento após submeter-se
 reply_comment=Adicionar mensagem no correio de resposta automática
 reply_use_comtpl=Adicionar mensagem de e-mail para ser modelo
+input_mail_confirm=Use de entrada para confirmar endereço de email
+input_mail_login=Login do usuário endereço de email de entrada
+accept_ext=Aceitar upload de extensões de arquivo (Exemplo: <tt>pdf|doc|jpg</tt>)
+accept_type=Aceitar upload do arquivo mime types (Exemplo: <tt>application/pdf|image/*</tt>)
 others=Outras variáveis ("Name=Valor" style)
 ');
+define('_AM_EMAIL_LOGIN_NOCONF','Sem confirmar');
+
 ?>

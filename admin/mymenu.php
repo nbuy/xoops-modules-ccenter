@@ -76,7 +76,7 @@ foreach( array_keys( $adminmenu ) as $i ) {
 if ( $use_altsys ) {
 	// display
 	require_once XOOPS_ROOT_PATH.'/class/template.php' ;
-	$tpl =& new XoopsTpl() ;
+	$tpl = new XoopsTpl() ;
 	$tpl->assign( array(
 						'adminmenu' => $adminmenu ,
 						) ) ;

@@ -27,9 +27,8 @@
 include '../../mainfile.php';
 include 'functions.php';
 
-$com_itemid = isset($_GET['com_itemid']) ? intval($_GET['com_itemid']) : 0;
-$com_id = isset($_GET['com_id']) ? intval($_GET['com_id']) : 0;
-cc_get_message(cc_check_comment($com_itemid, $com_id));
+$com_itemid = isset( $_GET['com_itemid'] ) ? (int) $_GET['com_itemid'] : 0;
+$com_id     = isset( $_GET['com_id'] ) ? (int) $_GET['com_id'] : 0;
+cc_get_message( cc_check_comment( $com_itemid, $com_id ) );
 
-include XOOPS_ROOT_PATH.'/include/comment_reply.php';
-?>
+include XOOPS_ROOT_PATH . '/include/comment_reply.php';

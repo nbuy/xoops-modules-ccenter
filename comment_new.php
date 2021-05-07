@@ -27,17 +27,16 @@
 include '../../mainfile.php';
 include 'functions.php';
 
-$myts =& MyTextSanitizer::getInstance();
-$com_itemid = isset($_GET['com_itemid']) ? intval($_GET['com_itemid']) : 0;
+$myts       =& MyTextSanitizer::getInstance();
+$com_itemid = isset( $_GET['com_itemid'] ) ? (int) $_GET['com_itemid'] : 0;
 
-$data = cc_get_message($com_itemid);
+$data = cc_get_message( $com_itemid );
 
-$com_replytext = _POSTEDBY.'&nbsp;<b>'.
-    xoops_getLinkedUnameFromId($data['uid']).'</b>&nbsp;'.
-    _DATE.'&nbsp;<b>'.formatTimestamp($data['mtime']).'</b>
-<br /><br />'.$myts->displayTarea($data['body'])."<br/><br/>".
+$com_replytext = _POSTEDBY . '&nbsp;<b>' .
+                 xoops_getLinkedUnameFromId( $data['uid'] ) . '</b>&nbsp;' .
+                 _DATE . '&nbsp;<b>' . formatTimestamp( $data['mtime'] ) . '</b>
+<br><br>' . $myts->displayTarea( $data['body'] ) . "<br><br>" .
 
-$com_replytitle = $data['title'];
+                 $com_replytitle = $data['title'];
 
-include XOOPS_ROOT_PATH.'/include/comment_new.php';
-?>
+include XOOPS_ROOT_PATH . '/include/comment_new.php';

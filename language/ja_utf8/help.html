@@ -48,9 +48,9 @@ pre { color: #600000; }
   「フォームの定義」項目を指定できる。指定の書式は次通り。
   <blockquote class="bnf">
       行 ::= 項目名["*"][=表示ラベル][,タイプ][,属性指定...][,引数...]<p />
-      タイプ ::= {text|checkbox|radio|textarea|select|const|hidden|mail|file}<br />
-      引数 ::= [値 ["+"] "="] ラベル<br />
-      属性指定 ::= 属性名 "=" 値<br />
+      タイプ ::= {text|checkbox|radio|textarea|select|const|hidden|mail|file}<br>
+      引数 ::= [値 ["+"] "="] ラベル<br>
+      属性指定 ::= 属性名 "=" 値<br>
       属性名 ::= {size|rows|maxlength|cols|prop|check}
   </blockquote>
   <ul>
@@ -89,7 +89,7 @@ pre { color: #600000; }
       <tr class="odd"><td>名前*,size=5</td><td>名前* <input name='samp2' size=5 /></td><td>属性 (大きさ) を指定する。</td></tr>
       <tr class="even"><td>名前*,size=10,規定値,#コメント文</td><td>名前* <input name='samp3' size='10' value='規定値'/> コメント文</td><td>引数の先頭を "#" にすると説明文として表示する</td></tr>
       <tr class="odd"><td>名前,size=10,check=reqire,{X_NAME},#コメント文</td><td>名前 <input name='samp3' size='10' value='本名'/> コメント文</td><td>必須検査は require として指定できる。既定値の <tt>{X_NAME}</tt>はユーザ情報の本名に設定しているものになる。</td></tr>
-      <tr class="even"><td>選択,radio,項目1+,項目2&lt;br/&gt;,*=その他</td><td>選択 <input type='radio' name='samp4' value='1' checked /> 項目1 &nbsp; <input type='radio' name='samp4' value='2' /> 項目2<br/> <input type='radio' name='samp4' value='*' /> その他 <input name='etc4' size='8'/> </td><td>引数には HTML タグを含めることができるが値としては無効。値を "*" に指定するとその他をテキスト指定できる。</td></tr>
+      <tr class="even"><td>選択,radio,項目1+,項目2&lt;br/&gt;,*=その他</td><td>選択 <input type='radio' name='samp4' value='1' checked /> 項目1 &nbsp; <input type='radio' name='samp4' value='2' /> 項目2<br> <input type='radio' name='samp4' value='*' /> その他 <input name='etc4' size='8'/> </td><td>引数には HTML タグを含めることができるが値としては無効。値を "*" に指定するとその他をテキスト指定できる。</td></tr>
       <tr class="odd"><td>選択,checkbox,項目1+,項目2,項目3</td><td>選択 <input type='checkbox' name='samp5_1' checked /> 項目1 &nbsp; <input type='checkbox' name='samp5_2' /> 項目2 &nbsp; <input type='checkbox' name='samp5_3' /> 項目3 &nbsp; </td><td>選択値のデフォルト選択は、"+" を付加する。</td></tr>
       <tr class="even"><td>選択,select,項目1,項目2,項目3</td><td>選択 <select name='samp6'><option>項目1</option><option>項目2</option><option>項目3</option></select></td><td></td></tr>
       <tr class="odd"><td>ラベル,const,値</td><td><em>ラベル 値</em></td><td>固定値として表示され、それが入力値となる。</td></tr>
@@ -185,7 +185,7 @@ pre { color: #600000; }
       <tr class="odd"><td class="head">charge_notify_tpl</td><td>なし</td><td>担当者向けの通知メッセージ用のメールテンプレートのファイル名を指定する。指定されない場合、応答メッセージ用のものが使われる。</td></tr>
       <tr class="even"><td class="head">group_notify_tpl</td><td>なし</td><td>担当グループ向けの通知メッセージ用のメールテンプレートのファイル名を指定する。指定されない場合、応答メッセージ用のものが使われる。</td></tr>
       <tr class="odd"><td class="head">他の名称</td><td>正規表現</td><td>入力検査の文字列定義
-	  <p>例: 数値 <tt>numeric=[-+]?[0-9]+</tt>、電話番号<tt>tel="\+?[0-9][0-9-,]*[0-9]"</tt><br />利用は、入力の定義で <tt>check=tel</tt> のように利用する。</p>
+	  <p>例: 数値 <tt>numeric=[-+]?[0-9]+</tt>、電話番号<tt>tel="\+?[0-9][0-9-,]*[0-9]"</tt><br>利用は、入力の定義で <tt>check=tel</tt> のように利用する。</p>
 	  <p>正規表現は、JavaScript で使える範囲のものを使うこと。(サーバ側は perl の正規表現が使うが、クライアント側は JavaScript を利用するため)</p>
       </td></tr>
     </table>
@@ -454,7 +454,7 @@ pre { color: #600000; }
 
 <hr/>
 <aliress>安富 伸浩 &lt;<a href="mailto:nobuhiro.yasutomi@nifty.ne.jp">nobuhiro.yasutomi@nifty.ne.jp</a>&gt;</aliress>
-マイサイト ユーザーズ <a href="http://myht.org/">http://myht.org/</a><br/>
+マイサイト ユーザーズ <a href="http://myht.org/">http://myht.org/</a><br>
 $Id: help.html,v 1.11 2012/01/22 09:22:18 nobu Exp $
 </body>
 </html>

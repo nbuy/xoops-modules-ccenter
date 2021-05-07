@@ -26,23 +26,22 @@
 //  ------------------------------------------------------------------------ //
 
 
-function ccenter_notify_iteminfo($category, $item_id)
-{
-    global $xoopsDB;
+function ccenter_notify_iteminfo( $category, $item_id ) {
+	global $xoopsDB;
 
-    $item = array('name'=>'','url'=>'');
-    $dirname = basename(dirname(__FILE__));
-    if ($category=='message' && $item_id!=0) {
-	// Assume we have a valid story id
-	$sql = "SELECT fidref, touid, title FROM ".
-	    $xoopsDB->prefix('ccenter_message').','.
-	    $xoopsDB->prefix('ccenter_form').
-	    " WHERE status<>'x' AND msgid=$item_id AND fidref=formid";
-	$result = $xoopsDB->query($sql); // TODO: error check
-	list($fid, $touid, $title) = $xoopsDB->fetchRow($result);
-	$item['name'] = $title;
-	$item['url'] = XOOPS_URL."/modules/$dirname/message.php?id=".$item_id;
-    }
-    return $item;
+	$item    = array( 'name' => '', 'url' => '' );
+	$dirname = basename( __DIR__ );
+	if ( $category == 'message' && $item_id != 0 ) {
+		// Assume we have a valid story id
+		$sql    = "SELECT fidref, touid, title FROM " .
+		          $xoopsDB->prefix( 'ccenter_message' ) . ',' .
+		          $xoopsDB->prefix( 'ccenter_form' ) .
+		          " WHERE status<>'x' AND msgid=$item_id AND fidref=formid";
+		$result = $xoopsDB->query( $sql ); // TODO: error check
+		list( $fid, $touid, $title ) = $xoopsDB->fetchRow( $result );
+		$item['name'] = $title;
+		$item['url']  = XOOPS_URL . "/modules/$dirname/message.php?id=" . $item_id;
+	}
+
+	return $item;
 }
-?>

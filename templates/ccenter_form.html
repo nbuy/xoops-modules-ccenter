@@ -1,52 +1,61 @@
 <{if $errors}>
 <div class="errorMsg">
-<{foreach from=$errors item=msg}>
-<div><{$msg}></div>
-<{/foreach}>
+    <{foreach from=$errors item=msg}>
+    <div><{$msg}></div>
+    <{/foreach}>
 </div>
 <{/if}>
 <div class="evform">
-<h2><{$form.title}></h2>
-<{$form.desc}>
-<a name="form"></a>
-<form action="<{$form.cc_url}>/<{$form.action}>" name="ccenter" class="ccform" method="post"<{if $form.check_script}> onsubmit="return xoopsFormValidate_ccenter();"<{/if}><{if $form.hasfile}> enctype="multipart/form-data"<{/if}>>
-<input type="hidden" name="op" value="<{$op}>" />
+    <h2><{$form.title}></h2>
+    <{$form.desc}>
+    <a name="form"></a>
+    <form action="<{$form.cc_url}>/<{$form.action}>" name="ccenter" class="ccform" method="post"
+    <{if $form.check_script}> onsubmit="return xoopsFormValidate_ccenter();"<{/if}><{if $form.hasfile}>
+    enctype="multipart/form-data"<{/if}>>
+    <input type="hidden" name="op" value="<{$op}>"/>
 
-<table class="outer" align="center" cellspacing="1" border="0" summary="Contact form items">
-  <col style="width: 20%;"/>
-<{foreach from=$form.items item=fm name=item}>
-  <{if preg_match("/^-/", $form.items[$smarty.foreach.item.iteration].label)}>
-    <{if empty($form_continue)}>
-      <tr class="<{cycle values="even, odd"}><{if $fm.attr.check}> require<{/if}>"><td class="head"><{$fm.label}></td><td>
-      <{assign var=form_continue value=1}>
+    <table class="outer" align="center" summary="Contact form items">
+        <col style="width: 20%;"/>
+        <{foreach from=$form.items item=fm name=item}>
+        <{if preg_match("/^-/", $form.items[$smarty.foreach.item.iteration].label)}>
+        <{if empty($form_continue)}>
+        <tr class="<{cycle values="even, odd"}><{if $fm.attr.check}> require<{/if}>">
+        <td class="head"><{$fm.label}></td>
+        <td>
+            <{assign var=form_continue value=1}>
+            <{/if}>
+            <{$fm.input}><{if $fm.comment}><span class="note"><{$fm.comment}></span><{/if}>
+            <{else}>
+            <{if !empty($form_continue)}>
+            <{$fm.input}>
+            <{if $fm.comment}><span class="note"><{$fm.comment}></span><{/if}>
+        </td>
+        </tr>
+        <{assign var=form_continue value=0}>
+        <{else}>
+        <tr class="<{cycle values="even, odd"}><{if $fm.attr.check}> require<{/if}>">
+        <{if $fm.label}>
+        <td class="head"><{$fm.label}></td>
+        <td><{else}>
+        <td colspan="2"><{/if}><{$fm.input}>
+            <{if $fm.comment}><span class="note"><{$fm.comment}></span><{/if}>
+        </td>
+        </tr>
+        <{/if}>
+        <{/if}>
+        <{/foreach}>
+    </table>
+    <p style="text-align: center;"><input type="submit" value="<{$smarty.const._MD_SUBMIT_CONF}>" <{$form.submit_opts}> /></p>
+    </form>
+    <{$form.check_script}>
+    <{if $form.lang_note || $form.note}>
+    <p align="right"><{$form.lang_note}> <{$form.note}></p>
     <{/if}>
-    <{$fm.input}><{if $fm.comment}><span class="note"><{$fm.comment}></span><{/if}>
-  <{else}>
-    <{if !empty($form_continue)}>
-      <{$fm.input}>
-	<{if $fm.comment}><span class="note"><{$fm.comment}></span><{/if}></td>
-      </tr>
-      <{assign var=form_continue value=0}>
-    <{else}>
-      <tr class="<{cycle values="even, odd"}><{if $fm.attr.check}> require<{/if}>">
-	<{if $fm.label}><td class="head"><{$fm.label}></td><td><{else}><td colspan="2"><{/if}><{$fm.input}>
-	<{if $fm.comment}><span class="note"><{$fm.comment}></span><{/if}></td>
-      </tr>
-    <{/if}>
-  <{/if}>
-<{/foreach}>
-</table>
-<p style="text-align: center;"><input type="submit" value="<{$smarty.const._MD_SUBMIT_CONF}>" <{$form.submit_opts}> /></p>
-</form>
-<{$form.check_script}>
-<{if $form.lang_note || $form.note}>
-  <p align="right"><{$form.lang_note}> <{$form.note}></p>
-<{/if}>
 </div>
 <{if $xoops_isadmin}>
-  <div class="ccadmin" style="text-align: right">[
+<div class="ccadmin" style="text-align: right">[
     <a href="<{$form.cc_url}>/reception.php?form=<{$form.formid}>"><{$smarty.const._MD_CCENTER_RECEPTION}></a>
     | <a href="<{$form.cc_url}>/admin/index.php?formid=<{$form.formid}>"><{$smarty.const._EDIT}></a>
     ]
-  </div>
+</div>
 <{/if}>

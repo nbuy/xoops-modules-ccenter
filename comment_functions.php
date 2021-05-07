@@ -28,63 +28,70 @@
 // comment callback functions
 include_once "functions.php";
 
-function ccenter_com_update($msgid, $total_num){
-    return true;
+function ccenter_com_update( $msgid, $total_num ) {
+	return true;
 }
 
-function ccenter_com_approve(&$comment){
-    global $xoopsDB, $xoopsUser, $xoopsModule, $xoopsConfig;
+function ccenter_com_approve( &$comment ) {
+	global $xoopsDB, $xoopsUser, $xoopsModule, $xoopsConfig;
 
-    $msgid = $comment->getVar('com_itemid');
-    $res = $xoopsDB->query("SELECT uid, touid, email, onepass, fidref, title, status FROM ".CCMES.", ".FORMS." WHERE msgid=$msgid AND formid=fidref");
+	$msgid = $comment->getVar( 'com_itemid' );
+	$res   = $xoopsDB->query( "SELECT uid, touid, email, onepass, fidref, title, status FROM " . CCMES . ", " . FORMS . " WHERE msgid=$msgid AND formid=fidref" );
 
-    $comid = $comment->getVar('com_id');
-    if ($res && $xoopsDB->getRowsNum($res)) {
-	$data = $xoopsDB->fetchArray($res);
-	$email = $data['email'];
-	$s = $data['status'];
+	$comid = $comment->getVar( 'com_id' );
+	if ( $res && $xoopsDB->getRowsNum( $res ) ) {
+		$data  = $xoopsDB->fetchArray( $res );
+		$email = $data['email'];
+		$s     = $data['status'];
 
-	$uid = is_object($xoopsUser)?$xoopsUser->getVar('uid'):0;
-	$msg = _CC_LOG_COMMENT;
-	$status = ''; // new status
-	$now = time();
-	$values = array('mtime='.$now);
-	if ($uid && $uid == $data['touid']) { // comment by charge
-	    // status to replyed
-	    if ($s==_STATUS_ACCEPT) $status = _STATUS_REPLY;
-	    $msg .= _CC_LOG_BYCHARGE;
-	} elseif ($uid==0 || $uid==$data['uid']) { // comment by order person
-	    // status back to contacting
-	    if ($s==_STATUS_REPLY || $s==_STATUS_CLOSE) $status = _STATUS_ACCEPT;
-	    $values[] = 'atime='.$now;
+		$uid    = is_object( $xoopsUser ) ? $xoopsUser->getVar( 'uid' ) : 0;
+		$msg    = _CC_LOG_COMMENT;
+		$status = ''; // new status
+		$now    = time();
+		$values = array( 'mtime=' . $now );
+		if ( $uid && $uid == $data['touid'] ) { // comment by charge
+			// status to replyed
+			if ( $s == _STATUS_ACCEPT ) {
+				$status = _STATUS_REPLY;
+			}
+			$msg .= _CC_LOG_BYCHARGE;
+		} elseif ( $uid == 0 || $uid == $data['uid'] ) { // comment by order person
+			// status back to contacting
+			if ( $s == _STATUS_REPLY || $s == _STATUS_CLOSE ) {
+				$status = _STATUS_ACCEPT;
+			}
+			$values[] = 'atime=' . $now;
+		}
+		if ( $status && $status != $s ) {
+			global $msg_status;
+			$msg      .= "\n" . sprintf( _CC_LOG_STATUS, $msg_status[ $s ], $msg_status[ $status ] );
+			$values[] = 'status=' . $xoopsDB->quoteString( $status );
+		}
+		$xoopsDB->query( "UPDATE " . CCMES . " SET " . implode( ',', $values ) . " WHERE msgid=$msgid" );
+		cc_log_message( $data['fidref'], $msg . " (comid=$comid)", $msgid );
+		// notification for guest contact
+		if ( is_object( $xoopsUser ) && $data['uid'] == 0 && $email ) {
+			$subj        = $data['title'];
+			$url         = XOOPS_URL . "/modules/" . basename( __DIR__ ) . "/message.php?id=$msgid&p=" . urlencode( $data['onepass'] ) . "#comment$comid";
+			$tags        = array(
+				'X_MODULE'      => $xoopsModule->getVar( 'name' ),
+				'X_ITEM_TYPE'   => '',
+				'X_ITEM_NAME'   => $subj,
+				'X_COMMENT_URL' => $url,
+				'FROM_EMAIL'    => $email,
+				'SUBJECT'       => $subj
+			);
+			$xoopsMailer =& getMailer();
+			$xoopsMailer->useMail();
+			$xoopsMailer->setFromEmail( $xoopsConfig['adminmail'] );
+			$xoopsMailer->setFromName( $xoopsModule->getVar( 'name' ) );
+			$xoopsMailer->setSubject( _MD_NOTIFY_SUBJ );
+			$xoopsMailer->assign( $tags );
+			$tpl = 'guest_notify.tpl';
+			$xoopsMailer->setTemplateDir( template_dir( $tpl ) );
+			$xoopsMailer->setTemplate( $tpl );
+			$xoopsMailer->setToEmails( $email );
+			$xoopsMailer->send();
+		}
 	}
-	if ($status && $status != $s) {
-	    global $msg_status;
-	    $msg .= "\n".sprintf(_CC_LOG_STATUS, $msg_status[$s], $msg_status[$status]);
-	    $values[] = 'status='.$xoopsDB->quoteString($status);
-	}
-	$xoopsDB->query("UPDATE ".CCMES." SET ".join(',', $values)." WHERE msgid=$msgid");
-	cc_log_message($data['fidref'], $msg." (comid=$comid)", $msgid);
-	// notification for guest contact
-	if (is_object($xoopsUser) && $data['uid']==0 && $email) {
-	    $subj = $data['title'];
-	    $url = XOOPS_URL."/modules/".basename(dirname(__FILE__))."/message.php?id=$msgid&p=".urlencode($data['onepass'])."#comment$comid";
-	    $tags = array('X_MODULE'=>$xoopsModule->getVar('name'),
-			  'X_ITEM_TYPE'=>'', 'X_ITEM_NAME'=>$subj,
-			  'X_COMMENT_URL'=>$url, 'FROM_EMAIL'=>$email,
-			  'SUBJECT'=>$subj);
-	    $xoopsMailer =& getMailer();
-	    $xoopsMailer->useMail();
-	    $xoopsMailer->setFromEmail($xoopsConfig['adminmail']);
-	    $xoopsMailer->setFromName($xoopsModule->getVar('name'));
-	    $xoopsMailer->setSubject(_MD_NOTIFY_SUBJ);
-	    $xoopsMailer->assign($tags);
-	    $tpl = 'guest_notify.tpl';
-	    $xoopsMailer->setTemplateDir(template_dir($tpl));
-	    $xoopsMailer->setTemplate($tpl);
-	    $xoopsMailer->setToEmails($email);
-	    $xoopsMailer->send();
-	}
-    }
 }
-?>

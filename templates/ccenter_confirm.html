@@ -1,27 +1,39 @@
 <a name="form"></a>
 <div class="evform">
-<form action="index.php?form=<{$form.formid}><{if $form.priuser.uid}>&amp;uid=<{$form.priuser.uid}><{/if}>" name="order" method="post">
-<input type="hidden" name="op" value="store" />
-<p clss="heading"><{$heading}></p>
-<table class="outer" align="center" cellspacing="1" border="0">
-<tr><th colspan="2"><{$form.title}></th></tr>
-<{foreach from=$form.items item=fm name=item}>
-  <{if preg_match("/^-/", $form.items[$smarty.foreach.item.iteration].label)}>
-    <{if empty($form_continue)}>
-      <tr class="<{cycle values="even, odd"}>"><td class="head"><{$fm.label}></td><td>
-      <{assign var=form_continue value=1}>
-    <{/if}>
-    <{$fm.input}>
-  <{else}>
-    <{if !empty($form_continue)}>
-       <{$fm.input}></td></tr>
-      <{assign var=form_continue value=0}>
-    <{else}>
-      <{if $fm.label}><tr class="<{cycle values="even, odd"}>"><td class="head"><{$fm.label}></td><td><{$fm.input}></td></tr><{/if}>
-    <{/if}>
-  <{/if}>
-<{/foreach}>
-</table>
-<p style="text-align: center;"><input type="submit" value="<{$smarty.const._MD_SUBMIT_SEND}>" /> &nbsp; <input type="submit" name="edit" value="<{$smarty.const._MD_SUBMIT_EDIT}>" /></p>
-</form>
+    <form action="index.php?form=<{$form.formid}><{if $form.priuser.uid}>&amp;uid=<{$form.priuser.uid}><{/if}>"
+          name="order" method="post">
+        <input type="hidden" name="op" value="store"/>
+        <p clss="heading"><{$heading}></p>
+        <table class="outer" align="center">
+            <tr>
+                <th colspan="2"><{$form.title}></th>
+            </tr>
+            <{foreach from=$form.items item=fm name=item}>
+            <{if preg_match("/^-/", $form.items[$smarty.foreach.item.iteration].label)}>
+            <{if empty($form_continue)}>
+            <tr class="<{cycle values="even, odd"}>">
+            <td class="head"><{$fm.label}></td>
+            <td>
+                <{assign var=form_continue value=1}>
+                <{/if}>
+                <{$fm.input}>
+                <{else}>
+                <{if !empty($form_continue)}>
+                <{$fm.input}>
+            </td>
+            </tr>
+            <{assign var=form_continue value=0}>
+            <{else}>
+            <{if $fm.label}>
+            <tr class="<{cycle values="even, odd"}>">
+            <td class="head"><{$fm.label}></td>
+            <td><{$fm.input}></td>
+            </tr><{/if}>
+            <{/if}>
+            <{/if}>
+            <{/foreach}>
+        </table>
+        <p style="text-align: center;"><input type="submit" value="<{$smarty.const._MD_SUBMIT_SEND}>"/> &nbsp;
+          <input type="submit" name="edit" value="<{$smarty.const._MD_SUBMIT_EDIT}>"/></p>
+    </form>
 </div>

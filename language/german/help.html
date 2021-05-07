@@ -47,9 +47,9 @@ pre { color: #600000; }
   Die Formumar Definitionen befolgen folgende Syntax:
   <blockquote class="bnf">
       <b>line ::= label["*"][,type][,attribute...][,argument...]</b><p />
-      type ::= {text|checkbox|radio|textarea|select|const|hidden|mail|multi|file}<br />
-      argument ::= [value ["+"] "="] display-value<br />
-      attribute ::= aname "=" value<br />
+      type ::= {text|checkbox|radio|textarea|select|const|hidden|mail|multi|file}<br>
+      argument ::= [value ["+"] "="] display-value<br>
+      attribute ::= aname "=" value<br>
       aname ::= {size|rows|maxlength|cols|prop|check}
   </blockquote>
   <ul>
@@ -90,7 +90,7 @@ pre { color: #600000; }
       <tr class="even"><td>Name*,size=10,Default,#Beschreibung</td><td>Name* <input name="samp3" size="10" value="Default" /> Beschreibung</td><td>Das Argument "#" als Prefix bedeutet dass "Beschreibung" als Text angezeigt wird.</td></tr>
       <tr class="odd"><td>Name,size=10,check=reqire,{X_NAME},#Comment</td><td>Name <input name="samp3" size="10" value="expand your name"/> Comment</td><td>checking requirement like this. Default value  <tt>{X_NAME}</tt> are expand user information.</td></tr>
       <tr class="even"><td>Selection,radio,Item1+,Item2&lt;br/&gt;,*=others</td><td>Selection <input type="radio" name="samp4" value="Item1" checked /> Item1
-	  &nbsp; <input type="radio" name="samp4" value="Item2" /> Item2<br/>
+	  &nbsp; <input type="radio" name="samp4" value="Item2" /> Item2<br>
 	  <input type="radio" name="samp4" value="*" /> others <input name="etc4" size="8"/> </td><td>Include HTML tags in label, but ignore in
 	  value. The value use "*", that use text input.</td></tr>
       <tr class="odd"><td>Selection,checkbox,Item1+,Item2,Item3</td><td>Selection <input type="checkbox" name="samp5_1" checked /> Item1 &nbsp;
@@ -176,7 +176,7 @@ Done: c</pre></td><td>the Format as: Display-label: [status1[,status2...]], incl
       <tr class="odd"><td class="head">export_charset</td><td><u>UTF-8</u></td><td>force setting encoding for CSV format file output.</td></tr>
       <tr class="even"><td class="head">redirect</td><td>URI</td><td>Gehe zur URL nach dem Absenden des Formulares.</td></tr>
       <tr class="odd"><td class="head">other names</td><td>RegExp</td><td>Input format checking regular expressions
-	  <p>Beispiel: Ziffernüberprüfung <tt>numeric=[-+]?[0-9]+</tt>;, Telefonnummer <tt>tel="\+?[0-9][0-9-,]*[0-9]"</tt><br />In Formularen die Attribute wie folg benutzen <tt>check=tel</tt>.</p>
+	  <p>Beispiel: Ziffernüberprüfung <tt>numeric=[-+]?[0-9]+</tt>;, Telefonnummer <tt>tel="\+?[0-9][0-9-,]*[0-9]"</tt><br>In Formularen die Attribute wie folg benutzen <tt>check=tel</tt>.</p>
 	  <p>Regular expressions using JavaScript acceptable range. (Server side use perl regexp, but client side use JavaScript)</p>
       </td></tr>
     </table>
@@ -402,7 +402,7 @@ Done: c</pre></td><td>the Format as: Display-label: [status1[,status2...]], incl
 
 <hr/>
 <aliress>Nobuhiro YASUTOMI &lt;<a href="mailto:nobuhiro.yasutomi@nifty.ne.jp">nobuhiro.yasutomi@nifty.ne.jp</a>&gt;</aliress>
-MySite Users <a href="http://myht.org/">http://myht.org/</a><br/>
+MySite Users <a href="http://myht.org/">http://myht.org/</a><br>
 $Id: help.html,v 1.2 2009/07/04 05:39:23 nobu Exp $
 </body>
 </html>

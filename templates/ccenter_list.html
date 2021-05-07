@@ -1,33 +1,41 @@
 <H3><{$smarty.const._MD_CCENTER_QUERY}></h3>
 
 <table class="ccctrl" width="100%">
-<tr>
-  <td class="ccinfo"><{$smarty.const._MD_COUNT}>: <{$total}></td>
-  <td class="ccpagenav" align="center"><{$pagenav}></td>
-  <td class="ccstatus" align="right">
-    <form method="get">
-      <{$smarty.const._CC_STATUS}>
-	<{$statctrl}>
-      <noscript>
-	<input type="submit" type="submit" value="<{$smarty.const._MD_SUBMIT_VIEW}>">
-      </noscript>
-    </form>
-  </td>
-</tr>
+  <tr>
+    <td class="ccinfo"><{$smarty.const._MD_COUNT}>: <{$total}></td>
+    <td class="ccpagenav" align="center"><{$pagenav}></td>
+    <td class="ccstatus" align="right">
+      <form method="get">
+        <{$smarty.const._CC_STATUS}>
+        <{$statctrl}>
+        <noscript>
+          <input type="submit" type="submit" value="<{$smarty.const._MD_SUBMIT_VIEW}>">
+        </noscript>
+      </form>
+    </td>
+  </tr>
 </table>
 <{if $list}>
-<table class="outer" border="0" cellspacing="1" width="100%">
-<tr class="head">
-<{foreach from=$labels item=lab}>
-<th><{$lab.text}><{if $lab.value}> <a href="?<{$lab.name}>=<{$lab.next}>" title="<{$smarty.const._CC_SORT_ORDER}>"<{$lab.extra}>><img src="images/<{$lab.value}>.gif"></a><{/if}></th>
-<{/foreach}>
-</tr>
-<{foreach from=$list item=m}>
-<tr class="<{cycle values="even, odd"}> stat<{$m.raw.status}>"><td><{$m.mdate}></td><td><{$m.title}></td><td><{$m.uname}></td><td><{$m.status}></td></tr>
-<{/foreach}>
+<table class="outer" width="100%">
+  <tr class="head">
+    <{foreach from=$labels item=lab}>
+    <th><{$lab.text}><{if $lab.value}>
+      <a href="?<{$lab.name}>=<{$lab.next}>" title="<{$smarty.const._CC_SORT_ORDER}>"<{$lab.extra}>>
+      <img src="images/<{$lab.value}>.gif"></a><{/if}>
+    </th>
+    <{/foreach}>
+  </tr>
+  <{foreach from=$list item=m}>
+  <tr class="<{cycle values="even, odd"}> stat<{$m.raw.status}>">
+  <td><{$m.mdate}></td>
+  <td><{$m.title}></td>
+  <td><{$m.uname}></td>
+  <td><{$m.status}></td>
+  </tr>
+  <{/foreach}>
 </table>
 <{else}>
 <div class="resultMsg"><{$smarty.const._MD_NODATA}></div>
 <{/if}>
 
-<{include file="db:system_notification_select.html"}>
+<{include file="db:legacy_notification_select.html"}>

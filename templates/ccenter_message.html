@@ -1,108 +1,120 @@
 <h3><{$subject}></h3>
-<div class="attr"><b class="label"><{$smarty.const._CC_STATUS}></b> 
-<{$status}>
- <{if $is_mine || $xoops_isadmin}>
-  <{if $readit}>(<{$smarty.const._MD_MSG_READTHIS}> <{$adate}>)
-  <{else}>(<{$smarty.const._MD_MSG_NOTREAD}>)
-  <{/if}>
-<{/if}>
+<div class="attr"><b class="label"><{$smarty.const._CC_STATUS}></b>
+    <{$status}>
+    <{if $is_mine || $xoops_isadmin}>
+    <{if $readit}>(<{$smarty.const._MD_MSG_READTHIS}> <{$adate}>)
+    <{else}>(<{$smarty.const._MD_MSG_NOTREAD}>)
+    <{/if}>
+    <{/if}>
 </div>
 <{if $data.value}>
 <div class="attr">
-  <b class="label"><{$smarty.const._MD_EVAL_VALUE}></b> <{$data.value}>
+    <b class="label"><{$smarty.const._MD_EVAL_VALUE}></b> <{$data.value}>
     <p><{$data.comment}></p>
 </div>
 <{elseif $is_mine && isset($own_status[$data.status])}>
 <div class="attr">
-  <form action="status.php" method="post">
-  <input type="hidden" name="id" value="<{$data.msgid}>" />
-  <select name="status">
-  <{foreach from=$own_status item=label key=val}>
-    <option value="<{$val}>"<{if $val==$data.status}> selected="selected"<{/if}>><{$label}></option>
-  <{/foreach}>
-  </select>
-  <input type="submit" value="<{$smarty.const._MD_SUBMIT}>" />
-  </form>
+    <form action="status.php" method="post">
+        <input type="hidden" name="id" value="<{$data.msgid}>"/>
+        <select name="status">
+            <{foreach from=$own_status item=label key=val}>
+            <option value="<{$val}>"
+            <{if $val==$data.status}> selected="selected"<{/if}>><{$label}></option>
+            <{/foreach}>
+        </select>
+        <input type="submit" value="<{$smarty.const._MD_SUBMIT}>"/>
+    </form>
 </div>
 <{/if}>
 <div class="attr"><b class="label"><{$smarty.const._MD_POSTDATE}></b> <{$cdate}></div>
 <div class="attr"><b class="label"><{$smarty.const._MD_MODDATE}></b> <{$mdate}></div>
-<div class="attr"><b class="label"><{$smarty.const._MD_CONTACT_FROM}></b> <{$sender}><{if $data.email}> &lt;<a href="mailto:<{$data.email|escape}>"><{$data.email|escape}></a>&gt;<{/if}></div>
+<div class="attr"><b class="label"><{$smarty.const._MD_CONTACT_FROM}></b> <{$sender}><{if $data.email}> &lt;<a
+        href="mailto:<{$data.email|escape}>"><{$data.email|escape}></a>&gt;<{/if}>
+</div>
 <div class="attr"><b class="label"><{$smarty.const._MD_CONTACT_TO}></b> <{$sendto}>
-<{if $is_getmine}>
-<form action="status.php" method="post" style="display: inline;">
-<input type="hidden" name="id" value="<{$data.msgid}>" />
-<input type="hidden" name="op" value="myself" />
-<input type="submit" value="<{$smarty.const._MD_CONTACT_MYSELF}>">
-</form>
-<{/if}>
+    <{if $is_getmine}>
+    <form action="status.php" method="post" style="display: inline;">
+        <input type="hidden" name="id" value="<{$data.msgid}>"/>
+        <input type="hidden" name="op" value="myself"/>
+        <input type="submit" value="<{$smarty.const._MD_CONTACT_MYSELF}>">
+    </form>
+    <{/if}>
 </div>
 
-<table class="outer" align="center" cellspacing="1" border="0" width="100%">
-<{foreach from=$items key=label item=value}>
-<tr><td class="head"><{$label}></td><td class="<{cycle values="even, odd"}>"><{$value}></td></tr>
-<{/foreach}>
+<table class="outer" align="center" width="100%">
+    <{foreach from=$items key=label item=value}>
+    <tr>
+        <td class="head"><{$label}></td>
+        <td class="<{cycle values="even, odd"}>"><{$value}></td></tr>
+    <{/foreach}>
 </table>
 
 <{if $xoops_isadmin}>
-<div style="text-align: right">[ <a href="admin/msgadm.php?msgid=<{$data.msgid}>"><{$smarty.const._MD_MSG_ADMIN}></a> ]</div>
+<div style="text-align: right">[ <a href="admin/msgadm.php?msgid=<{$data.msgid}>"><{$smarty.const._MD_MSG_ADMIN}></a> ]
+</div>
 <{/if}>
 
-<br />
+<br>
 
 <{if $has_mail}>
 <div class="commentnav">
-<{$commentsnav}>
-<{$lang_notice}>
+    <{$commentsnav}>
+    <{$lang_notice}>
 </div>
 <{/if}>
 
 <div class="comment">
-<!-- start comments loop -->
-<{if $comment_mode == "flat"}>
-<{include file="db:system_comments_flat.html"}>
-<{elseif $comment_mode == "thread"}>
-<{include file="db:system_comments_thread.html"}>
-<{elseif $comment_mode == "nest"}>
-<{include file="db:system_comments_nest.html"}>
-<{/if}>
-<!-- end comments loop -->
+    <!-- start comments loop -->
+    <{if $comment_mode == "flat"}>
+    <{include file="db:legacy_comments_flat.html"}>
+    <{elseif $comment_mode == "thread"}>
+    <{include file="db:legacy_comments_thread.html"}>
+    <{elseif $comment_mode == "nest"}>
+    <{include file="db:legacy_comments_nest.html"}>
+    <{/if}>
+    <!-- end comments loop -->
 </div>
 <{if $is_eval}>
 <div class="evaluate">
-<a name="evaluate"></a>
-<h4><{$smarty.const._MD_EVAL_VALUE}></h4>
-<p><{$smarty.const._MD_EVAL_DESC}></p>
-<form action="status.php" method="post">
-<style>
-table.evaluate { width: 20em; }
-table.evaluate td { width: 20%; text-align: center; }
-</style>
-<table id="evalate">
-<tr>
-  <td><input type="radio" name="eval" value="1">1</td>
-  <td><input type="radio" name="eval" value="2">2</td>
-  <td><input type="radio" name="eval" value="3" checked="checked">3</td>
-  <td><input type="radio" name="eval" value="4">4</td>
-  <td><input type="radio" name="eval" value="5">5</td>
-</tr>
-<tr>
-  <td><{$smarty.const._MD_EVAL_VAL_LOW}></td>
-  <td></td>
-  <td><{$smarty.const._MD_EVAL_VAL_MID}></td>
-  <td></td>
-  <td><{$smarty.const._MD_EVAL_VAL_MAX}></td>
-</tr>
-</table>
+    <a name="evaluate"></a>
+    <h4><{$smarty.const._MD_EVAL_VALUE}></h4>
+    <p><{$smarty.const._MD_EVAL_DESC}></p>
+    <form action="status.php" method="post">
+        <style>
+            table.evaluate {
+                width: 20em;
+            }
 
-<h4><{$smarty.const._MD_EVAL_COMMENT}>:</h4>
-<textarea name="comment" cols="50" rows="4"></textarea>
-<p>
-<input type="hidden" name="id" value="<{$data.msgid}>" />
-<input type="hidden" name="pass" value="<{$data.onepass|escape}>" />
-<input type="submit" value="<{$smarty.const._MD_EVAL_SUBMIT}>" />
-</p>
-</form>
+            table.evaluate td {
+                width: 20%;
+                text-align: center;
+            }
+        </style>
+        <table id="evalate">
+            <tr>
+                <td><input type="radio" name="eval" value="1">1</td>
+                <td><input type="radio" name="eval" value="2">2</td>
+                <td><input type="radio" name="eval" value="3" checked="checked">3</td>
+                <td><input type="radio" name="eval" value="4">4</td>
+                <td><input type="radio" name="eval" value="5">5</td>
+            </tr>
+            <tr>
+                <td><{$smarty.const._MD_EVAL_VAL_LOW}></td>
+                <td></td>
+                <td><{$smarty.const._MD_EVAL_VAL_MID}></td>
+                <td></td>
+                <td><{$smarty.const._MD_EVAL_VAL_MAX}></td>
+            </tr>
+        </table>
+
+        <h4><{$smarty.const._MD_EVAL_COMMENT}>:</h4>
+        <textarea name="comment" cols="50" rows="4"></textarea>
+        <p>
+            <input type="hidden" name="id" value="<{$data.msgid}>"/>
+            <input type="hidden" name="pass" value="<{$data.onepass|escape}>"/>
+            <input type="submit" value="<{$smarty.const._MD_EVAL_SUBMIT}>"/>
+        </p>
+    </form>
 </div>
 <{/if}>
-<{include file="db:system_notification_select.html"}>
+<{include file="db:legacy_notification_select.html"}>

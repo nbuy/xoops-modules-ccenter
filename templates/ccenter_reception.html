@@ -1,81 +1,85 @@
 <{if $forms}>
-  <{* list forms *}>
-    <h2><{$smarty.const._MD_CCENTER_RECEPTION}></h2>
+<{* list forms *}>
+<h2><{$smarty.const._MD_CCENTER_RECEPTION}></h2>
 
-    <table class="outer" cellspacing="1">
-      <tr class="head">
-	<th>ID</th>
-	<th><{$smarty.const._MD_CONTACT_FORM}></th>
-	<th><{$smarty.const._MD_CONTACT_TO}></th>
-	<th><{$smarty.const._MD_COUNT}></th>
-	<th><{$smarty.const._MD_MODDATE}></th>
-      </tr>
-      <{foreach item=form from=$forms}>
-	<tr class="<{cycle values="even, odd"}>">
-	  <td align="right"><{$form.formid}></td>
-	  <td><a href="?form=<{$form.formid}>"><{$form.title}></a></td>
-	  <td><{$form.contact}></td>
-	  <td align="right"><{$form.nmsg}></td>
-	  <td><{$form.ltime}></td>
-	</tr>
-      <{/foreach}>
-    </table>
+<table class="outer">
+    <tr class="head">
+        <th>ID</th>
+        <th><{$smarty.const._MD_CONTACT_FORM}></th>
+        <th><{$smarty.const._MD_CONTACT_TO}></th>
+        <th><{$smarty.const._MD_COUNT}></th>
+        <th><{$smarty.const._MD_MODDATE}></th>
+    </tr>
+    <{foreach item=form from=$forms}>
+    <tr class="<{cycle values=" even, odd
+    "}>">
+    <td align="right"><{$form.formid}></td>
+    <td><a href="?form=<{$form.formid}>"><{$form.title}></a></td>
+    <td><{$form.contact}></td>
+    <td align="right"><{$form.nmsg}></td>
+    <td><{$form.ltime}></td>
+    </tr>
+    <{/foreach}>
+</table>
 
 <{else}>
-  <{* show a form *}>
-    <h3><{$form.title}></h3>
+<{* show a form *}>
+<h3><{$form.title}></h3>
 
-    <{if !$form.active}><div><b><{$smarty.const._MD_FORM_INACTIVE}></b></div><{/if}>
-    <{if empty($start)}>
-    <div><b><{$smarty.const._MD_MODDATE}></b> <{$form.mdate}></div>
+<{if !$form.active}>
+<div><b><{$smarty.const._MD_FORM_INACTIVE}></b></div><{/if}>
+<{if empty($start)}>
+<div><b><{$smarty.const._MD_MODDATE}></b> <{$form.mdate}></div>
 
-    <div class="description"><{$form.description}></div>
-    <hr />
-    <{/if}>
+<div class="description"><{$form.description}></div>
+<hr/>
+<{/if}>
 
-    <table width="100%">
+<table width="100%">
     <tr>
-      <td><{$smarty.const._MD_COUNT}> <{$form.nmsg}></td>
-      <td align="right">
-    <{if $form.nmsg}>
-      <form action="export.php">
-	<b><{$smarty.const._MD_EXPORT_RANGE}></b> <select name="range">
-	  <{foreach item=label key=value from=$export_range}>
-	    <option value="<{$value}>"><{$label}></option>
-	  <{/foreach}>
-	</select>
-	<input type="hidden" name="form" value="<{$form.formid}>" />
-	<input type="submit" value="<{$smarty.const._MD_EXPORT_CSV}>" />
-      </form>
-    <{/if}></td>
+        <td><{$smarty.const._MD_COUNT}> <{$form.nmsg}></td>
+        <td align="right">
+            <{if $form.nmsg}>
+            <form action="export.php">
+                <b><{$smarty.const._MD_EXPORT_RANGE}></b> <select name="range">
+                <{foreach item=label key=value from=$export_range}>
+                <option value="<{$value}>"><{$label}></option>
+                <{/foreach}>
+            </select>
+                <input type="hidden" name="form" value="<{$form.formid}>"/>
+                <input type="submit" value="<{$smarty.const._MD_EXPORT_CSV}>"/>
+            </form>
+            <{/if}>
+        </td>
     </tr>
-    </table>
-    <{if $mlist}>
-    <{if $pagenav}><div style="text-align: center;"><{$pagenav}></div><{/if}>
-    <table class="outer" cellspacing="1" border="0">
+</table>
+<{if $mlist}>
+<{if $pagenav}>
+<div style="text-align: center;"><{$pagenav}></div><{/if}>
+<table class="outer">
     <tr>
-      <th></th>
-      <th><{$smarty.const._MD_POSTDATE}></th>
-      <th><{$smarty.const._CC_STATUS}></th>
-      <th><{$smarty.const._MD_CONTACT_FROM}></th>
-    <{foreach from=$form.items item=item name=labs}>
-      <th><{$item.label}></th>
-    <{/foreach}>
+        <th></th>
+        <th><{$smarty.const._MD_POSTDATE}></th>
+        <th><{$smarty.const._CC_STATUS}></th>
+        <th><{$smarty.const._MD_CONTACT_FROM}></th>
+        <{foreach from=$form.items item=item name=labs}>
+        <th><{$item.label}></th>
+        <{/foreach}>
     </tr>
     <{foreach from=$mlist item=msg}>
     <tr class="<{cycle values="even, odd"}>">
-      <td><a href="message.php?id=<{$msg.msgid}>"><{$smarty.const._MD_DETAIL}></a></td>
-      <td><{$msg.cdate}></td>
-      <td><{$msg.stat}><{if $msg.mtime<$msg.atime}><{$smarty.const._CC_MARK_READIT}><{/if}></td>
-      <td><{$msg.uname}></td>
+    <td><a href="message.php?id=<{$msg.msgid}>"><{$smarty.const._MD_DETAIL}></a></td>
+    <td><{$msg.cdate}></td>
+    <td><{$msg.stat}><{if $msg.mtime<$msg.atime}><{$smarty.const._CC_MARK_READIT}><{/if}></td>
+    <td><{$msg.uname}></td>
     <{foreach from=$msg.values item=val name=vals}>
-      <td><{$val|escape}></td>
+    <td><{$val|escape}></td>
     <{/foreach}>
     <{/foreach}>
     </tr>
-    </table>
-    <{/if}>
+</table>
+<{/if}>
 
 <{/if}>
 
-<{include file="db:system_notification_select.html"}>
+<{include file="db:legacy_notification_select.html"}>

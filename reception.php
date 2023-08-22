@@ -10,7 +10,7 @@ if (!is_object($xoopsUser)) {
     exit;
 }
 
-$myts =& MyTextSanitizer::getInstance();
+$myts = MyTextSanitizer::getInstance();
 $id= isset($_GET['form'])?intval($_GET['form']):0;
 $isadmin = $xoopsUser->isAdmin($xoopsModule->getVar('mid'));
 if ($isadmin) $cond = "1";
@@ -38,7 +38,7 @@ if ($xoopsDB->getRowsNum($res)>1) {
     $xoopsOption['template_main'] = "ccenter_reception.html";
     $breadcrumbs->assign();
     $forms = array();
-    $member_handler =& xoops_gethandler('member');
+    $member_handler = xoops_gethandler('member');
     $groups = $member_handler->getGroupList(new Criteria('groupid', XOOPS_GROUP_ANONYMOUS, '!='));
     while ($form=$xoopsDB->fetchArray($res)) {
 	$form['title'] = htmlspecialchars($form['title']);

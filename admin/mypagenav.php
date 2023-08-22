@@ -8,8 +8,8 @@ define('_CC_MAX_USERS', 100);	// users/page
 
 class MyPageNav extends XoopsPageNav {
 
-    function MyPageNav($total, $items, $current, $name="start", $target='uid') {
-	$this->XoopsPageNav($total, $items, $current, $name);
+    function __construct($total, $items, $current, $name="start", $target='uid') {
+	parent::__construct($total, $items, $current, $name);
 	$this->target = $target;
     }
 

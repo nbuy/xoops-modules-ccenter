@@ -6,7 +6,7 @@ include "../../mainfile.php";
 include "functions.php";
 include_once XOOPS_ROOT_PATH.'/class/pagenav.php';
 
-$myts =& MyTextSanitizer::getInstance();
+$myts = MyTextSanitizer::getInstance();
 $xoopsOption['template_main'] = "ccenter_list.html";
 $uid = is_object($xoopsUser)?$xoopsUser->getVar('uid'):0;
 

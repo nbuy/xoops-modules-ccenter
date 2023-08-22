@@ -8,7 +8,7 @@ define("FORMS", $xoopsDB->prefix("ccenter_form"));
 define('CCMES', $xoopsDB->prefix('ccenter_message'));
 define('CCLOG', $xoopsDB->prefix('ccenter_log'));
 
-$myts =& MyTextSanitizer::getInstance();
+$myts = MyTextSanitizer::getInstance();
 include_once XOOPS_ROOT_PATH."/class/template.php";
 
 define('_STATUS_NONE',   '-');
@@ -72,10 +72,10 @@ function get_attr_value($pri, $name=null, $value=null) {
 	    $GLOBALS['xoopsModule']->getVar('dirname')==$mydirname) {
 	    $def_attr = $GLOBALS['xoopsModuleConfig']['def_attrs'];
 	} else {
-	    $module_handler =& xoops_gethandler('module');
-	    $module =& $module_handler->getByDirname($mydirname);
-	    $config_handler =& xoops_gethandler('config');
-	    $configs =& $config_handler->getConfigsByCat(0, $module->getVar('mid'));
+	    $module_handler = xoops_gethandler('module');
+	    $module = $module_handler->getByDirname($mydirname);
+	    $config_handler = xoops_gethandler('config');
+	    $configs = $config_handler->getConfigsByCat(0, $module->getVar('mid'));
 	    $def_attr = $configs['def_attrs'];
 	}
 	foreach (unserialize_vars($def_attr) as $k => $v) {
@@ -94,7 +94,7 @@ function get_attr_value($pri, $name=null, $value=null) {
 }
 
 function cc_display_values($vals, $items, $msgid=0, $add="") {
-    $myts =& MyTextSanitizer::getInstance();
+    $myts = MyTextSanitizer::getInstance();
     $values=array();
     foreach ($vals as $key=>$val) {
 	if (isset($items[$key])) {
@@ -691,7 +691,7 @@ function is_cc_evaluate($id, $uid, $pass) {
 
 function cc_notify_mail($tpl, $tags, $users, $from="") { // return: error count
     global $xoopsConfig, $xoopsModuleConfig, $xoopsUser, $xoopsModule;
-    $xoopsMailer =& getMailer();
+    $xoopsMailer = getMailer();
     if (is_array($users)) {
 	$err = 0;
 	foreach ($users as $u) {
@@ -835,7 +835,7 @@ function cc_log_message($formid, $comment, $msgid=0) {
 		      'CHANGE_BY'=>$xoopsUser?$xoopsUser->getVar('uname'):"",
 		      'MSG_ID'=>$msgid,
 		      'MSG_URL'=>$msgurl);
-	$notification_handler =& xoops_gethandler('notification');
+	$notification_handler = xoops_gethandler('notification');
 	$notification_handler->triggerEvent('message', $msgid, 'status', $tags);
     }
     return $comment;
@@ -878,7 +878,7 @@ class ListCtrl {
     var $vars;
     var $combo;
 
-    function ListCtrl($name, $init=array(), $combo='') {
+    function __construct($name, $init=array(), $combo='') {
 	if (empty($combo)) {
 	    global $xoopsModuleConfig;
 	    $combo = $xoopsModuleConfig['status_combo'];
@@ -926,7 +926,7 @@ class ListCtrl {
     }
 
     function updateVars($args) {
-	$myts =& MyTextSanitizer::getInstance();
+	$myts = MyTextSanitizer::getInstance();
 	$changes = array();
 	foreach (array_keys($this->vars) as $k) {
 	    if (isset($args[$k])) {
@@ -1042,7 +1042,7 @@ function render_form(&$form, $op) {
     global $xoopsTpl;
 
     set_checkvalue($form);
-    $myts =& MyTextSanitizer::getInstance();
+    $myts = MyTextSanitizer::getInstance();
     $html = 0;
     $br = 1;
     switch ($form['custom']) {

@@ -6,7 +6,7 @@ include "../../mainfile.php";
 include "functions.php";
 
 $uid = is_object($xoopsUser)?$xoopsUser->getVar('uid'):0;
-$myts =& MyTextSanitizer::getInstance();
+$myts = MyTextSanitizer::getInstance();
 $msgid = intval($_POST['id']);
 $redirect = "message.php?id=".$msgid;
 if (!empty($_POST['eval'])) {	// evaluate at last
@@ -26,7 +26,7 @@ if (!empty($_POST['eval'])) {	// evaluate at last
 	$log .= "\n".sprintf(_CC_LOG_STATUS, $msg_status[$s], $msg_status[_STATUS_CLOSE]);
 	$evalmsg = _MD_EVALS." ($eval)\n$com";
 	$tags = array('X_COMMENT_URL'=>XOOPS_URL."/modules/".basename(dirname(__FILE__))."/message.php?id=$msgid\n\n".$evalmsg);
-	$notification_handler =& xoops_gethandler('notification');
+	$notification_handler = xoops_gethandler('notification');
 	$notification_handler->triggerEvent('message', $msgid, 'comment', $tags);
 	cc_log_message($formid, $log, $msgid);
 	redirect_header($redirect, 1, _MD_EVAL_THANKYOU);
@@ -54,7 +54,7 @@ if (!empty($_POST['eval'])) {	// evaluate at last
 	    $res = $xoopsDB->query("UPDATE ".CCMES." $set WHERE msgid=$msgid");
 	    $log = sprintf(_CC_LOG_TOUSER, _CC_USER_NONE, $xoopsUser->getVar('uname'));
 	    $log .= "\n".sprintf(_CC_LOG_STATUS, $msg_status[$s], $msg_status['a']);
-	    $notification_handler =& xoops_gethandler('notification');
+	    $notification_handler = xoops_gethandler('notification');
 	    $notification_handler->subscribe('message', $msgid, 'comment');
 	    //$notification_handler->subscribe('message', $msgid, 'status');
 

@@ -60,7 +60,7 @@
 
 <{elseif $item.type != "javascript"}><{* as text *}>
 
-  <input name="<{$item.field}>" id="<{$item.field}>" type="text" value="<{$item.value|escape}>"<{if $item.attr.size}> size="<{$item.attr.size}>"<{/if}><{if $item.attr.maxlength}> maxlength="<{$item.attr.maxlength}>"<{/if}> />
+  <input name="<{$item.field}>" id="<{$item.field}>" type="text" value="<{$item.value|escape}>"<{if $item.attr.size}> size="<{$item.attr.size}>"<{/if}><{if !empty($item.attr.maxlength)}> maxlength="<{$item.attr.maxlength}>"<{/if}> />
 
 <{else}>
 

@@ -7,7 +7,7 @@ include "functions.php";
 
 $errors = array();
 $op = "form";
-$myts =& MyTextSanitizer::getInstance();
+$myts = MyTextSanitizer::getInstance();
 
 $id= isset($_GET['form'])?intval($_GET['form']):0;
 
@@ -52,7 +52,7 @@ $items = get_form_attribute($form['defs']);
 if ($form['priuid']< 0) {	// assign group member
     $priuid = isset($_GET['uid'])?intval($_GET['uid']):0;
     if ($priuid) {
-	$member_handler =& xoops_gethandler('member');
+	$member_handler = xoops_gethandler('member');
 	$priuser = $member_handler->getUser($priuid);
 	if (!is_object($priuser) || !in_array(-$form['priuid'], $priuser->groups())) $priuid=0;
     }
@@ -182,7 +182,7 @@ function store_message($items, $form) {
     } else {
 	$id = 0;
     }
-    $member_handler =& xoops_gethandler('member');
+    $member_handler = xoops_gethandler('member');
     if ($touid) {
 	$toUser = $member_handler->getUser($touid);
 	$toUname = $toUser->getVar('uname');
@@ -224,7 +224,7 @@ function store_message($items, $form) {
     $tags['VALUES'] = "$rtext$btext";
     $tags['MSG_URL'] = ($store==_DB_STORE_NONE)?'':"\n"._MD_NOTIFY_URL."\n".$msgurl;
 
-    $notification_handler =& xoops_gethandler('notification');
+    $notification_handler = xoops_gethandler('notification');
     $notification_handler->triggerEvent('global', 0, 'new', $tags);
     $notification_handler->triggerEvent('form', $form['formid'], 'new', $tags);
     // force subscribe sender and recipient

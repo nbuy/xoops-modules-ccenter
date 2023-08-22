@@ -27,7 +27,7 @@ function b_ccenter_form_show($options) {
     $res = $xoopsDB->query("SELECT * FROM ".FORMS." WHERE $cond ORDER BY weight,formid");
     if (!$res || $xoopsDB->getRowsNum($res)==0) return array();
     $form = $xoopsDB->fetchArray($res);
-    $myts =& MyTextSanitizer::getInstance();
+    $myts = MyTextSanitizer::getInstance();
     $items = get_form_attribute($form['defs']);
     assign_form_widgets($items);
     $form['items'] =& $items;

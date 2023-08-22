@@ -26,7 +26,7 @@ if( $use_altsys ) {
 } else {
 
     // preferences
-    $config_handler =& xoops_gethandler('config');
+    $config_handler = xoops_gethandler('config');
     if( count( $config_handler->getConfigs( new Criteria( 'conf_modid' , $xoopsModule->mid() ) ) ) > 0 ) {
 	if (defined('XOOPS_CUBE_LEGACY')) {
 		// system->preferences

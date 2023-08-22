@@ -26,7 +26,7 @@ if (function_exists('Legacy_function_stylesheet')) {
     echo "<link href=\"".XOOPS_URL."/modules/legacyRender/admin/css.php?file=module.css&amp;dirname=legacy\" media=\"all\" type=\"text/css\" rel=\"stylesheet\"/>\n";
 }
 
-$myts =& MyTextSanitizer::getInstance();
+$myts = MyTextSanitizer::getInstance();
 $file = isset($_GET['file'])?
     $myts->stripSlashesGPC($_GET['file']):"help.html";
 display_lang_file($file);

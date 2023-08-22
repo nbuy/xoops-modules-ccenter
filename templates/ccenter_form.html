@@ -17,7 +17,7 @@
 <{foreach from=$form.items item=fm name=item}>
   <{if preg_match("/^-/", $form.items[$smarty.foreach.item.iteration].label)}>
     <{if empty($form_continue)}>
-      <tr class="<{cycle values="even, odd"}><{if $fm.attr.check}> require<{/if}>"><td class="head"><{$fm.label}></td><td>
+      <tr class="<{cycle values="even, odd"}><{if !empty($fm.attr.check)}> require<{/if}>"><td class="head"><{$fm.label}></td><td>
       <{assign var=form_continue value=1}>
     <{/if}>
     <{$fm.input}><{if $fm.comment}><span class="note"><{$fm.comment}></span><{/if}>
@@ -28,7 +28,7 @@
       </tr>
       <{assign var=form_continue value=0}>
     <{else}>
-      <tr class="<{cycle values="even, odd"}><{if $fm.attr.check}> require<{/if}>">
+      <tr class="<{cycle values="even, odd"}><{if !empty($fm.attr.check)}> require<{/if}>">
 	<{if $fm.label}><td class="head"><{$fm.label}></td><td><{else}><td colspan="2"><{/if}><{$fm.input}>
 	<{if $fm.comment}><span class="note"><{$fm.comment}></span><{/if}></td>
       </tr>

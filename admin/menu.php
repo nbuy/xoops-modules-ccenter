@@ -8,11 +8,11 @@ $adminmenu[]=array('title' => _MI_CCENTER_FORMADMIN,
 $adminmenu[]=array('title' => _MI_CCENTER_MSGADMIN,
 		    'link' => "admin/msgadm.php");
 
-/* XXX: not yet work well...
+if (defined('_MD_A_MYMENU_MYLANGADMIN')) {
 $adminmenu4altsys[]=
     array('title' => _MD_A_MYMENU_MYLANGADMIN,
 	  'link' => 'admin/index.php?mode=admin&lib=altsys&page=mylangadmin');
-*/
+}
 $adminmenu4altsys[]=
     array('title' => _MD_A_MYMENU_MYTPLSADMIN,
 	  'link' => 'admin/index.php?mode=admin&lib=altsys&page=mytplsadmin');

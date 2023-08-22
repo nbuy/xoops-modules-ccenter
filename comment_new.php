@@ -26,8 +26,9 @@
 //  ------------------------------------------------------------------------ //
 include '../../mainfile.php';
 include 'functions.php';
+include_once XOOPS_ROOT_PATH.'/include/cp_functions.php';
 
-$myts =& MyTextSanitizer::getInstance();
+$myts = MyTextSanitizer::getInstance();
 $com_itemid = isset($_GET['com_itemid']) ? intval($_GET['com_itemid']) : 0;
 
 $data = cc_get_message($com_itemid);

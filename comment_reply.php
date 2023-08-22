@@ -26,6 +26,7 @@
 //  ------------------------------------------------------------------------ //
 include '../../mainfile.php';
 include 'functions.php';
+include_once XOOPS_ROOT_PATH.'/include/cp_functions.php';
 
 $com_itemid = isset($_GET['com_itemid']) ? intval($_GET['com_itemid']) : 0;
 $com_id = isset($_GET['com_id']) ? intval($_GET['com_id']) : 0;

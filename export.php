@@ -10,7 +10,7 @@ if (!is_object($xoopsUser)) {
     exit;
 }
 
-$myts =& MyTextSanitizer::getInstance();
+$myts = MyTextSanitizer::getInstance();
 $id= isset($_GET['form'])?intval($_GET['form']):0;
 
 $cond = 'formid='.$id;

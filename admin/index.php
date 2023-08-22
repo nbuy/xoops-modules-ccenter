@@ -16,7 +16,7 @@ accept_ext,text,size=30
 accept_type,text,size=30
 others,textarea");
 
-$myts =& MyTextSanitizer::getInstance();
+$myts = MyTextSanitizer::getInstance();
 $op = isset($_GET['op'])?$_GET['op']:'';
 if (isset($_POST['op'])) $op = $_POST['op'];
 $formid = isset($_REQUEST['formid'])?intval($_REQUEST['formid']):0;
@@ -154,7 +154,7 @@ FROM ".FORMS." LEFT JOIN ".CCMES." ON fidref=formid AND status<>'x' GROUP BY for
     $nodata = "<td class='num'>--</td>";
     $msgs = array('- a b c'=>'nmes', '-'=>'nwait', 'a'=>'nwork',
 		  'b'=>'nreply', 'c'=>'nclose');
-    $member_handler =& xoops_gethandler('member');
+    $member_handler = xoops_gethandler('member');
     $groups = $member_handler->getGroupList(new Criteria('groupid', XOOPS_GROUP_ANONYMOUS, '!='));
     while ($data = $xoopsDB->fetchArray($res)) {
 	$id = $data['formid'];
@@ -289,7 +289,7 @@ function build_form($formid=0) {
     $defs_tray->setDescription(_AM_FORM_DEFS_DESC);
     $form->addElement($defs_tray);
 
-    $member_handler =& xoops_gethandler('member');
+    $member_handler = xoops_gethandler('member');
     $groups = $member_handler->getGroupList(new Criteria('groupid', XOOPS_GROUP_ANONYMOUS, '!='));
     $groups = $member_handler->getGroupList(new Criteria('groupid', XOOPS_GROUP_ANONYMOUS, '!='));
     $options = array();

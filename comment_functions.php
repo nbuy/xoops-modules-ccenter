@@ -73,7 +73,7 @@ function ccenter_com_approve(&$comment){
 			  'X_ITEM_TYPE'=>'', 'X_ITEM_NAME'=>$subj,
 			  'X_COMMENT_URL'=>$url, 'FROM_EMAIL'=>$email,
 			  'SUBJECT'=>$subj);
-	    $xoopsMailer =& getMailer();
+	    $xoopsMailer = getMailer();
 	    $xoopsMailer->useMail();
 	    $xoopsMailer->setFromEmail($xoopsConfig['adminmail']);
 	    $xoopsMailer->setFromName($xoopsModule->getVar('name'));

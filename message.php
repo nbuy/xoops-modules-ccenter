@@ -5,7 +5,7 @@
 include "../../mainfile.php";
 include "functions.php";
 
-$myts =& MyTextSanitizer::getInstance();
+$myts = MyTextSanitizer::getInstance();
 $xoopsOption['template_main'] = "ccenter_message.html";
 $uid = is_object($xoopsUser)?$xoopsUser->getVar('uid'):0;
 
